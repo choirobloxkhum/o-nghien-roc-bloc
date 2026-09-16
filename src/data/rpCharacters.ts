@@ -6,6 +6,25 @@ const now = Date.now();
 // và gắn cờ isNew: true, cornerTag: 'MỚI' để hiển thị tag nổi bật ở góc phải trên cùng ảnh.
 export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
   {
+    id: 'char-15-seo-jihoon',
+    name: 'Seo Jihoon',
+    avatarUrl: 'https://i.ibb.co/XrJQzRnq/Kh-ng-C-Ti-u-4-20260908130049.png',
+    roleTag: 'Học đường',
+    tags: ['Học đường', 'Ngọt', '🦊✖️🐰', 'user ngốc'],
+    tagline: '',
+    robuxDonations: 0,
+    personality: '',
+    plotTitle: '',
+    plotSummary: 'Sau này nếu cậu muốn hôn. Thì hôn tôi cũng được.',
+    fullPlot: '',
+    sampleDialogue: [],
+    playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%2211oW_p0ptUtGAbMOC2zsw09SLdnY7MLOQ%22%5D,%22action%22:%22open%22,%22userId%22:%22118220567926520160271%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing',
+    plotUrl: 'https://rentry.co/choirobloxkhum_jihoon',
+    createdAt: now + 4000,
+    isNew: true,
+    cornerTag: 'MỚI',
+  },
+  {
     id: 'char-14-gabriel',
     name: 'Gabriel Marias',
     avatarUrl: 'https://i.ibb.co/yc5hB8Gx/media-1788541815.png',
@@ -67,8 +86,6 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     plotUrl: 'https://rentry.co/choirobloxkhum_jaxon',
     voiceUrl: 'https://res.cloudinary.com/opmwpbzb/video/upload/v1788452056/ElevenLabs_2026-09-03T16_10_32_Ryan_-_Rich_Smooth_and_Engaging_pvc_sp89_s39_sb32_v3.mp3',
     createdAt: now + 1500,
-    isNew: true,
-    cornerTag: 'MỚI',
   },
   {
     id: 'char-13-asmodeus',
