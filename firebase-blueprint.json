@@ -11,12 +11,40 @@
         }
       },
       "required": ["count"]
+    },
+    "CharacterComment": {
+      "title": "CharacterComment",
+      "description": "Public user comment or review for a character",
+      "type": "object",
+      "properties": {
+        "characterId": {
+          "type": "string",
+          "description": "ID of the target character"
+        },
+        "userName": {
+          "type": "string",
+          "description": "Name or nickname of the commenter"
+        },
+        "commentText": {
+          "type": "string",
+          "description": "Text content of the comment (max 250 chars)"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Timestamp when the comment was created in ms"
+        }
+      },
+      "required": ["characterId", "userName", "commentText", "createdAt"]
     }
   },
   "firestore": {
     "/robux_counts/{characterId}": {
       "schema": "RobuxCount",
       "description": "Robux counts for characters"
+    },
+    "/rp_comments/{characterId}/items/{commentId}": {
+      "schema": "CharacterComment",
+      "description": "Public comments and reviews for a character"
     }
   }
 }

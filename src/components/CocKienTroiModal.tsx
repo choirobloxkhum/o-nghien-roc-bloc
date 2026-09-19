@@ -7,7 +7,6 @@ import {
   KeyRound,
   CheckCircle2,
   Lock,
-  Sparkles,
   Volume2,
   VolumeX,
   ChevronRight,
@@ -157,16 +156,13 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
       playFrogCroakSound(soundEnabled);
     }
 
-    // Check milestones crossed
-    if (prevBeats < 100 && nextBeats >= 100) {
-      playMilestoneUnlockSound(soundEnabled);
-      triggerConfetti(70);
-    } else if (prevBeats < 500 && nextBeats >= 500) {
+    // Check milestones crossed (10,000 and 100,000 beats)
+    if (prevBeats < 10000 && nextBeats >= 10000) {
       playMilestoneUnlockSound(soundEnabled);
       triggerConfetti(100);
-    } else if (prevBeats < 1000 && nextBeats >= 1000) {
+    } else if (prevBeats < 100000 && nextBeats >= 100000) {
       playMilestoneUnlockSound(soundEnabled);
-      triggerConfetti(160);
+      triggerConfetti(180);
     }
 
     // Add floating text
@@ -208,10 +204,9 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Milestone unlock states for selectedChar
-  const hasHint1 = beats >= 100;
-  const hasHint2 = beats >= 500;
-  const hasDirectPlay = beats >= 1000;
+  // Milestone unlock states for selectedChar: 10,000 for Hint 1, 100,000 for Hint 2
+  const hasHint1 = beats >= 10000;
+  const hasHint2 = beats >= 100000;
 
   // Specific hint content for Lucifer & fallback for others
   const hint1Text =
@@ -229,14 +224,6 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
       ? 'Bio mô tả của Ngọc Hoàng'
       : 'Xem kỹ phần mô tả cốt truyện và thông tin của Ngọc Hoàng');
 
-  // Direct play handler
-  const handleDirectPlay = () => {
-    playUiClick(soundEnabled);
-    if (selectedChar?.playUrl) {
-      window.open(selectedChar.playUrl, '_blank');
-    }
-  };
-
   // Switch to Password Modal
   const handleGoToPassword = () => {
     playUiClick(soundEnabled);
@@ -246,8 +233,8 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
     }
   };
 
-  // Progress percentage (capped at 100%)
-  const progressPercent = Math.min(100, (beats / 1000) * 100);
+  // Progress percentage (capped at 100%, based on 100,000 beats)
+  const progressPercent = Math.min(100, (beats / 100000) * 100);
 
   return (
     <AnimatePresence>
@@ -398,9 +385,8 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {lockedCharacters.map((char) => {
                       const charBeats = beatsMap[char.id] || 0;
-                      const isComplete = charBeats >= 1000;
-                      const hasHint1Unlocked = charBeats >= 100;
-                      const hasHint2Unlocked = charBeats >= 500;
+                      const hasHint1Unlocked = charBeats >= 10000;
+                      const hasHint2Unlocked = charBeats >= 100000;
 
                       return (
                         <motion.button
@@ -441,19 +427,15 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                             {/* Progress info badge */}
                             <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
                               <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
-                                🥁 {charBeats}/1000 lần
+                                🥁 {charBeats.toLocaleString('vi-VN')}/100.000 lần
                               </span>
-                              {isComplete ? (
-                                <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-green-600 text-white">
-                                  ✓ Vào Chơi
-                                </span>
-                              ) : hasHint2Unlocked ? (
+                              {hasHint2Unlocked ? (
                                 <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-blue-600 text-white">
-                                  ✓ 2 Gợi ý
+                                  ✓ Đủ 2 Gợi ý
                                 </span>
                               ) : hasHint1Unlocked ? (
                                 <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-emerald-600 text-white">
-                                  ✓ 1 Gợi ý
+                                  ✓ Gợi ý 1
                                 </span>
                               ) : null}
                             </div>
@@ -542,8 +524,8 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                     <div className="flex items-center gap-1.5">
                       <span className="px-2.5 py-1 rounded-full bg-amber-900 text-yellow-300 font-black text-xs sm:text-sm border border-yellow-400 shadow-xs flex items-center gap-1">
                         <span>🥁 Đã Gõ:</span>
-                        <strong className="text-white text-sm sm:text-base">{beats}</strong>
-                        <span className="text-[10px] text-amber-200">/1000 lần</span>
+                        <strong className="text-white text-sm sm:text-base">{beats.toLocaleString('vi-VN')}</strong>
+                        <span className="text-[10px] text-amber-200">/100.000 lần</span>
                       </span>
                     </div>
 
@@ -638,10 +620,27 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                   </p>
                 </div>
 
-                {/* OVERALL PROGRESS BAR (0 -> 1000) WITH MILESTONE FLAGS */}
+                {/* ROYAL DECREE RULES BANNER */}
+                <div className="rounded-2xl p-3 sm:p-3.5 bg-gradient-to-r from-amber-100 via-yellow-100 to-amber-100 border-2 border-amber-400 shadow-xs flex items-start gap-2.5">
+                  <span className="text-xl sm:text-2xl shrink-0">📜</span>
+                  <div className="text-xs text-amber-950 space-y-1">
+                    <div className="font-black text-amber-900 uppercase tracking-wide flex items-center gap-1.5">
+                      <span>Luật Kiện Trời Của Thiên Đình</span>
+                    </div>
+                    <p className="leading-relaxed font-semibold">
+                      • Đánh trống <strong>10.000 lần</strong>: nhận được <strong>gợi ý lần 1</strong>.<br />
+                      • Đánh trống <strong>100.000 lần</strong>: nhận được <strong>gợi ý lần 2</strong>.
+                    </p>
+                    <p className="text-red-700 font-black text-[11px] pt-0.5">
+                      ⚠️ Chỉ có 2 lần gợi ý duy nhất — Không có bất kỳ cách nào khác để nhận link nếu không tự giải được mật khẩu!
+                    </p>
+                  </div>
+                </div>
+
+                {/* OVERALL PROGRESS BAR (0 -> 100.000) WITH 2 MILESTONE FLAGS */}
                 <div className="bg-white/90 rounded-2xl p-3 sm:p-4 border-2 border-amber-300 shadow-xs space-y-2">
                   <div className="flex items-center justify-between text-xs font-black text-amber-950">
-                    <span>Tiến độ xin lệnh Ngọc Hoàng:</span>
+                    <span>Tiến độ xin lệnh Ngọc Hoàng (tối đa 100.000 tiếng trống):</span>
                     <span className="text-red-700 font-extrabold">{progressPercent.toFixed(1)}%</span>
                   </div>
 
@@ -655,26 +654,22 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                     />
                   </div>
 
-                  {/* Milestone Flag Labels */}
-                  <div className="grid grid-cols-3 gap-2 text-[10px] sm:text-xs pt-1">
-                    <div className={`flex flex-col items-center text-center p-1.5 rounded-xl border ${hasHint1 ? 'bg-green-50 border-green-300 text-green-900 font-black' : 'bg-stone-50 border-stone-200 text-stone-500'}`}>
-                      <span>100 lần 📜</span>
-                      <span className="text-[9px]">{hasHint1 ? '✓ ĐÃ MỞ GỢI Ý 1' : 'Gợi ý thứ nhất'}</span>
+                  {/* Milestone Flag Labels (2 milestones: 10,000 and 100,000) */}
+                  <div className="grid grid-cols-2 gap-2 text-[10px] sm:text-xs pt-1">
+                    <div className={`flex flex-col items-center text-center p-2 rounded-xl border ${hasHint1 ? 'bg-emerald-50 border-emerald-400 text-emerald-950 font-black shadow-xs' : 'bg-stone-50 border-stone-200 text-stone-500'}`}>
+                      <span className="font-bold text-xs sm:text-sm">10.000 lần 📜</span>
+                      <span className="text-[9px] sm:text-[10px]">{hasHint1 ? '✓ ĐÃ MỞ GỢI Ý 1' : 'Gợi ý lần 1'}</span>
                     </div>
-                    <div className={`flex flex-col items-center text-center p-1.5 rounded-xl border ${hasHint2 ? 'bg-green-50 border-green-300 text-green-900 font-black' : 'bg-stone-50 border-stone-200 text-stone-500'}`}>
-                      <span>500 lần 💡</span>
-                      <span className="text-[9px]">{hasHint2 ? '✓ ĐÃ MỞ GỢI Ý 2' : 'Gợi ý thứ hai'}</span>
-                    </div>
-                    <div className={`flex flex-col items-center text-center p-1.5 rounded-xl border ${hasDirectPlay ? 'bg-amber-100 border-amber-400 text-amber-950 font-black' : 'bg-stone-50 border-stone-200 text-stone-500'}`}>
-                      <span>1000 lần 👑</span>
-                      <span className="text-[9px]">{hasDirectPlay ? '✓ ĐẠI XÁ CHƠI LUÔN' : 'Vào Chơi Luôn'}</span>
+                    <div className={`flex flex-col items-center text-center p-2 rounded-xl border ${hasHint2 ? 'bg-blue-50 border-blue-400 text-blue-950 font-black shadow-xs' : 'bg-stone-50 border-stone-200 text-stone-500'}`}>
+                      <span className="font-bold text-xs sm:text-sm">100.000 lần 💡</span>
+                      <span className="text-[9px] sm:text-[10px]">{hasHint2 ? '✓ ĐÃ MỞ GỢI Ý 2' : 'Gợi ý lần 2'}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* MILESTONE CARDS: THE 3 REWARDS */}
+                {/* MILESTONE CARDS: THE 2 REWARDS ONLY */}
                 <div className="space-y-3">
-                  {/* MILESTONE 1: 100 BEATS (GỢI Ý THỨ NHẤT) */}
+                  {/* MILESTONE 1: 10,000 BEATS (GỢI Ý THỨ NHẤT) */}
                   <div
                     className={`relative rounded-2xl p-3.5 sm:p-4 border-2 transition-all ${
                       hasHint1
@@ -685,18 +680,18 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2.5">
                         <div
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0 border ${
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs shrink-0 border ${
                             hasHint1
                               ? 'bg-emerald-500 text-white border-emerald-600 shadow-xs'
                               : 'bg-stone-200 text-stone-500 border-stone-300'
                           }`}
                         >
-                          {hasHint1 ? <CheckCircle2 className="w-5 h-5" /> : '100'}
+                          {hasHint1 ? <CheckCircle2 className="w-5 h-5" /> : '10K'}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
                             <h4 className="text-xs sm:text-sm font-black text-stone-900">
-                              MỐC 1: GỢI Ý THỨ NHẤT (100 LẦN GÕ)
+                              MỐC 1: GỢI Ý THỨ NHẤT (10.000 LẦN GÕ)
                             </h4>
                             {hasHint1 && (
                               <span className="px-2 py-0.2 bg-emerald-600 text-white text-[9px] font-black rounded-full uppercase">
@@ -707,7 +702,7 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                           <p className="text-[11px] text-stone-600">
                             {hasHint1
                               ? 'Ngọc Hoàng đã truyền lệnh mật báo đầu mối:'
-                              : `Còn thiếu ${Math.max(0, 100 - beats)} lần gõ trống để mở`}
+                              : `Còn thiếu ${Math.max(0, 10000 - beats).toLocaleString('vi-VN')} lần gõ trống để mở`}
                           </p>
                         </div>
                       </div>
@@ -738,12 +733,12 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                       </div>
                     ) : (
                       <div className="mt-2 text-xs font-medium text-stone-400 italic">
-                        🔒 Đánh đủ 100 tiếng trống để kinh động Thiên Cung nhận manh mối thứ nhất.
+                        🔒 Đánh đủ 10.000 tiếng trống để kinh động Thiên Cung nhận manh mối thứ nhất.
                       </div>
                     )}
                   </div>
 
-                  {/* MILESTONE 2: 500 BEATS (GỢI Ý THỨ HAI) */}
+                  {/* MILESTONE 2: 100,000 BEATS (GỢI Ý THỨ HAI) */}
                   <div
                     className={`relative rounded-2xl p-3.5 sm:p-4 border-2 transition-all ${
                       hasHint2
@@ -754,18 +749,18 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2.5">
                         <div
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0 border ${
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs shrink-0 border ${
                             hasHint2
                               ? 'bg-blue-600 text-white border-blue-700 shadow-xs'
                               : 'bg-stone-200 text-stone-500 border-stone-300'
                           }`}
                         >
-                          {hasHint2 ? <CheckCircle2 className="w-5 h-5" /> : '500'}
+                          {hasHint2 ? <CheckCircle2 className="w-5 h-5" /> : '100K'}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
                             <h4 className="text-xs sm:text-sm font-black text-stone-900">
-                              MỐC 2: GỢI Ý THỨ HAI (500 LẦN GÕ)
+                              MỐC 2: GỢI Ý THỨ HAI (100.000 LẦN GÕ)
                             </h4>
                             {hasHint2 && (
                               <span className="px-2 py-0.2 bg-blue-600 text-white text-[9px] font-black rounded-full uppercase">
@@ -776,7 +771,7 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                           <p className="text-[11px] text-stone-600">
                             {hasHint2
                               ? 'Mật khải chi tiết từ Ngai Vàng Thiên Tử:'
-                              : `Còn thiếu ${Math.max(0, 500 - beats)} lần gõ trống để mở`}
+                              : `Còn thiếu ${Math.max(0, 100000 - beats).toLocaleString('vi-VN')} lần gõ trống để mở`}
                           </p>
                         </div>
                       </div>
@@ -800,71 +795,20 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                       </div>
                     ) : (
                       <div className="mt-2 text-xs font-medium text-stone-400 italic">
-                        🔒 Đánh đủ 500 tiếng trống để nhận gợi ý chí mạng thứ hai.
+                        🔒 Đánh đủ 100.000 tiếng trống để nhận gợi ý chí mạng thứ hai.
                       </div>
                     )}
                   </div>
 
-                  {/* MILESTONE 3: 1000 BEATS (ĐẶC XÁ VÀO LINK CHƠI LUÔN) */}
-                  <div
-                    className={`relative rounded-2xl p-3.5 sm:p-4 border-2 transition-all ${
-                      hasDirectPlay
-                        ? 'bg-gradient-to-r from-amber-100 via-yellow-100 to-amber-100 border-amber-500 shadow-lg'
-                        : 'bg-white/60 border-dashed border-stone-300 opacity-75'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2.5">
-                        <div
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0 border ${
-                            hasDirectPlay
-                              ? 'bg-gradient-to-br from-amber-500 to-yellow-500 text-amber-950 border-amber-600 shadow-xs'
-                              : 'bg-stone-200 text-stone-500 border-stone-300'
-                          }`}
-                        >
-                          {hasDirectPlay ? <Crown className="w-5 h-5 text-amber-950 fill-amber-950" /> : '1000'}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-xs sm:text-sm font-black text-amber-950">
-                              MỐC 3: ĐẶC XÁ THIÊN ĐÌNH (1000 LẦN GÕ)
-                            </h4>
-                            {hasDirectPlay && (
-                              <span className="px-2 py-0.2 bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-950 text-[9px] font-black rounded-full uppercase border border-amber-600">
-                                ĐẠI XÁ
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[11px] text-stone-600">
-                            {hasDirectPlay
-                              ? 'Ngọc Hoàng kính nể ý chí của con — Đặc xá vào thẳng đường dẫn Chơi!'
-                              : `Còn thiếu ${Math.max(0, 1000 - beats)} lần gõ trống để được vào chơi trực tiếp`}
-                          </p>
-                        </div>
-                      </div>
+                  {/* STRICT RULE NOTICE: ONLY 2 HINTS, NO OTHER WAY TO GET LINK */}
+                  <div className="rounded-2xl p-3.5 sm:p-4 border-2 border-dashed border-amber-300 bg-amber-50/70 text-center space-y-1">
+                    <div className="flex items-center justify-center gap-1.5 font-black text-xs sm:text-sm text-amber-950">
+                      <span>🚫</span>
+                      <span>TUYỆT ĐỐI KHÔNG CÓ ĐẶC XÁ MỞ LINK TRỰC TIẾP</span>
                     </div>
-
-                    {/* Unlocked Direct Play Button */}
-                    {hasDirectPlay ? (
-                      <div className="mt-3 p-3 rounded-xl bg-white border-2 border-amber-400 shadow-md flex flex-col sm:flex-row items-center justify-between gap-2">
-                        <div className="text-xs font-black text-amber-900">
-                          🎉 ĐÃ ĐẠT 1000 TIẾNG TRỐNG! Con đã chinh phục Ngọc Hoàng!
-                        </div>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={handleDirectPlay}
-                          className="w-full sm:w-auto px-5 py-2 rounded-xl bg-gradient-to-r from-green-500 via-emerald-500 to-green-600 hover:from-green-400 hover:to-emerald-500 text-white font-black text-xs sm:text-sm shadow-md border border-green-400 cursor-pointer flex items-center justify-center gap-1.5"
-                        >
-                          <Sparkles className="w-4 h-4 fill-white" />
-                          <span>VÀO "CHƠI" LUÔN ➜</span>
-                        </motion.button>
-                      </div>
-                    ) : (
-                      <div className="mt-2 text-xs font-medium text-stone-400 italic">
-                        🔒 Đánh đủ 1000 tiếng trống để Ngọc Hoàng ban chiếu đặc cách vào chơi không cần pass.
-                      </div>
-                    )}
+                    <p className="text-[11px] sm:text-xs font-medium text-stone-700 max-w-md mx-auto leading-relaxed">
+                      Thiên Đình chỉ ban tối đa <strong>2 lần gợi ý</strong> (ở mốc 10.000 và 100.000 lần gõ). Không có bất kỳ cách nào khác để nhận link chơi nếu không giải được pass. Thí chủ hãy dùng 2 gợi ý trên để suy luận và tự mở khóa!
+                    </p>
                   </div>
                 </div>
 

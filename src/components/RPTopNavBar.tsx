@@ -11,7 +11,6 @@ interface RPTopNavBarProps {
   isHellMode?: boolean;
   onOpenAgeVerification?: () => void;
   onReturnToEarth?: () => void;
-  onOpenCocKienTroi?: () => void;
 }
 
 export const RPTopNavBar: React.FC<RPTopNavBarProps> = ({
@@ -20,7 +19,6 @@ export const RPTopNavBar: React.FC<RPTopNavBarProps> = ({
   isHellMode = false,
   onOpenAgeVerification,
   onReturnToEarth,
-  onOpenCocKienTroi,
 }) => {
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -133,26 +131,8 @@ export const RPTopNavBar: React.FC<RPTopNavBarProps> = ({
           </div>
         </div>
 
-        {/* Right Section: Cóc Kiện Trời (Icon Con Cóc) & Fullscreen Action */}
+        {/* Right Section: Fullscreen Action */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          {/* Nút Cóc Kiện Trời - Chỉ icon con cóc */}
-          {onOpenCocKienTroi && (
-            <button
-              id="btn-coc-kien-troi-nav"
-              onClick={() => {
-                playUiClick(soundEnabled);
-                onOpenCocKienTroi();
-              }}
-              title="Cóc Kiện Trời - Xin gợi ý pass từ Ngọc Hoàng 🐸"
-              aria-label="Cóc Kiện Trời - Xin gợi ý pass"
-              className="relative p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-400 via-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-amber-950 border-2 border-yellow-200 shadow-[0_4px_12px_rgba(245,158,11,0.45)] hover:shadow-[0_6px_18px_rgba(245,158,11,0.6)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 group"
-            >
-              <span className="text-lg sm:text-2xl leading-none group-hover:scale-120 transition-transform">
-                🐸
-              </span>
-            </button>
-          )}
-
           {/* Fullscreen Button */}
           <button
             onClick={toggleFullscreen}

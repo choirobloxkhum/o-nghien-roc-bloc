@@ -15,5 +15,22 @@ service cloud.firestore {
     match /device_votes/{fingerprint} {
       allow read, write: if true;
     }
+
+    match /rp_comments/{characterId}/items/{commentId} {
+      allow read: if true;
+      allow create: if request.resource.data.userName is string &&
+                       request.resource.data.userName.size() > 0 &&
+                       request.resource.data.userName.size() <= 50 &&
+                       request.resource.data.commentText is string &&
+                       request.resource.data.commentText.size() > 0 &&
+                       request.resource.data.commentText.size() <= 250 &&
+                       request.resource.data.characterId == characterId;
+      allow update, delete: if false;
+    }
+
+    match /rp_comment_counts/{characterId} {
+      allow read: if true;
+      allow write: if true;
+    }
   }
 }

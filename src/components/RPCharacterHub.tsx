@@ -28,6 +28,7 @@ import {
   upvoteCharacterRobux,
   subscribeToRobuxCounts,
 } from '../services/robuxApi';
+import { subscribeToAllCommentCounts } from '../services/commentsApi';
 import {
   getLeaderboardSnapshot,
   forceRefreshLeaderboardSnapshot,
@@ -78,6 +79,8 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(window.innerWidth >= 640 ? 20 : 10);
+  // Real-time comment counts map
+  const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const handleResize = () => {
@@ -130,7 +133,7 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
     syncServerData();
 
     // 2. Real-time Firestore snapshot listener: Nhận dữ liệu cập nhật tức thì từ Firestore
-    const unsubscribe = subscribeToRobuxCounts((newCounts) => {
+    const unsubscribeRobux = subscribeToRobuxCounts((newCounts) => {
       setCharacters((prev) => {
         let changed = false;
         const updated = prev.map((char) => {
@@ -148,8 +151,14 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
       });
     });
 
+    // 3. Real-time Comment Counts listener
+    const unsubscribeComments = subscribeToAllCommentCounts((counts) => {
+      setCommentCounts(counts);
+    });
+
     return () => {
-      unsubscribe();
+      unsubscribeRobux();
+      unsubscribeComments();
     };
   }, [syncServerData]);
 
@@ -395,7 +404,6 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
         isHellMode={isHellMode}
         onOpenAgeVerification={handleOpenAgeVerification}
         onReturnToEarth={handleReturnToEarth}
-        onOpenCocKienTroi={() => handleOpenCocKienTroi()}
       />
 
       {/* 2. MAIN CONTENT AREA */}
@@ -610,6 +618,7 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
                     onDonateRobux={handleDonateRobux}
                     rankBadge={rankMap.get(character.id)}
                     isHellMode={isHellMode}
+                    commentCount={commentCounts[character.id] || 0}
                   />
                 ))}
               </motion.div>

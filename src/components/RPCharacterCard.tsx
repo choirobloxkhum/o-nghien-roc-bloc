@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Play, BookOpen, Sparkles, Crown, Check, Volume2, Flame, Lock } from 'lucide-react';
 import { RPCharacter } from '../types';
 import { useCharacterVoice } from '../utils/characterVoice';
+import { RPCharacterComments } from './RPCharacterComments';
 
 interface RPCharacterCardProps {
   character: RPCharacter;
@@ -11,6 +12,7 @@ interface RPCharacterCardProps {
   onReadPlot: (character: RPCharacter) => void;
   onDonateRobux: (characterId: string) => void;
   isHellMode?: boolean;
+  commentCount?: number;
   rankBadge?: {
     rank: number;
     label: string;
@@ -25,6 +27,7 @@ export const RPCharacterCard: React.FC<RPCharacterCardProps> = ({
   onReadPlot,
   onDonateRobux,
   isHellMode = false,
+  commentCount = 0,
   rankBadge,
 }) => {
   const [floatingPuffs, setFloatingPuffs] = useState<{ id: number; text: string; isWarning?: boolean }[]>([]);
@@ -362,6 +365,16 @@ export const RPCharacterCard: React.FC<RPCharacterCardProps> = ({
           </div>
         </div>
       )}
+
+      {/* 4. PUBLIC COMMENT / REVIEW MODAL TRIGGER */}
+      <RPCharacterComments
+        characterId={character.id}
+        characterName={character.name}
+        characterAvatar={character.avatarUrl}
+        characterRole={character.roleTag}
+        isHellMode={isHellMode}
+        commentCount={commentCount}
+      />
     </motion.div>
   );
 };
