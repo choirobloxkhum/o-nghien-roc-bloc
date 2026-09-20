@@ -12,63 +12,68 @@ interface VinylRecordButtonProps {
   isHellMode?: boolean;
 }
 
+const DEFAULT_PLAYLIST_AUDIO_URL =
+  'https://res.cloudinary.com/opmwpbzb/video/upload/v1789917302/PLAYLIST_01_songs_to_calm_you_down_after_a_hard_day_my20s.mp3';
+
 export const VinylRecordButton: React.FC<VinylRecordButtonProps> = ({
   isPlaying,
   onTogglePlay,
+  playlistUrl,
   className = '',
   isHellMode = false,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const [sparkles, setSparkles] = useState<{ id: number; x: number; y: number; char: string }[]>([]);
-  const iframeRef = useRef<HTMLIFrameElement | null>(null);
-  const [ytReady, setYtReady] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const { playingId } = useCharacterVoice();
   const isVoiceDucking = Boolean(playingId);
 
-  // Extract YouTube ID from link: Hell mode uses GYEpWL5khmc, Normal mode uses -amHlcPIpgM
-  const videoId = isHellMode ? 'GYEpWL5khmc' : '-amHlcPIpgM';
+  const audioSrc = playlistUrl || DEFAULT_PLAYLIST_AUDIO_URL;
 
-  // Handle YouTube iframe messages when isPlaying or videoId changes
+  // Handle Play / Pause with Audio Ducking
   useEffect(() => {
-    if (!iframeRef.current || !iframeRef.current.contentWindow) return;
+    const audio = audioRef.current;
+    if (!audio) return;
 
-    try {
-      const command = isPlaying
-        ? '{"event":"command","func":"playVideo","args":""}'
-        : '{"event":"command","func":"pauseVideo","args":""}';
-      
-      iframeRef.current.contentWindow.postMessage(command, '*');
-    } catch {
-      // ignore
-    }
-  }, [isPlaying, ytReady, videoId]);
-
-  // Audio Ducking: Lower the vinyl record music volume when character voice is speaking
-  useEffect(() => {
-    const targetVolume = isVoiceDucking ? 15 : 85;
-    
-    // 1. YouTube Iframe player volume adjustment
-    if (iframeRef.current && iframeRef.current.contentWindow) {
-      try {
-        const volumeCommand = JSON.stringify({
-          event: 'command',
-          func: 'setVolume',
-          args: [targetVolume],
+    if (isPlaying) {
+      audio.volume = isVoiceDucking ? 0.15 : 0.8;
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Autoplay was prevented or user hasn't interacted yet
         });
-        iframeRef.current.contentWindow.postMessage(volumeCommand, '*');
-      } catch {
-        // ignore
       }
+    } else {
+      audio.pause();
+    }
+  }, [isPlaying, isVoiceDucking]);
+
+  // Audio Ducking: Smoothly adjust volume when voice is playing
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio && isPlaying) {
+      audio.volume = isVoiceDucking ? 0.15 : 0.8;
     }
 
-    // 2. Synthesizer procedural audio volume adjustment if active
     try {
       setChillBgmVolume(isVoiceDucking ? 0.12 : 0.6);
     } catch {
       // ignore
     }
-  }, [isVoiceDucking, isPlaying, ytReady]);
+  }, [isVoiceDucking, isPlaying]);
+
+  // Handle Audio Source Changes
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (audio.src !== audioSrc) {
+      audio.src = audioSrc;
+      if (isPlaying) {
+        audio.play().catch(() => {});
+      }
+    }
+  }, [audioSrc, isPlaying]);
 
   // Spawn floating music notes / sparkles when playing
   useEffect(() => {
@@ -109,34 +114,15 @@ export const VinylRecordButton: React.FC<VinylRecordButtonProps> = ({
         setShowTooltip(false);
       }}
     >
-      {/* Hidden YouTube Audio IFrame Player for Background Music */}
-      <div className="sr-only pointer-events-none absolute opacity-0 w-0 h-0 overflow-hidden">
-        <iframe
-          ref={iframeRef}
-          id="youtube-bgm-iframe"
-          title="Roblox Chill BGM Playlist"
-          src={`https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${videoId}&playsinline=1&controls=0&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`}
-          allow="autoplay; encrypted-media"
-          onLoad={() => {
-            setYtReady(true);
-            if (isPlaying && iframeRef.current?.contentWindow) {
-              iframeRef.current.contentWindow.postMessage(
-                '{"event":"command","func":"playVideo","args":""}',
-                '*'
-              );
-              // Apply initial volume
-              iframeRef.current.contentWindow.postMessage(
-                JSON.stringify({
-                  event: 'command',
-                  func: 'setVolume',
-                  args: [isVoiceDucking ? 15 : 85],
-                }),
-                '*'
-              );
-            }
-          }}
-        />
-      </div>
+      {/* HTML5 Direct Audio Player for Calming BGM Playlist */}
+      <audio
+        ref={audioRef}
+        id="bgm-vinyl-audio-player"
+        src={audioSrc}
+        loop
+        preload="auto"
+        className="hidden"
+      />
 
       {/* Floating Animated Music Notes / Sparkles */}
       <AnimatePresence>
