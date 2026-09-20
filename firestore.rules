@@ -32,5 +32,18 @@ service cloud.firestore {
       allow read: if true;
       allow write: if true;
     }
+
+    match /artworks/{artworkId} {
+      allow read: if true;
+      allow create: if request.resource.data.imageUrl is string &&
+                       request.resource.data.imageUrl.size() > 0 &&
+                       request.resource.data.characterId is string &&
+                       request.resource.data.characterName is string &&
+                       request.resource.data.authorName is string &&
+                       request.resource.data.authorName.size() > 0 &&
+                       request.resource.data.authorName.size() <= 60;
+      allow delete: if true;
+      allow update: if false;
+    }
   }
 }

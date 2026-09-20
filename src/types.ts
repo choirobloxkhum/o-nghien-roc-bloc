@@ -31,3 +31,15 @@ export interface RPCharacter {
 export interface PlayScenarioModalData {
   character: RPCharacter;
 }
+
+export interface Artwork {
+  id: string;
+  imageUrl: string;
+  characterId: string;
+  characterName: string;
+  characterAvatarUrl?: string;
+  authorName: string;
+  title?: string;
+  message?: string;
+  createdAt: number;
+}

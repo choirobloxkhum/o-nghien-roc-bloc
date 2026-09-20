@@ -35,6 +35,42 @@
         }
       },
       "required": ["characterId", "userName", "commentText", "createdAt"]
+    },
+    "Artwork": {
+      "title": "Artwork",
+      "description": "User submitted artwork for characters in the art gallery",
+      "type": "object",
+      "properties": {
+        "imageUrl": {
+          "type": "string",
+          "description": "Direct ImgBB link of the artwork"
+        },
+        "characterId": {
+          "type": "string",
+          "description": "Target character ID"
+        },
+        "characterName": {
+          "type": "string",
+          "description": "Name of the character"
+        },
+        "characterAvatarUrl": {
+          "type": "string",
+          "description": "Avatar URL of the character"
+        },
+        "authorName": {
+          "type": "string",
+          "description": "Artist or author name"
+        },
+        "title": {
+          "type": "string",
+          "description": "Optional title or poem caption"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Timestamp in milliseconds"
+        }
+      },
+      "required": ["imageUrl", "characterId", "characterName", "authorName", "createdAt"]
     }
   },
   "firestore": {
@@ -45,6 +81,10 @@
     "/rp_comments/{characterId}/items/{commentId}": {
       "schema": "CharacterComment",
       "description": "Public comments and reviews for a character"
+    },
+    "/artworks/{artworkId}": {
+      "schema": "Artwork",
+      "description": "Public artworks contributed by fans"
     }
   }
 }

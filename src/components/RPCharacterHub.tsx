@@ -18,6 +18,8 @@ import { NgocHoangCloudModal } from './NgocHoangCloudModal';
 import { RapunzelTributeFooter } from './RapunzelTributeFooter';
 import { PasswordModal } from './PasswordModal';
 import { CocKienTroiModal } from './CocKienTroiModal';
+import { ArtGalleryEntranceCard } from './ArtGalleryEntranceCard';
+import { ArtGalleryPage } from './ArtGalleryPage';
 import {
   getStoredRPCharacters,
   saveStoredRPCharacters,
@@ -75,6 +77,19 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
   // Cóc Kiện Trời Modal states (Đánh trống xin gợi ý password)
   const [isCocKienTroiOpen, setIsCocKienTroiOpen] = useState(false);
   const [cocKienTroiCharId, setCocKienTroiCharId] = useState<string>('char-11-lucifer');
+
+  // Phòng Tranh (Art Gallery) Page state - default to false so app always enters Home Hub first
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+
+  const handleOpenGallery = () => {
+    playUiClick(soundEnabled);
+    setIsGalleryOpen(true);
+  };
+
+  const handleCloseGallery = () => {
+    playUiClick(soundEnabled);
+    setIsGalleryOpen(false);
+  };
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -387,6 +402,17 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
     return map;
   }, [top3LeaderboardCharacters]);
 
+  if (isGalleryOpen) {
+    return (
+      <ArtGalleryPage
+        onBackToHub={handleCloseGallery}
+        characters={characters}
+        isHellMode={isHellMode}
+        soundEnabled={soundEnabled}
+      />
+    );
+  }
+
   return (
     <div
       className={`relative min-h-screen w-full flex flex-col font-dessert select-none overflow-x-hidden transition-colors duration-700 ${
@@ -404,6 +430,7 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
         isHellMode={isHellMode}
         onOpenAgeVerification={handleOpenAgeVerification}
         onReturnToEarth={handleReturnToEarth}
+        onOpenGallery={handleOpenGallery}
       />
 
       {/* 2. MAIN CONTENT AREA */}
@@ -526,6 +553,17 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
             onOpenGacha={() => setIsGachaOpen(true)}
             soundEnabled={soundEnabled}
           />
+        )}
+
+        {/* 🎨 PHÒNG TRANH PROMINENT BANNER (DIRECTLY UNDER GACHA WHEEL) */}
+        {!searchQuery && (
+          <div className="mb-6 sm:mb-10 w-full">
+            <ArtGalleryEntranceCard
+              onOpenGallery={handleOpenGallery}
+              isHellMode={isHellMode}
+              soundEnabled={soundEnabled}
+            />
+          </div>
         )}
 
         {/* SECTION 2: "Các chồng / Danh sách nhân vật" */}

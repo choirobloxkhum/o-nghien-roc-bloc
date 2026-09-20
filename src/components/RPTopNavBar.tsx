@@ -11,6 +11,7 @@ interface RPTopNavBarProps {
   isHellMode?: boolean;
   onOpenAgeVerification?: () => void;
   onReturnToEarth?: () => void;
+  onOpenGallery?: () => void;
 }
 
 export const RPTopNavBar: React.FC<RPTopNavBarProps> = ({
@@ -19,6 +20,7 @@ export const RPTopNavBar: React.FC<RPTopNavBarProps> = ({
   isHellMode = false,
   onOpenAgeVerification,
   onReturnToEarth,
+  onOpenGallery,
 }) => {
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {

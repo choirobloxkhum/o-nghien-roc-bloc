@@ -159,6 +159,11 @@ export default function App() {
   const handleEnterGame = () => {
     setShowJoinModal(false);
     setCurrentScreen('rphub');
+    try {
+      if (window.location.hash) {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    } catch {}
     playVictoryChime(soundEnabled);
     confetti({
       particleCount: 50,

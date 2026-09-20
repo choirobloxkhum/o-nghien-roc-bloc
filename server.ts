@@ -4,7 +4,7 @@ import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, getDocs, addDoc, query, orderBy, limit } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, getDocs, addDoc, deleteDoc, query, orderBy, limit } from 'firebase/firestore';
 
 const configPath = path.join(process.cwd(), 'firebase-applet-config.json');
 let firebaseConfig;
@@ -19,7 +19,54 @@ const db = getFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId);
 
 const app = express();
 const PORT = 3000;
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Serve uploaded public assets if any
+const uploadsDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  try {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  } catch (err) {
+    console.warn('Could not create uploads directory:', err);
+  }
+}
+app.use('/uploads', express.static(uploadsDir));
+
+// Direct Device Image Upload Endpoint (Lossless direct storage without AI degradation)
+app.post('/api/upload-image', (req, res) => {
+  try {
+    const { fileData, fileName } = req.body;
+    if (!fileData || typeof fileData !== 'string') {
+      return res.status(400).json({ success: false, message: 'Dữ liệu ảnh không hợp lệ' });
+    }
+
+    // Match base64 data url
+    const match = fileData.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+    if (match) {
+      const ext = match[1] === 'jpeg' ? 'jpg' : match[1];
+      const base64Data = match[2];
+      const buffer = Buffer.from(base64Data, 'base64');
+      const safeName = `art_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${ext}`;
+      const filePath = path.join(uploadsDir, safeName);
+      fs.writeFileSync(filePath, buffer);
+      
+      const fileUrl = `/uploads/${safeName}`;
+      return res.json({ success: true, url: fileUrl });
+    }
+
+    // If fileData is already a URL or valid string
+    if (fileData.startsWith('http://') || fileData.startsWith('https://')) {
+      return res.json({ success: true, url: fileData });
+    }
+
+    // Fallback: return data URL directly
+    return res.json({ success: true, url: fileData });
+  } catch (err) {
+    console.error('[Upload Error]:', err);
+    res.status(500).json({ success: false, message: 'Lỗi lưu trữ ảnh' });
+  }
+});
 
 // Anti-spam in-memory rate limiting map for comments (5s per client)
 const commentRateLimits: Record<string, number> = {};
@@ -298,6 +345,151 @@ app.post('/api/comments/:characterId', async (req, res) => {
 });
 
 // ==========================================
+// ART GALLERY (PHÒNG TRANH) API
+// ==========================================
+
+// 8. GET /api/artworks - Get list of artworks (optional filter ?characterId=...)
+app.get('/api/artworks', async (req, res) => {
+  try {
+    const { characterId } = req.query;
+    const artworksRef = collection(db, 'artworks');
+    const q = query(artworksRef, orderBy('createdAt', 'desc'), limit(100));
+    const snapshot = await getDocs(q);
+
+    let artworks: Array<{
+      id: string;
+      imageUrl: string;
+      characterId: string;
+      characterName: string;
+      characterAvatarUrl?: string;
+      authorName: string;
+      title?: string;
+      message?: string;
+      createdAt: number;
+    }> = [];
+
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      artworks.push({
+        id: docSnap.id,
+        imageUrl: data.imageUrl || '',
+        characterId: data.characterId || '',
+        characterName: data.characterName || 'Chồng Roblox',
+        characterAvatarUrl: data.characterAvatarUrl || '',
+        authorName: data.authorName || 'Họa sĩ ẩn danh',
+        title: data.title || '',
+        message: data.message || '',
+        createdAt: data.createdAt || Date.now(),
+      });
+    });
+
+    if (characterId && typeof characterId === 'string') {
+      artworks = artworks.filter((item) => item.characterId === characterId);
+    }
+
+    res.json({
+      success: true,
+      artworks,
+      totalCount: artworks.length,
+    });
+  } catch (err) {
+    console.error('[Artworks GET Error]:', err);
+    res.status(500).json({ success: false, error: String(err) });
+  }
+});
+
+// 9. POST /api/artworks - Submit new artwork
+app.post('/api/artworks', async (req, res) => {
+  try {
+    const { imageUrl, characterId, characterName, characterAvatarUrl, authorName, title, message } = req.body;
+
+    const trimmedUrl = typeof imageUrl === 'string' ? imageUrl.trim() : '';
+    const trimmedAuthor = typeof authorName === 'string' ? authorName.trim() : '';
+    const trimmedTitle = typeof title === 'string' ? title.trim() : '';
+    const trimmedMessage = typeof message === 'string' ? message.trim() : '';
+
+    if (!trimmedUrl) {
+      return res.status(400).json({ success: false, message: 'Vui lòng chọn hoặc tải ảnh lên!' });
+    }
+
+    if (!characterId || typeof characterId !== 'string') {
+      return res.status(400).json({ success: false, message: 'Vui lòng chọn nhân vật gắn với bức tranh!' });
+    }
+
+    if (!trimmedAuthor) {
+      return res.status(400).json({ success: false, message: 'Vui lòng nhập Tên tác giả / Họa sĩ!' });
+    }
+
+    if (trimmedAuthor.length > 60) {
+      return res.status(400).json({ success: false, message: 'Tên tác giả không được vượt quá 60 ký tự!' });
+    }
+
+    const now = Date.now();
+    const artworkPayload = {
+      imageUrl: trimmedUrl,
+      characterId: characterId.trim(),
+      characterName: typeof characterName === 'string' && characterName.trim() ? characterName.trim() : 'Chồng Roblox',
+      characterAvatarUrl: typeof characterAvatarUrl === 'string' ? characterAvatarUrl.trim() : '',
+      authorName: trimmedAuthor,
+      title: trimmedTitle.slice(0, 120),
+      message: trimmedMessage.slice(0, 300),
+      createdAt: now,
+    };
+
+    const artworksRef = collection(db, 'artworks');
+    const docRef = await addDoc(artworksRef, artworkPayload);
+
+    console.log(`[New Artwork] "${trimmedAuthor}" submitted artwork for "${artworkPayload.characterName}": ${trimmedUrl}`);
+
+    res.json({
+      success: true,
+      artwork: {
+        id: docRef.id,
+        ...artworkPayload,
+      },
+      message: 'Đăng tranh thành công! Tác phẩm đã được lưu vào Phòng Tranh.',
+    });
+  } catch (err) {
+    console.error('[Artworks POST Error]:', err);
+    res.status(500).json({ success: false, error: String(err) });
+  }
+});
+
+// 10. POST /api/artworks/clear-all - Clear all artworks
+app.post('/api/artworks/clear-all', async (req, res) => {
+  try {
+    const artworksRef = collection(db, 'artworks');
+    const snapshot = await getDocs(artworksRef);
+    let deletedCount = 0;
+    for (const docSnap of snapshot.docs) {
+      await deleteDoc(doc(db, 'artworks', docSnap.id));
+      deletedCount++;
+    }
+    console.log(`[Artworks] Cleared ${deletedCount} artworks from Firestore database.`);
+    res.json({ success: true, deletedCount, message: `Đã xóa ${deletedCount} bức tranh khỏi phòng tranh.` });
+  } catch (err) {
+    console.error('[Artworks Clear Error]:', err);
+    res.status(500).json({ success: false, error: String(err) });
+  }
+});
+
+async function clearExistingArtworks() {
+  try {
+    const artworksRef = collection(db, 'artworks');
+    const snapshot = await getDocs(artworksRef);
+    if (!snapshot.empty) {
+      console.log(`[Artworks Cleanup] Found ${snapshot.size} test artworks. Deleting now...`);
+      for (const docSnap of snapshot.docs) {
+        await deleteDoc(doc(db, 'artworks', docSnap.id));
+      }
+      console.log(`[Artworks Cleanup] Successfully cleared all test artworks from Firestore!`);
+    }
+  } catch (err) {
+    console.warn('[Artworks Cleanup Warning]:', err);
+  }
+}
+
+// ==========================================
 // VITE / STATIC SERVING SETUP
 // ==========================================
 
@@ -318,6 +510,7 @@ async function startServer() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Roblox RP Hub Server running on http://0.0.0.0:${PORT}`);
+    clearExistingArtworks();
   });
 }
 
