@@ -25,7 +25,8 @@ service cloud.firestore {
                        request.resource.data.commentText.size() > 0 &&
                        request.resource.data.commentText.size() <= 250 &&
                        request.resource.data.characterId == characterId;
-      allow update, delete: if false;
+      allow delete: if true;
+      allow update: if false;
     }
 
     match /rp_comment_counts/{characterId} {

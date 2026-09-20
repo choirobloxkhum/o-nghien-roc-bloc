@@ -236,8 +236,23 @@ app.get('/api/comments/:characterId', async (req, res) => {
       createdAt: number;
     }> = [];
 
-    snapshot.forEach((docSnap) => {
+    for (const docSnap of snapshot.docs) {
       const data = docSnap.data();
+      const uName = (data.userName || '').toLowerCase().trim();
+      const cText = (data.commentText || '').toLowerCase();
+
+      // Delete spoiler comments by em iu
+      if (
+        uName === 'em iu' ||
+        uName.includes('em iu') ||
+        uName.includes('em_iu') ||
+        uName.includes('emiu') ||
+        (characterId === 'char-15-thien' && (uName.includes('em') && (cText.includes('pass') || cText.includes('mật khẩu') || cText.includes('spoil'))))
+      ) {
+        deleteDoc(doc(db, 'rp_comments', characterId, 'items', docSnap.id)).catch(() => {});
+        continue;
+      }
+
       comments.push({
         id: docSnap.id,
         characterId: data.characterId || characterId,
@@ -245,7 +260,7 @@ app.get('/api/comments/:characterId', async (req, res) => {
         commentText: data.commentText || '',
         createdAt: data.createdAt || Date.now(),
       });
-    });
+    }
 
     res.json({
       success: true,

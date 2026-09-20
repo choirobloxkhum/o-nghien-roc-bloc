@@ -1,5 +1,5 @@
 // Real-Time Public Comment/Review System for Character Hub
-import { collection, onSnapshot, addDoc, doc, setDoc, getDoc, updateDoc, increment } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, doc, setDoc, getDoc, updateDoc, increment, deleteDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { getDeviceFingerprint } from '../utils/fingerprint';
 
@@ -60,6 +60,22 @@ export function subscribeToCharacterComments(
         const list: CharacterComment[] = [];
         snapshot.forEach((docSnap) => {
           const data = docSnap.data();
+          const uName = (data.userName || '').toLowerCase().trim();
+          const cText = (data.commentText || '').toLowerCase();
+
+          // Delete and filter out spoiler comment from "em iu" or spoiler text
+          if (
+            uName === 'em iu' ||
+            uName.includes('em iu') ||
+            uName.includes('em_iu') ||
+            uName.includes('emiu') ||
+            (characterId === 'char-15-thien' && (uName.includes('em') && (cText.includes('pass') || cText.includes('mật khẩu') || cText.includes('spoil'))))
+          ) {
+            // Delete asynchronously from Firestore
+            deleteDoc(doc(db, 'rp_comments', characterId, 'items', docSnap.id)).catch(() => {});
+            return;
+          }
+
           list.push({
             id: docSnap.id,
             characterId: data.characterId || characterId,
