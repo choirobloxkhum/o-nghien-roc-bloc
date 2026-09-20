@@ -156,11 +156,11 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
       playFrogCroakSound(soundEnabled);
     }
 
-    // Check milestones crossed (10,000 and 100,000 beats)
-    if (prevBeats < 10000 && nextBeats >= 10000) {
+    // Check milestones crossed (1,000 and 10,000 beats)
+    if (prevBeats < 1000 && nextBeats >= 1000) {
       playMilestoneUnlockSound(soundEnabled);
       triggerConfetti(100);
-    } else if (prevBeats < 100000 && nextBeats >= 100000) {
+    } else if (prevBeats < 10000 && nextBeats >= 10000) {
       playMilestoneUnlockSound(soundEnabled);
       triggerConfetti(180);
     }
@@ -204,9 +204,9 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Milestone unlock states for selectedChar: 10,000 for Hint 1, 100,000 for Hint 2
-  const hasHint1 = beats >= 10000;
-  const hasHint2 = beats >= 100000;
+  // Milestone unlock states for selectedChar: 1,000 for Hint 1, 10,000 for Hint 2
+  const hasHint1 = beats >= 1000;
+  const hasHint2 = beats >= 10000;
 
   // Specific hint content for Lucifer & fallback for others
   const hint1Text =
@@ -233,8 +233,8 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
     }
   };
 
-  // Progress percentage (capped at 100%, based on 100,000 beats)
-  const progressPercent = Math.min(100, (beats / 100000) * 100);
+  // Progress percentage (capped at 100%, based on 10,000 beats)
+  const progressPercent = Math.min(100, (beats / 10000) * 100);
 
   return (
     <AnimatePresence>
@@ -385,8 +385,8 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {lockedCharacters.map((char) => {
                       const charBeats = beatsMap[char.id] || 0;
-                      const hasHint1Unlocked = charBeats >= 10000;
-                      const hasHint2Unlocked = charBeats >= 100000;
+                      const hasHint1Unlocked = charBeats >= 1000;
+                      const hasHint2Unlocked = charBeats >= 10000;
 
                       return (
                         <motion.button
@@ -427,7 +427,7 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                             {/* Progress info badge */}
                             <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
                               <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
-                                🥁 {charBeats.toLocaleString('vi-VN')}/100.000 lần
+                                🥁 {charBeats.toLocaleString('vi-VN')}/10.000 lần
                               </span>
                               {hasHint2Unlocked ? (
                                 <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-blue-600 text-white">
@@ -525,7 +525,7 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                       <span className="px-2.5 py-1 rounded-full bg-amber-900 text-yellow-300 font-black text-xs sm:text-sm border border-yellow-400 shadow-xs flex items-center gap-1">
                         <span>🥁 Đã Gõ:</span>
                         <strong className="text-white text-sm sm:text-base">{beats.toLocaleString('vi-VN')}</strong>
-                        <span className="text-[10px] text-amber-200">/100.000 lần</span>
+                        <span className="text-[10px] text-amber-200">/10.000 lần</span>
                       </span>
                     </div>
 
@@ -628,8 +628,8 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                       <span>Luật Kiện Trời Của Thiên Đình</span>
                     </div>
                     <p className="leading-relaxed font-semibold">
-                      • Đánh trống <strong>10.000 lần</strong>: nhận được <strong>gợi ý lần 1</strong>.<br />
-                      • Đánh trống <strong>100.000 lần</strong>: nhận được <strong>gợi ý lần 2</strong>.
+                      • Đánh trống <strong>1.000 lần</strong>: nhận được <strong>gợi ý lần 1</strong>.<br />
+                      • Đánh trống <strong>10.000 lần</strong>: nhận được <strong>gợi ý lần 2</strong>.
                     </p>
                     <p className="text-red-700 font-black text-[11px] pt-0.5">
                       ⚠️ Chỉ có 2 lần gợi ý duy nhất — Không có bất kỳ cách nào khác để nhận link nếu không tự giải được mật khẩu!
@@ -637,10 +637,10 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                   </div>
                 </div>
 
-                {/* OVERALL PROGRESS BAR (0 -> 100.000) WITH 2 MILESTONE FLAGS */}
+                {/* OVERALL PROGRESS BAR (0 -> 10.000) WITH 2 MILESTONE FLAGS */}
                 <div className="bg-white/90 rounded-2xl p-3 sm:p-4 border-2 border-amber-300 shadow-xs space-y-2">
                   <div className="flex items-center justify-between text-xs font-black text-amber-950">
-                    <span>Tiến độ xin lệnh Ngọc Hoàng (tối đa 100.000 tiếng trống):</span>
+                    <span>Tiến độ xin lệnh Ngọc Hoàng (tối đa 10.000 tiếng trống):</span>
                     <span className="text-red-700 font-extrabold">{progressPercent.toFixed(1)}%</span>
                   </div>
 
@@ -654,14 +654,14 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                     />
                   </div>
 
-                  {/* Milestone Flag Labels (2 milestones: 10,000 and 100,000) */}
+                  {/* Milestone Flag Labels (2 milestones: 1,000 and 10,000) */}
                   <div className="grid grid-cols-2 gap-2 text-[10px] sm:text-xs pt-1">
                     <div className={`flex flex-col items-center text-center p-2 rounded-xl border ${hasHint1 ? 'bg-emerald-50 border-emerald-400 text-emerald-950 font-black shadow-xs' : 'bg-stone-50 border-stone-200 text-stone-500'}`}>
-                      <span className="font-bold text-xs sm:text-sm">10.000 lần 📜</span>
+                      <span className="font-bold text-xs sm:text-sm">1.000 lần 📜</span>
                       <span className="text-[9px] sm:text-[10px]">{hasHint1 ? '✓ ĐÃ MỞ GỢI Ý 1' : 'Gợi ý lần 1'}</span>
                     </div>
                     <div className={`flex flex-col items-center text-center p-2 rounded-xl border ${hasHint2 ? 'bg-blue-50 border-blue-400 text-blue-950 font-black shadow-xs' : 'bg-stone-50 border-stone-200 text-stone-500'}`}>
-                      <span className="font-bold text-xs sm:text-sm">100.000 lần 💡</span>
+                      <span className="font-bold text-xs sm:text-sm">10.000 lần 💡</span>
                       <span className="text-[9px] sm:text-[10px]">{hasHint2 ? '✓ ĐÃ MỞ GỢI Ý 2' : 'Gợi ý lần 2'}</span>
                     </div>
                   </div>
@@ -669,7 +669,7 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
 
                 {/* MILESTONE CARDS: THE 2 REWARDS ONLY */}
                 <div className="space-y-3">
-                  {/* MILESTONE 1: 10,000 BEATS (GỢI Ý THỨ NHẤT) */}
+                  {/* MILESTONE 1: 1,000 BEATS (GỢI Ý THỨ NHẤT) */}
                   <div
                     className={`relative rounded-2xl p-3.5 sm:p-4 border-2 transition-all ${
                       hasHint1
@@ -686,12 +686,12 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                               : 'bg-stone-200 text-stone-500 border-stone-300'
                           }`}
                         >
-                          {hasHint1 ? <CheckCircle2 className="w-5 h-5" /> : '10K'}
+                          {hasHint1 ? <CheckCircle2 className="w-5 h-5" /> : '1K'}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
                             <h4 className="text-xs sm:text-sm font-black text-stone-900">
-                              MỐC 1: GỢI Ý THỨ NHẤT (10.000 LẦN GÕ)
+                              MỐC 1: GỢI Ý THỨ NHẤT (1.000 LẦN GÕ)
                             </h4>
                             {hasHint1 && (
                               <span className="px-2 py-0.2 bg-emerald-600 text-white text-[9px] font-black rounded-full uppercase">
@@ -702,7 +702,7 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                           <p className="text-[11px] text-stone-600">
                             {hasHint1
                               ? 'Ngọc Hoàng đã truyền lệnh mật báo đầu mối:'
-                              : `Còn thiếu ${Math.max(0, 10000 - beats).toLocaleString('vi-VN')} lần gõ trống để mở`}
+                              : `Còn thiếu ${Math.max(0, 1000 - beats).toLocaleString('vi-VN')} lần gõ trống để mở`}
                           </p>
                         </div>
                       </div>
@@ -733,12 +733,12 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                       </div>
                     ) : (
                       <div className="mt-2 text-xs font-medium text-stone-400 italic">
-                        🔒 Đánh đủ 10.000 tiếng trống để kinh động Thiên Cung nhận manh mối thứ nhất.
+                        🔒 Đánh đủ 1.000 tiếng trống để kinh động Thiên Cung nhận manh mối thứ nhất.
                       </div>
                     )}
                   </div>
 
-                  {/* MILESTONE 2: 100,000 BEATS (GỢI Ý THỨ HAI) */}
+                  {/* MILESTONE 2: 10,000 BEATS (GỢI Ý THỨ HAI) */}
                   <div
                     className={`relative rounded-2xl p-3.5 sm:p-4 border-2 transition-all ${
                       hasHint2
@@ -755,12 +755,12 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                               : 'bg-stone-200 text-stone-500 border-stone-300'
                           }`}
                         >
-                          {hasHint2 ? <CheckCircle2 className="w-5 h-5" /> : '100K'}
+                          {hasHint2 ? <CheckCircle2 className="w-5 h-5" /> : '10K'}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
                             <h4 className="text-xs sm:text-sm font-black text-stone-900">
-                              MỐC 2: GỢI Ý THỨ HAI (100.000 LẦN GÕ)
+                              MỐC 2: GỢI Ý THỨ HAI (10.000 LẦN GÕ)
                             </h4>
                             {hasHint2 && (
                               <span className="px-2 py-0.2 bg-blue-600 text-white text-[9px] font-black rounded-full uppercase">
@@ -771,7 +771,7 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                           <p className="text-[11px] text-stone-600">
                             {hasHint2
                               ? 'Mật khải chi tiết từ Ngai Vàng Thiên Tử:'
-                              : `Còn thiếu ${Math.max(0, 100000 - beats).toLocaleString('vi-VN')} lần gõ trống để mở`}
+                              : `Còn thiếu ${Math.max(0, 10000 - beats).toLocaleString('vi-VN')} lần gõ trống để mở`}
                           </p>
                         </div>
                       </div>
@@ -790,12 +790,12 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                           (Đọc kỹ dòng tiểu sử / bio trên trang Ngọc Hoàng để giải mật mã!)
                         </p>
                         <p className="text-[10px] text-amber-800 font-semibold mt-1">
-                          📌 Quy tắc: Pass không viết hoa, không viết dấu, không khoảng cách.
+                          📌 Quy tắc: Password không viết hoa, không dấu, không cách
                         </p>
                       </div>
                     ) : (
                       <div className="mt-2 text-xs font-medium text-stone-400 italic">
-                        🔒 Đánh đủ 100.000 tiếng trống để nhận gợi ý chí mạng thứ hai.
+                        🔒 Đánh đủ 10.000 tiếng trống để nhận gợi ý chí mạng thứ hai.
                       </div>
                     )}
                   </div>
@@ -807,7 +807,7 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                       <span>TUYỆT ĐỐI KHÔNG CÓ ĐẶC XÁ MỞ LINK TRỰC TIẾP</span>
                     </div>
                     <p className="text-[11px] sm:text-xs font-medium text-stone-700 max-w-md mx-auto leading-relaxed">
-                      Thiên Đình chỉ ban tối đa <strong>2 lần gợi ý</strong> (ở mốc 10.000 và 100.000 lần gõ). Không có bất kỳ cách nào khác để nhận link chơi nếu không giải được pass. Thí chủ hãy dùng 2 gợi ý trên để suy luận và tự mở khóa!
+                      Thiên Đình chỉ ban tối đa <strong>2 lần gợi ý</strong> (ở mốc 1.000 và 10.000 lần gõ). Không có bất kỳ cách nào khác để nhận link chơi nếu không giải được pass. Thí chủ hãy dùng 2 gợi ý trên để suy luận và tự mở khóa!
                     </p>
                   </div>
                 </div>

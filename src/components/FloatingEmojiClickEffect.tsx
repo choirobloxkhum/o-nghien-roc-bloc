@@ -40,6 +40,9 @@ export const FloatingEmojiClickEffect: React.FC = () => {
     const rotation = (Math.random() - 0.5) * 35; // gentle tilt
     const duration = 3.0; // 3 seconds duration
 
+    const isMobile = window.innerWidth < 768;
+    const maxItems = isMobile ? 5 : 12;
+
     const newItem: FloatingEmoji = {
       id: Date.now() + Math.random(),
       x: clickX,
@@ -52,7 +55,7 @@ export const FloatingEmojiClickEffect: React.FC = () => {
       duration,
     };
 
-    setEmojis((prev) => [...prev.slice(-25), newItem]); // keep max 25 items
+    setEmojis((prev) => [...prev.slice(-maxItems), newItem]);
   }, []);
 
   useEffect(() => {

@@ -20,7 +20,10 @@ export interface RPCharacter {
   createdAt: number;
   isNew?: boolean;
   cornerTag?: string;
+  realAvatarUrl?: string;
+  trollAvatarUrl?: string;
   password?: string;
+  hasDynamicPassword?: boolean;
   passwordHint?: string;
   hint1?: string;
   hint1Url?: string;

@@ -2,6 +2,26 @@ import { RPCharacter } from '../types';
 
 const now = Date.now();
 
+export const REVEALED_AVATARS_PREFIX = 'roblox_rp_real_avatar_';
+
+export function isCharacterAvatarRevealed(characterId: string): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return localStorage.getItem(`${REVEALED_AVATARS_PREFIX}${characterId}`) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+export function setCharacterAvatarRevealed(characterId: string) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(`${REVEALED_AVATARS_PREFIX}${characterId}`, 'true');
+  } catch {
+    // ignore
+  }
+}
+
 // Mộng chè - Ngọc Hoàng đặc biệt luôn đứng đầu danh sách phòng tranh & tặng tranh
 export const MONG_CHE_CHARACTER: RPCharacter = {
   id: 'mong_che_admin',
@@ -22,8 +42,33 @@ export const MONG_CHE_CHARACTER: RPCharacter = {
 };
 
 // QUY TẮC: Nhân vật mới thêm vào luôn được đặt ở ĐẦU mảng (index 0) để xuất hiện phía trước,
-// và gắn cờ isNew: true, cornerTag: 'MỚI' để hiển thị tag nổi bật ở góc phải trên cùng ảnh.
+// và gắn cờ isNew: true, cornerTag: 'MỚI' để hiển thị tag nổi bật ở góc phải trên cùng ảnh (tối đa 3 nhân vật).
 export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
+  {
+    id: 'char-16-hoang-nhat-thien',
+    name: 'Hoàng Nhất Thiên',
+    avatarUrl: 'https://i.ibb.co/zjDNf5m/Kh-ng-C-Ti-u-65-20260919130152.jpg',
+    roleTag: 'Hiện đại',
+    tags: ['Hiện đại', 'char máu S', 'user ngoại tình (?)', 'trai IT', 'Sài Gòn'],
+    tagline: '',
+    robuxDonations: 0,
+    personality: 'Trai IT, máu S, sắc sảo, nguy hiểm',
+    plotTitle: '',
+    plotSummary: 'Tôi phát hiện bạn gái ngoại tình với...Google AI Studio?',
+    fullPlot: '',
+    sampleDialogue: [],
+    playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22%3A%5B%221ERpUQlKrc-YcynTWrJgw2yU8BdMnChqn%22%5D%2C%22action%22%3A%22open%22%2C%22userId%22%3A%22102834450421569886676%22%2C%22resourceKeys%22%3A%7B%7D%7D&usp=drive_link',
+    plotUrl: 'https://rentry.co/choirobloxkhum_thien',
+    voiceUrl: 'https://res.cloudinary.com/opmwpbzb/video/upload/v1789908496/ElevenLabs_2026-09-20T12_44_00_Hung_Tran_-_Deep_Calm_and_Reflective_pvc_sp105_s50_sb75_v3.mp3',
+    createdAt: now + 5000,
+    isNew: true,
+    cornerTag: 'MỚI',
+    hasDynamicPassword: true,
+    password: 'HN1T89',
+    passwordHint: 'Nhấp anh mười đêm',
+    hint1: 'Chữ "anh" có bình thường không nhỉ?',
+    hint2: 'Nhấp vào chữ anh trong phần hint 10 lần sẽ ra Password',
+  },
   {
     id: 'char-15-seo-jihoon',
     name: 'Seo Jihoon',
@@ -39,6 +84,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%2211oW_p0ptUtGAbMOC2zsw09SLdnY7MLOQ%22%5D,%22action%22:%22open%22,%22userId%22:%22118220567926520160271%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing',
     plotUrl: 'https://rentry.co/choirobloxkhum_jihoon',
+    voiceUrl: 'https://res.cloudinary.com/opmwpbzb/video/upload/v1789908658/ElevenLabs_2026-09-20T12_49_54_Chris_-_Warm_and_Clear_pvc_sp100_s55_sb55_v3.mp3',
     createdAt: now + 4000,
     isNew: true,
     cornerTag: 'MỚI',
@@ -68,7 +114,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     name: 'Lucifer',
     avatarUrl: 'https://i.ibb.co/SwLw6RXR/media-1788514839.png',
     roleTag: 'Khác',
-    tags: ['Khác', 'ma vương', 'hài', 'chim bé', 'user là incubus/succubus', 'F7 Big Wrongs'],
+    tags: ['🔒', 'Khác', 'ma vương', 'hài', 'chim bé', 'user là incubus/succubus', 'F7 Big Wrongs'],
     tagline: '',
     robuxDonations: 0,
     personality: '',
@@ -80,8 +126,6 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     plotUrl: 'https://rentry.co/choirobloxkhum_lucifer',
     voiceUrl: 'https://res.cloudinary.com/ygmarp6t/video/upload/v1788602993/ElevenLabs_2026-09-05T10_06_43_VASKO_-_Deep_Warm_and_Pleasant_pvc_sp100_s75_sb70_v3.mp3',
     createdAt: now + 2000,
-    isNew: true,
-    cornerTag: 'MỚI',
     password: 'cuccut',
     passwordHint: 'gọi tui là cục cưng, bạn tệ bạc gọi là...?',
     hint1: 'Facebook của Ngọc Hoàng',

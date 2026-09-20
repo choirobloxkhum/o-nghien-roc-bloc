@@ -11,11 +11,11 @@ export const RobloxBackground: React.FC = () => {
       {/* Sky Gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#1d7bf8] via-[#52a7ff] to-[#a2d8ff]" />
 
-      {/* Radiant Sunburst Rays */}
+      {/* Radiant Sunburst Rays (Desktop/Tablet only for max 60FPS mobile performance) */}
       <motion.div
         animate={{ rotate: 360 }}
         transition={{ duration: 90, repeat: Infinity, ease: 'linear' }}
-        className="absolute -top-24 -left-24 w-[600px] h-[600px] opacity-20 pointer-events-none"
+        className="absolute -top-24 -left-24 w-[600px] h-[600px] opacity-20 pointer-events-none hidden md:block"
         style={{
           background:
             'conic-gradient(from 0deg, transparent 0deg 15deg, rgba(255,255,255,0.7) 15deg 30deg, transparent 30deg 45deg, rgba(255,255,255,0.7) 45deg 60deg, transparent 60deg 75deg, rgba(255,255,255,0.7) 75deg 90deg, transparent 90deg 105deg, rgba(255,255,255,0.7) 105deg 120deg, transparent 120deg 135deg, rgba(255,255,255,0.7) 135deg 150deg, transparent 150deg 165deg, rgba(255,255,255,0.7) 165deg 180deg, transparent 180deg 195deg, rgba(255,255,255,0.7) 195deg 210deg, transparent 210deg 225deg, rgba(255,255,255,0.7) 225deg 240deg, transparent 240deg 255deg, rgba(255,255,255,0.7) 255deg 270deg, transparent 270deg 285deg, rgba(255,255,255,0.7) 285deg 300deg, transparent 300deg 315deg, rgba(255,255,255,0.7) 315deg 330deg, transparent 330deg 345deg, rgba(255,255,255,0.7) 345deg 360deg)',
@@ -23,7 +23,7 @@ export const RobloxBackground: React.FC = () => {
       />
 
       {/* Sun with intense glow and rays */}
-      <div className="absolute top-8 left-8 sm:top-14 sm:left-14 w-28 h-28 sm:w-40 sm:h-40 bg-yellow-200 rounded-full blur-[1px] opacity-95 animate-pulse-glow shadow-[0_0_90px_35px_rgba(253,224,71,0.65)]">
+      <div className="absolute top-8 left-8 sm:top-14 sm:left-14 w-28 h-28 sm:w-40 sm:h-40 bg-yellow-200 rounded-full blur-[1px] opacity-95 shadow-[0_0_40px_15px_rgba(253,224,71,0.5)] md:shadow-[0_0_90px_35px_rgba(253,224,71,0.65)]">
         {/* Sun inner core */}
         <div className="absolute inset-3 bg-gradient-to-tr from-amber-300 via-yellow-100 to-white rounded-full blur-xs" />
       </div>

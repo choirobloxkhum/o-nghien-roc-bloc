@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Lock, Unlock, Play, ChevronRight } from 'lucide-react';
+import { X, Lock, Unlock, Play, ChevronRight, Copy, Check } from 'lucide-react';
 import { RPCharacter } from '../types';
-import { playUiClick } from '../utils/audio';
+import { playUiClick, playSparkleSound } from '../utils/audio';
+import { getCharacterSessionPassword } from '../utils/passwordGenerator';
 
 interface PasswordModalProps {
   isOpen: boolean;
@@ -24,6 +25,8 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
   const [passwordInput, setPasswordInput] = useState('');
   const [error, setError] = useState('');
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const [hintClicks, setHintClicks] = useState(0);
+  const [copiedPassword, setCopiedPassword] = useState(false);
 
   // Reset state when opened with a new character
   React.useEffect(() => {
@@ -31,15 +34,21 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
       setPasswordInput('');
       setError('');
       setIsUnlocked(false);
+      setHintClicks(0);
+      setCopiedPassword(false);
     }
-  }, [isOpen, character]);
+  }, [isOpen, character?.id]);
 
   if (!character) return null;
+
+  const activePassword = character.hasDynamicPassword
+    ? getCharacterSessionPassword(character.id, character.password)
+    : character.password || '';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     playUiClick(soundEnabled);
-    if (passwordInput.toLowerCase().trim() === character.password?.toLowerCase()) {
+    if (passwordInput.toLowerCase().trim() === activePassword.toLowerCase().trim()) {
       setIsUnlocked(true);
       setError('');
     } else {
@@ -124,10 +133,96 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
                       }`}>
                         Gợi ý
                       </div>
-                      <p className="font-semibold mb-1 mt-1">{character.passwordHint}</p>
-                      <p className={`italic text-xs font-medium ${isHellMode ? 'text-red-400/80' : 'text-amber-700/80'}`}>
-                        Pass không viết hoa, không viết dấu, không khoảng cách.
-                      </p>
+
+                      {character.passwordHint.toLowerCase().includes('nhấp anh mười đêm') ? (
+                        <div>
+                          <p className="font-semibold mb-1 mt-1">
+                            Nhấp{' '}
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                playUiClick(soundEnabled);
+                                const nextClicks = hintClicks + 1;
+                                setHintClicks(nextClicks);
+                                if (nextClicks === 10) {
+                                  playSparkleSound(soundEnabled);
+                                }
+                              }}
+                              className="cursor-pointer select-none"
+                            >
+                              anh
+                            </span>{' '}
+                            mười đêm
+                          </p>
+
+                          {/* Secret password reveal after 10 clicks */}
+                          {hintClicks >= 10 && (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.95, y: 5 }}
+                              animate={{ opacity: 1, scale: 1, y: 0 }}
+                              className={`mt-2.5 p-3 rounded-xl border flex items-center justify-between gap-2 ${
+                                isHellMode
+                                  ? 'bg-red-950/80 border-red-500/60 text-red-100 shadow-[0_0_15px_rgba(239,68,68,0.25)]'
+                                  : 'bg-gradient-to-r from-amber-100 via-orange-50 to-yellow-100 border-amber-300 text-stone-900 shadow-xs'
+                              }`}
+                            >
+                              <div className="flex flex-col text-left">
+                                <span className={`text-[10px] font-bold uppercase tracking-wider ${isHellMode ? 'text-red-300' : 'text-amber-900'}`}>
+                                  ✨ Mật khẩu của anh nè:
+                                </span>
+                                <span className="text-base font-black font-mono tracking-widest text-emerald-600 dark:text-emerald-400">
+                                  {activePassword}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  playUiClick(soundEnabled);
+                                  if (activePassword) {
+                                    navigator.clipboard.writeText(activePassword);
+                                    setPasswordInput(activePassword);
+                                    setCopiedPassword(true);
+                                    setTimeout(() => setCopiedPassword(false), 2000);
+                                  }
+                                }}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all active:scale-95 cursor-pointer shadow-xs flex items-center gap-1.5 ${
+                                  copiedPassword
+                                    ? 'bg-emerald-600 text-white'
+                                    : isHellMode
+                                    ? 'bg-red-800 hover:bg-red-700 text-white'
+                                    : 'bg-amber-500 hover:bg-amber-600 text-white'
+                                }`}
+                              >
+                                {copiedPassword ? (
+                                  <>
+                                    <Check className="w-3.5 h-3.5" />
+                                    <span>Đã copy & điền!</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="w-3.5 h-3.5" />
+                                    <span>Copy Pass</span>
+                                  </>
+                                )}
+                              </button>
+                            </motion.div>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="font-semibold mb-1 mt-1">{character.passwordHint}</p>
+                      )}
+
+                      {(character.id === 'char-11-lucifer' || character.name.toLowerCase().includes('lucifer')) && (
+                        <p className={`text-[11px] font-medium mt-1.5 pt-1.5 border-t italic ${
+                          isHellMode
+                            ? 'text-red-300/80 border-red-900/50'
+                            : 'text-amber-800/80 border-amber-200'
+                        }`}>
+                          Password không viết hoa, không dấu, không cách
+                        </p>
+                      )}
                     </div>
                   )}
 
@@ -204,13 +299,14 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
                     </div>
                   </div>
                   
-                  <div>
-                    <h4 className={`text-lg font-bold mb-1 ${isHellMode ? 'text-red-100' : 'text-stone-800'}`}>
+                  <div className="text-center space-y-1.5">
+                    <h4 className={`text-lg font-bold ${isHellMode ? 'text-red-100' : 'text-stone-800'}`}>
                       Đã mở khóa thành công!
                     </h4>
-                    <p className={`text-sm ${isHellMode ? 'text-red-400/80' : 'text-stone-500'}`}>
-                      Bây giờ bạn có thể tương tác với {character.name}
-                    </p>
+                    <div className={`text-sm font-medium leading-relaxed ${isHellMode ? 'text-red-300/90' : 'text-stone-600'}`}>
+                      <p>bé iu ích kỷ diếm link 1 mik chơi thui nhóee</p>
+                      <p className="text-base font-semibold mt-1">ദ്ദി(˵ •̀ ᴗ - ˵ ) ✧</p>
+                    </div>
                   </div>
 
                   <button

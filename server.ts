@@ -499,22 +499,6 @@ app.post('/api/artworks/clear-all', async (req, res) => {
   }
 });
 
-async function clearExistingArtworks() {
-  try {
-    const artworksRef = collection(db, 'artworks');
-    const snapshot = await getDocs(artworksRef);
-    if (!snapshot.empty) {
-      console.log(`[Artworks Cleanup] Found ${snapshot.size} test artworks. Deleting now...`);
-      for (const docSnap of snapshot.docs) {
-        await deleteDoc(doc(db, 'artworks', docSnap.id));
-      }
-      console.log(`[Artworks Cleanup] Successfully cleared all test artworks from Firestore!`);
-    }
-  } catch (err) {
-    console.warn('[Artworks Cleanup Warning]:', err);
-  }
-}
-
 // ==========================================
 // VITE / STATIC SERVING SETUP
 // ==========================================
@@ -536,7 +520,6 @@ async function startServer() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Roblox RP Hub Server running on http://0.0.0.0:${PORT}`);
-    clearExistingArtworks();
   });
 }
 

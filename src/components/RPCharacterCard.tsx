@@ -20,7 +20,7 @@ interface RPCharacterCardProps {
   };
 }
 
-export const RPCharacterCard: React.FC<RPCharacterCardProps> = ({
+const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
   character,
   hasVoted = false,
   onPlay,
@@ -39,6 +39,7 @@ export const RPCharacterCard: React.FC<RPCharacterCardProps> = ({
 
   const handleImageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+
     if (!character.voiceUrl) return;
 
     if (isSpeaking) {
@@ -380,3 +381,16 @@ export const RPCharacterCard: React.FC<RPCharacterCardProps> = ({
     </motion.div>
   );
 };
+
+export const RPCharacterCard = React.memo(RPCharacterCardComponent, (prev, next) => {
+  return (
+    prev.character.id === next.character.id &&
+    prev.character.robuxDonations === next.character.robuxDonations &&
+    prev.character.avatarUrl === next.character.avatarUrl &&
+    prev.character.name === next.character.name &&
+    prev.hasVoted === next.hasVoted &&
+    prev.commentCount === next.commentCount &&
+    prev.isHellMode === next.isHellMode &&
+    prev.rankBadge?.rank === next.rankBadge?.rank
+  );
+});

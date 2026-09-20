@@ -71,7 +71,7 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const [activeCategory, setActiveCategory] = useState<'all' | 'hiendai' | 'hocduong' | 'cotrang' | 'vnxua' | 'ngot' | 'nguoc' | 'khac' | 'f7'>('all');
+  const [activeCategory, setActiveCategory] = useState<'all' | 'locked' | 'hiendai' | 'hocduong' | 'cotrang' | 'vnxua' | 'ngot' | 'nguoc' | 'khac' | 'f7'>('all');
   const [isGachaOpen, setIsGachaOpen] = useState(false);
   const [isNgocHoangModalOpen, setIsNgocHoangModalOpen] = useState(false);
 
@@ -131,6 +131,15 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
       // Update character counts if returned
       if (counts && Object.keys(counts).length > 0) {
         setCharacters((prev) => {
+          let hasDiff = false;
+          for (const char of prev) {
+            const countVal = counts[char.id];
+            if (typeof countVal === 'number' && countVal !== (char.robuxDonations || 0)) {
+              hasDiff = true;
+              break;
+            }
+          }
+          if (!hasDiff) return prev;
           const updated = prev.map((char) => ({
             ...char,
             robuxDonations: typeof counts[char.id] === 'number' ? counts[char.id] : (char.robuxDonations || 0),
@@ -143,6 +152,8 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
       // Update voted list for this device
       if (serverVotes && serverVotes.length > 0) {
         setVotedIds((prev) => {
+          const hasNew = serverVotes.some((id: string) => !prev.includes(id));
+          if (!hasNew) return prev;
           const combined = Array.from(new Set([...prev, ...serverVotes]));
           return combined;
         });
@@ -286,26 +297,19 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
   }, [activeModeCharacters]);
 
   // 24-Hour Leaderboard Snapshot (Tự động cập nhật thứ hạng top 3 sau 24 tiếng để tránh lag nhảy vị trí)
-  const [leaderboardInfo, setLeaderboardInfo] = useState(() => {
-    const currentSortedIds = [...activeModeCharacters]
-      .sort((a, b) => b.robuxDonations - a.robuxDonations)
-      .map((c) => c.id);
-    return getLeaderboardSnapshot(currentSortedIds);
-  });
+  const [forceRefreshKey, setForceRefreshKey] = useState(0);
 
-  // Tự động kiểm tra chu kỳ 24 giờ khi số tim thay đổi
-  useEffect(() => {
+  const leaderboardInfo = useMemo(() => {
     const currentSortedIds = sortedByRobux.map((c) => c.id);
-    const snap = getLeaderboardSnapshot(currentSortedIds);
-    setLeaderboardInfo(snap);
-  }, [sortedByRobux]);
+    return getLeaderboardSnapshot(currentSortedIds);
+  }, [sortedByRobux, forceRefreshKey]);
 
   // Cho phép người dùng bấm nút cập nhật lại thứ hạng Top 3 ngay lập tức nếu muốn
   const handleForceRefreshLeaderboard = () => {
     playUiClick(soundEnabled);
     const currentSortedIds = sortedByRobux.map((c) => c.id);
-    const snap = forceRefreshLeaderboardSnapshot(currentSortedIds);
-    setLeaderboardInfo(snap);
+    forceRefreshLeaderboardSnapshot(currentSortedIds);
+    setForceRefreshKey((prev) => prev + 1);
   };
 
   // Top 3 nhân vật cho Bảng Xếp Hạng theo vị trí chốt 24h (Số tim vẫn nhảy real-time từ Firestore)
@@ -326,10 +330,12 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
         !q ||
         char.name.toLowerCase().includes(q) ||
         char.roleTag.toLowerCase().includes(q) ||
-        (char.plotSummary && char.plotSummary.toLowerCase().includes(q));
+        (char.plotSummary && char.plotSummary.toLowerCase().includes(q)) ||
+        char.tags?.some((t) => t.toLowerCase().includes(q));
 
       if (!matchSearch) return false;
 
+      if (activeCategory === 'locked') return Boolean(char.password) || char.tags?.some((t) => t.toLowerCase() === '🔒' || t.toLowerCase() === 'pass');
       if (activeCategory === 'hiendai') return char.tags?.some((t) => t.toLowerCase() === 'hiện đại');
       if (activeCategory === 'hocduong') return char.tags?.some((t) => t.toLowerCase() === 'học đường');
       if (activeCategory === 'cotrang') return char.tags?.some((t) => t.toLowerCase() === 'cổ trang');
@@ -620,6 +626,7 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
             <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar -mx-1 px-1">
               {[
                 { key: 'all', label: `Tất cả (${activeModeCharacters.length})` },
+                { key: 'locked', label: '🔒' },
                 { key: 'hiendai', label: 'Hiện đại' },
                 { key: 'hocduong', label: 'Học đường' },
                 { key: 'cotrang', label: 'Cổ trang' },
