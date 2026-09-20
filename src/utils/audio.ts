@@ -966,6 +966,71 @@ export function playMilestoneUnlockSound(enabled = true) {
   }
 }
 
+// 8. Tiếng Chụt Nụ Hôn Ngọt Ngào (Kiss Sound / Smooch Pop with Love Twinkles)
+export function playKissSound(enabled = true) {
+  if (!enabled) return;
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+
+    // 1. Suction & Lip smack / Pop (Tiếng chụt mwah)
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(320, now);
+    osc.frequency.exponentialRampToValueAtTime(1400, now + 0.04);
+    osc.frequency.exponentialRampToValueAtTime(450, now + 0.12);
+
+    gain.gain.setValueAtTime(0.01, now);
+    gain.gain.linearRampToValueAtTime(0.45, now + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.16);
+
+    // 2. High sparkle "mwah" pop
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(1200, now + 0.02);
+    osc2.frequency.exponentialRampToValueAtTime(2400, now + 0.06);
+    osc2.frequency.exponentialRampToValueAtTime(800, now + 0.14);
+
+    gain2.gain.setValueAtTime(0.01, now + 0.02);
+    gain2.gain.linearRampToValueAtTime(0.3, now + 0.05);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now + 0.02);
+    osc2.stop(now + 0.19);
+
+    // 3. Heart melody bells / harmonic twinkle
+    const sweetNotes = [659.25, 880, 1046.5, 1318.51, 1567.98]; // E5, A5, C6, E6, G6
+    sweetNotes.forEach((freq, idx) => {
+      const bell = ctx.createOscillator();
+      const bellGain = ctx.createGain();
+      bell.type = 'sine';
+      bell.frequency.setValueAtTime(freq, now + 0.08 + idx * 0.06);
+
+      bellGain.gain.setValueAtTime(0, now + 0.08 + idx * 0.06);
+      bellGain.gain.linearRampToValueAtTime(0.2, now + 0.08 + idx * 0.06 + 0.02);
+      bellGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08 + idx * 0.06 + 0.35);
+
+      bell.connect(bellGain);
+      bellGain.connect(ctx.destination);
+      bell.start(now + 0.08 + idx * 0.06);
+      bell.stop(now + 0.08 + idx * 0.06 + 0.38);
+    });
+  } catch {
+    // Ignore audio errors
+  }
+}
+
+
 
 
 

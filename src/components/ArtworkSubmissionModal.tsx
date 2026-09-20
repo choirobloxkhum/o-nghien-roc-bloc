@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { RPCharacter, Artwork } from '../types';
+import { MONG_CHE_CHARACTER } from '../data/rpCharacters';
 import { submitArtwork, uploadArtworkFile } from '../services/artworksApi';
 import { playUiClick, playVictoryChime } from '../utils/audio';
 
@@ -28,6 +29,7 @@ interface ArtworkSubmissionModalProps {
   isHellMode?: boolean;
   soundEnabled?: boolean;
   onArtworkSubmitted: (newArtwork: Artwork) => void;
+  onSecretLetterTriggered?: () => void;
 }
 
 export const ArtworkSubmissionModal: React.FC<ArtworkSubmissionModalProps> = ({
@@ -38,13 +40,22 @@ export const ArtworkSubmissionModal: React.FC<ArtworkSubmissionModalProps> = ({
   isHellMode = false,
   soundEnabled = true,
   onArtworkSubmitted,
+  onSecretLetterTriggered,
 }) => {
+  // Ensure Mộng chè is always at the top of the selectable list
+  const availableCharacters: RPCharacter[] = [
+    MONG_CHE_CHARACTER,
+    ...characters.filter((c) => c.id !== MONG_CHE_CHARACTER.id),
+  ];
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState('');
   const [useUrlMode, setUseUrlMode] = useState(false);
 
-  const [selectedCharId, setSelectedCharId] = useState(initialSelectedCharId || characters[0]?.id || '');
+  const [selectedCharId, setSelectedCharId] = useState(
+    initialSelectedCharId || availableCharacters[0]?.id || ''
+  );
   const [authorName, setAuthorName] = useState('');
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
@@ -59,7 +70,8 @@ export const ArtworkSubmissionModal: React.FC<ArtworkSubmissionModalProps> = ({
 
   if (!isOpen) return null;
 
-  const selectedChar = characters.find((c) => c.id === selectedCharId) || characters[0];
+  const selectedChar =
+    availableCharacters.find((c) => c.id === selectedCharId) || availableCharacters[0];
 
   const handleFileSelect = (file: File) => {
     if (!file) return;
@@ -191,6 +203,8 @@ export const ArtworkSubmissionModal: React.FC<ArtworkSubmissionModalProps> = ({
           origin: { y: 0.6 },
         });
 
+        const isDedicatedToMongChe = selectedCharId === MONG_CHE_CHARACTER.id;
+
         onArtworkSubmitted(result.artwork);
         // Reset form
         handleClearSelectedFile();
@@ -199,6 +213,13 @@ export const ArtworkSubmissionModal: React.FC<ArtworkSubmissionModalProps> = ({
         setTitle('');
         setMessage('');
         onClose();
+
+        // If artwork is dedicated to Mộng chè, reveal the secret letter!
+        if (isDedicatedToMongChe && onSecretLetterTriggered) {
+          setTimeout(() => {
+            onSecretLetterTriggered();
+          }, 350);
+        }
       } else {
         setErrorMessage(result.message || 'Không thể đăng tranh. Vui lòng thử lại!');
       }
@@ -479,7 +500,7 @@ export const ArtworkSubmissionModal: React.FC<ArtworkSubmissionModalProps> = ({
                   isHellMode ? 'text-purple-200' : 'text-slate-700'
                 }`}
               >
-                Dành tặng anh chồng nào:
+                Dành tặng ai trong thế giới Roblox RP:
               </label>
 
               <div className="relative">
@@ -488,28 +509,68 @@ export const ArtworkSubmissionModal: React.FC<ArtworkSubmissionModalProps> = ({
                   value={selectedCharId}
                   onChange={(e) => setSelectedCharId(e.target.value)}
                   className={`w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold outline-none border-2 transition-all cursor-pointer ${
-                    isHellMode
+                    selectedCharId === MONG_CHE_CHARACTER.id
+                      ? 'bg-gradient-to-r from-pink-50 to-amber-50 dark:bg-[#250428] border-pink-400 dark:border-pink-500 text-pink-700 dark:text-pink-200'
+                      : isHellMode
                       ? 'bg-[#1e0524] border-purple-900/60 focus:border-red-500 text-purple-100'
                       : 'bg-slate-50 border-slate-200 focus:border-sky-500 text-slate-800'
                   }`}
                 >
-                  {characters.map((char) => (
+                  {availableCharacters.map((char) => (
                     <option key={char.id} value={char.id}>
-                      {char.name} {char.roleTag ? `(${char.roleTag})` : ''}
+                      {char.id === MONG_CHE_CHARACTER.id
+                        ? `👑 ✨ ${char.name} (Ngọc Hoàng) ✨`
+                        : `${char.name} ${char.roleTag ? `(${char.roleTag})` : ''}`}
                     </option>
                   ))}
                 </select>
               </div>
 
+              {/* Dynamic Selected Character Banner */}
               {selectedChar && (
-                <div className="mt-1.5 flex items-center gap-2 text-[11px] text-slate-500">
-                  <img
-                    src={selectedChar.avatarUrl}
-                    alt={selectedChar.name}
-                    className="w-5 h-5 rounded-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                  <span className="font-semibold">{selectedChar.name}</span>
+                <div className="mt-2">
+                  {selectedChar.id === MONG_CHE_CHARACTER.id ? (
+                    <div className="relative p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-pink-500/15 via-rose-500/10 to-amber-500/15 border-2 border-pink-400/80 dark:border-pink-500/70 flex items-center gap-3 shadow-md backdrop-blur-sm">
+                      {/* Avatar with Rainbow Halo */}
+                      <div className="relative shrink-0 w-10 h-10 sm:w-11 sm:h-11">
+                        <div
+                          className="absolute -inset-1 rounded-full bg-gradient-to-r from-pink-500 via-yellow-400 to-rose-500 animate-spin opacity-85 blur-2xs"
+                          style={{ animationDuration: '3.5s' }}
+                        />
+                        <img
+                          src={selectedChar.avatarUrl}
+                          alt={selectedChar.name}
+                          className="relative w-full h-full rounded-full object-cover border-2 border-white shadow-sm select-none pointer-events-none"
+                          referrerPolicy="no-referrer"
+                        />
+                        <span className="absolute -top-1 -right-1 text-xs">👑</span>
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-black text-xs sm:text-sm text-pink-600 dark:text-pink-300 truncate">
+                            {selectedChar.name}
+                          </span>
+                          <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-pink-500 text-white shadow-2xs">
+                            ĐẶC BIỆT
+                          </span>
+                        </div>
+                        <p className="text-[10px] sm:text-[11px] text-pink-700/90 dark:text-pink-200/90 italic font-medium leading-tight mt-0.5">
+                          💌 Gửi tranh tặng Mộng chè sẽ kích hoạt lá thư bí mật & nụ hôn ngọt ngào! ✨
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-purple-300">
+                      <img
+                        src={selectedChar.avatarUrl}
+                        alt={selectedChar.name}
+                        className="w-5 h-5 rounded-full object-cover border border-amber-300 shrink-0"
+                        referrerPolicy="no-referrer"
+                      />
+                      <span className="font-semibold">{selectedChar.name}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

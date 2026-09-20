@@ -2,6 +2,25 @@ import { RPCharacter } from '../types';
 
 const now = Date.now();
 
+// Mộng chè - Ngọc Hoàng đặc biệt luôn đứng đầu danh sách phòng tranh & tặng tranh
+export const MONG_CHE_CHARACTER: RPCharacter = {
+  id: 'mong_che_admin',
+  name: 'Mộng chè - Chơi Roblox Khum',
+  avatarUrl: 'https://i.ibb.co/sLXrS2L/FB-IMG-1787048727875.jpg',
+  roleTag: 'Ngọc Hoàng / Chơi Roblox Khum',
+  tags: ['Admin', 'Ngọc Hoàng', 'Mộng chè', 'Chơi Roblox Khum'],
+  tagline: 'Chơi Roblox Khum',
+  robuxDonations: 0,
+  personality: 'Đáng yêu, hài hước, luôn thương bồ',
+  plotTitle: 'Mộng chè',
+  plotSummary: 'Ngọc Hoàng tối cao của vũ trụ Chơi Roblox Khum 👑✨',
+  fullPlot: '',
+  sampleDialogue: [],
+  createdAt: now + 999999999,
+  isNew: true,
+  cornerTag: 'ADMIN ✨',
+};
+
 // QUY TẮC: Nhân vật mới thêm vào luôn được đặt ở ĐẦU mảng (index 0) để xuất hiện phía trước,
 // và gắn cờ isNew: true, cornerTag: 'MỚI' để hiển thị tag nổi bật ở góc phải trên cùng ảnh.
 export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
