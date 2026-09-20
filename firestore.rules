@@ -35,13 +35,12 @@ service cloud.firestore {
 
     match /artworks/{artworkId} {
       allow read: if true;
-      allow create: if request.resource.data.imageUrl is string &&
-                       request.resource.data.imageUrl.size() > 0 &&
-                       request.resource.data.characterId is string &&
-                       request.resource.data.characterName is string &&
-                       request.resource.data.authorName is string &&
-                       request.resource.data.authorName.size() > 0 &&
-                       request.resource.data.authorName.size() <= 60;
+      allow create: if ((request.resource.data.imageUrl is string && request.resource.data.imageUrl.size() > 0) ||
+                        (request.resource.data.image_url is string && request.resource.data.image_url.size() > 0)) &&
+                       ((request.resource.data.characterId is string && request.resource.data.characterId.size() > 0) ||
+                        (request.resource.data.character_id is string && request.resource.data.character_id.size() > 0)) &&
+                       ((request.resource.data.authorName is string && request.resource.data.authorName.size() > 0) ||
+                        (request.resource.data.author_name is string && request.resource.data.author_name.size() > 0));
       allow delete: if true;
       allow update: if false;
     }

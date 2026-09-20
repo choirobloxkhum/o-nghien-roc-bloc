@@ -372,14 +372,14 @@ app.get('/api/artworks', async (req, res) => {
       const data = docSnap.data();
       artworks.push({
         id: docSnap.id,
-        imageUrl: data.imageUrl || '',
-        characterId: data.characterId || '',
+        imageUrl: data.imageUrl || data.image_url || '',
+        characterId: data.characterId || data.character_id || '',
         characterName: data.characterName || 'Chồng Roblox',
         characterAvatarUrl: data.characterAvatarUrl || '',
-        authorName: data.authorName || 'Họa sĩ ẩn danh',
+        authorName: data.authorName || data.author_name || 'Họa sĩ ẩn danh',
         title: data.title || '',
         message: data.message || '',
-        createdAt: data.createdAt || Date.now(),
+        createdAt: data.createdAt || data.created_at || Date.now(),
       });
     });
 
@@ -401,10 +401,25 @@ app.get('/api/artworks', async (req, res) => {
 // 9. POST /api/artworks - Submit new artwork
 app.post('/api/artworks', async (req, res) => {
   try {
-    const { imageUrl, characterId, characterName, characterAvatarUrl, authorName, title, message } = req.body;
+    const {
+      imageUrl,
+      image_url,
+      characterId,
+      character_id,
+      characterName,
+      characterAvatarUrl,
+      authorName,
+      author_name,
+      title,
+      message,
+    } = req.body;
 
-    const trimmedUrl = typeof imageUrl === 'string' ? imageUrl.trim() : '';
-    const trimmedAuthor = typeof authorName === 'string' ? authorName.trim() : '';
+    const rawUrl = imageUrl || image_url;
+    const rawCharId = characterId || character_id;
+    const rawAuthor = authorName || author_name;
+
+    const trimmedUrl = typeof rawUrl === 'string' ? rawUrl.trim() : '';
+    const trimmedAuthor = typeof rawAuthor === 'string' ? rawAuthor.trim() : '';
     const trimmedTitle = typeof title === 'string' ? title.trim() : '';
     const trimmedMessage = typeof message === 'string' ? message.trim() : '';
 
@@ -412,7 +427,7 @@ app.post('/api/artworks', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Vui lòng chọn hoặc tải ảnh lên!' });
     }
 
-    if (!characterId || typeof characterId !== 'string') {
+    if (!rawCharId || typeof rawCharId !== 'string') {
       return res.status(400).json({ success: false, message: 'Vui lòng chọn nhân vật gắn với bức tranh!' });
     }
 
@@ -427,13 +442,17 @@ app.post('/api/artworks', async (req, res) => {
     const now = Date.now();
     const artworkPayload = {
       imageUrl: trimmedUrl,
-      characterId: characterId.trim(),
+      image_url: trimmedUrl,
+      characterId: rawCharId.trim(),
+      character_id: rawCharId.trim(),
       characterName: typeof characterName === 'string' && characterName.trim() ? characterName.trim() : 'Chồng Roblox',
       characterAvatarUrl: typeof characterAvatarUrl === 'string' ? characterAvatarUrl.trim() : '',
       authorName: trimmedAuthor,
+      author_name: trimmedAuthor,
       title: trimmedTitle.slice(0, 120),
       message: trimmedMessage.slice(0, 300),
       createdAt: now,
+      created_at: now,
     };
 
     const artworksRef = collection(db, 'artworks');
@@ -445,7 +464,14 @@ app.post('/api/artworks', async (req, res) => {
       success: true,
       artwork: {
         id: docRef.id,
-        ...artworkPayload,
+        imageUrl: trimmedUrl,
+        characterId: rawCharId.trim(),
+        characterName: artworkPayload.characterName,
+        characterAvatarUrl: artworkPayload.characterAvatarUrl,
+        authorName: trimmedAuthor,
+        title: trimmedTitle.slice(0, 120),
+        message: trimmedMessage.slice(0, 300),
+        createdAt: now,
       },
       message: 'Đăng tranh thành công! Tác phẩm đã được lưu vào Phòng Tranh.',
     });

@@ -164,20 +164,20 @@ export const MongCheSecretLetterModal: React.FC<MongCheSecretLetterModalProps> =
           <div
             className={`relative rounded-2xl p-4 sm:p-5 border-2 shadow-inner mb-5 text-left leading-relaxed ${
               isHellMode
-                ? 'bg-purple-950/60 border-pink-600/60 text-pink-100'
-                : 'bg-gradient-to-br from-white to-pink-50/80 border-pink-200 text-slate-800'
+                ? 'bg-[#26052b]/90 border-pink-500/80 text-pink-50 shadow-[0_0_15px_rgba(244,114,182,0.2)]'
+                : 'bg-gradient-to-br from-white via-pink-50/90 to-rose-50/90 border-pink-300 shadow-sm'
             }`}
           >
             {/* Watermark Heart */}
-            <div className="absolute top-2 right-3 text-2xl sm:text-3xl opacity-20 pointer-events-none">
+            <div className="absolute top-2 right-3 text-2xl sm:text-3xl opacity-25 pointer-events-none select-none">
               💌
             </div>
 
-            <p className="text-xs sm:text-sm md:text-base font-semibold italic text-slate-700 dark:text-pink-100 leading-relaxed font-sans">
+            <p className="text-xs sm:text-sm md:text-[15px] font-bold italic text-[#831843] dark:text-pink-100 leading-relaxed font-sans">
               "oiiii, tui ìu bồ nhiều quá. Không ngờ có một ngày mình sẽ được tặng tranh vẽ như này. Cảm ơn bồ vì đã dành nhiều tình yêu thiệt to bự dành cho chiếc ổ nhỏ và trên hết là cho con mộng chè này, xin được tri ân bằng một nụ hôn thật tooo 💗✨"
             </p>
 
-            <div className="mt-3 pt-2.5 border-t border-pink-200/60 dark:border-pink-800/60 flex items-center justify-between text-xs text-pink-600 dark:text-pink-300 font-bold">
+            <div className="mt-3 pt-2.5 border-t border-pink-300/80 dark:border-pink-700/80 flex items-center justify-between text-xs text-[#9d174d] dark:text-pink-200 font-black">
               <span>Gửi từ: Mộng chè (Chơi Roblox Khum)</span>
               <span>Dành riêng cho bồ 🌸</span>
             </div>
@@ -204,7 +204,7 @@ export const MongCheSecretLetterModal: React.FC<MongCheSecretLetterModalProps> =
               <motion.div
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-xs font-bold text-pink-600 dark:text-pink-300 flex items-center gap-1"
+                className="text-xs sm:text-sm font-black text-[#9d174d] dark:text-pink-200 flex items-center gap-1"
               >
                 <span>Bồ đã nhận được {kissCount} nụ hôn ngọt ngào từ Mộng chè!</span>
                 <span>💕</span>

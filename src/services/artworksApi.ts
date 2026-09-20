@@ -23,14 +23,14 @@ export function subscribeToArtworks(
             const data = docSnap.data();
             list.push({
               id: docSnap.id,
-              imageUrl: data.imageUrl || '',
-              characterId: data.characterId || '',
+              imageUrl: data.imageUrl || data.image_url || '',
+              characterId: data.characterId || data.character_id || '',
               characterName: data.characterName || 'Chồng Roblox',
               characterAvatarUrl: data.characterAvatarUrl || '',
-              authorName: data.authorName || 'Họa sĩ ẩn danh',
+              authorName: data.authorName || data.author_name || 'Họa sĩ ẩn danh',
               title: data.title || '',
               message: data.message || '',
-              createdAt: data.createdAt || Date.now(),
+              createdAt: data.createdAt || data.created_at || Date.now(),
             });
           });
           onUpdate(list);
@@ -207,13 +207,17 @@ export async function submitArtwork(payload: {
       const now = Date.now();
       const docData = {
         imageUrl: trimmedUrl,
+        image_url: trimmedUrl,
         characterId: payload.characterId,
+        character_id: payload.characterId,
         characterName: payload.characterName,
         characterAvatarUrl: payload.characterAvatarUrl || '',
         authorName: trimmedAuthor,
+        author_name: trimmedAuthor,
         title: trimmedTitle,
         message: trimmedMessage,
         createdAt: now,
+        created_at: now,
       };
 
       const docRef = await addDoc(collection(db, 'artworks'), docData);
@@ -221,7 +225,14 @@ export async function submitArtwork(payload: {
         success: true,
         artwork: {
           id: docRef.id,
-          ...docData,
+          imageUrl: trimmedUrl,
+          characterId: payload.characterId,
+          characterName: payload.characterName,
+          characterAvatarUrl: payload.characterAvatarUrl || '',
+          authorName: trimmedAuthor,
+          title: trimmedTitle,
+          message: trimmedMessage,
+          createdAt: now,
         },
         message: 'Đăng tranh thành công!',
       };
