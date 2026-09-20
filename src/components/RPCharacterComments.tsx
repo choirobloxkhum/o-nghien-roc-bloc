@@ -57,6 +57,7 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [comments, setComments] = useState<CharacterComment[]>([]);
+  const [visibleCommentsCount, setVisibleCommentsCount] = useState(15);
   const [isLoading, setIsLoading] = useState(false);
 
   // Form states
@@ -419,10 +420,10 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
                       </div>
                     )}
 
-                    {comments.map((item) => (
+                    {comments.slice(0, visibleCommentsCount).map((item) => (
                       <div
                         key={item.id}
-                        className={`p-3 rounded-2xl border text-xs transition-all ${
+                        className={`p-3 rounded-2xl border text-xs transition-all gpu-accelerated content-auto ${
                           isHellMode
                             ? 'bg-red-950/30 border-red-900/50 hover:border-red-700/70 text-red-100'
                             : 'bg-slate-50 hover:bg-white border-slate-200/80 hover:border-sky-200 text-slate-800 shadow-2xs'
@@ -470,6 +471,25 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
                         </p>
                       </div>
                     ))}
+
+                    {/* Load More Older Comments Button */}
+                    {comments.length > visibleCommentsCount && (
+                      <div className="flex justify-center pt-2 pb-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVisibleCommentsCount((prev) => prev + 15);
+                          }}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-xs active:scale-95 flex items-center gap-1.5 ${
+                            isHellMode
+                              ? 'bg-red-950/60 hover:bg-red-900/80 border-red-800 text-red-200'
+                              : 'bg-white hover:bg-sky-50 border-slate-200 hover:border-sky-300 text-slate-700'
+                          }`}
+                        >
+                          <span>Xem thêm nhận xét cũ hơn ({comments.length - visibleCommentsCount})</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* FIXED INPUT SECTION (BOTTOM AREA) */}

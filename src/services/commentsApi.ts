@@ -44,14 +44,16 @@ export function recordCommentPostTime(): void {
 
 /**
  * 1. Real-time subscription to comments of a specific character
- * Uses onSnapshot so any visitor on any device immediately sees new comments!
+ * Uses onSnapshot with 300ms debounce to prevent main-thread UI blocking
  */
 export function subscribeToCharacterComments(
   characterId: string,
   onUpdate: (comments: CharacterComment[]) => void
 ): () => void {
   try {
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     const itemsRef = collection(db, 'rp_comments', characterId, 'items');
+    
     const unsubscribe = onSnapshot(
       itemsRef,
       (snapshot) => {
@@ -68,13 +70,21 @@ export function subscribeToCharacterComments(
         });
         // Sort newest first
         list.sort((a, b) => b.createdAt - a.createdAt);
-        onUpdate(list);
+
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          onUpdate(list);
+        }, 300);
       },
       (error) => {
         handleFirestoreError(error, OperationType.GET, `rp_comments/${characterId}/items`);
       }
     );
-    return unsubscribe;
+
+    return () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      unsubscribe();
+    };
   } catch (err) {
     console.warn('[CommentsAPI] Firestore onSnapshot warning:', err);
     return () => {};
@@ -83,30 +93,40 @@ export function subscribeToCharacterComments(
 
 /**
  * 2. Real-time subscription to all character comment counts
- * Reads /rp_comment_counts so cards know the count before expanding
+ * Reads /rp_comment_counts with 300ms debounce batching
  */
 export function subscribeToAllCommentCounts(
   onCountsUpdate: (counts: Record<string, number>) => void
 ): () => void {
   try {
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    let pendingCounts: Record<string, number> = {};
     const countsRef = collection(db, 'rp_comment_counts');
+
     const unsubscribe = onSnapshot(
       countsRef,
       (snapshot) => {
-        const counts: Record<string, number> = {};
         snapshot.forEach((docSnap) => {
           const data = docSnap.data();
           if (data && typeof data.count === 'number') {
-            counts[docSnap.id] = data.count;
+            pendingCounts[docSnap.id] = data.count;
           }
         });
-        onCountsUpdate(counts);
+
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          onCountsUpdate({ ...pendingCounts });
+        }, 300);
       },
       (error) => {
         handleFirestoreError(error, OperationType.GET, 'rp_comment_counts');
       }
     );
-    return unsubscribe;
+
+    return () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      unsubscribe();
+    };
   } catch (err) {
     console.warn('[CommentsAPI] Firestore counts onSnapshot warning:', err);
     return () => {};

@@ -61,6 +61,16 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
     getLocalVotedCharactersList(getStoredRPCharacters().map((c) => c.id))
   );
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  // 300ms Debounce for Search Query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const [activeCategory, setActiveCategory] = useState<'all' | 'hiendai' | 'hocduong' | 'cotrang' | 'vnxua' | 'ngot' | 'nguoc' | 'khac' | 'f7'>('all');
   const [isGachaOpen, setIsGachaOpen] = useState(false);
   const [isNgocHoangModalOpen, setIsNgocHoangModalOpen] = useState(false);
@@ -310,11 +320,13 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
 
   // Filtered characters for "Các chồng" section
   const filteredCharacters = useMemo(() => {
+    const q = debouncedSearchQuery.trim().toLowerCase();
     return activeModeCharacters.filter((char) => {
       const matchSearch =
-        char.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        char.roleTag.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (char.plotSummary && char.plotSummary.toLowerCase().includes(searchQuery.toLowerCase()));
+        !q ||
+        char.name.toLowerCase().includes(q) ||
+        char.roleTag.toLowerCase().includes(q) ||
+        (char.plotSummary && char.plotSummary.toLowerCase().includes(q));
 
       if (!matchSearch) return false;
 
@@ -329,7 +341,7 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
 
       return true;
     });
-  }, [activeModeCharacters, searchQuery, activeCategory]);
+  }, [activeModeCharacters, debouncedSearchQuery, activeCategory]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredCharacters.length / itemsPerPage);

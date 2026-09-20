@@ -5,20 +5,21 @@ import { Artwork } from '../types';
 export const CURATED_INITIAL_ARTWORKS: Artwork[] = [];
 
 /**
- * 1. Subscribe to real-time public artworks from Firestore
+ * 1. Subscribe to real-time public artworks from Firestore with 300ms debounce
  */
 export function subscribeToArtworks(
   onUpdate: (artworks: Artwork[]) => void
 ): () => void {
   try {
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     const artworksRef = collection(db, 'artworks');
     const q = query(artworksRef, orderBy('createdAt', 'desc'), limit(100));
 
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
+        const list: Artwork[] = [];
         if (!snapshot.empty) {
-          const list: Artwork[] = [];
           snapshot.forEach((docSnap) => {
             const data = docSnap.data();
             list.push({
@@ -33,11 +34,12 @@ export function subscribeToArtworks(
               createdAt: data.createdAt || data.created_at || Date.now(),
             });
           });
-          onUpdate(list);
-        } else {
-          // Empty collection
-          onUpdate([]);
         }
+
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          onUpdate(list);
+        }, 300);
       },
       (error) => {
         handleFirestoreError(error, OperationType.GET, 'artworks');
@@ -48,7 +50,10 @@ export function subscribeToArtworks(
       }
     );
 
-    return unsubscribe;
+    return () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      unsubscribe();
+    };
   } catch (err) {
     console.warn('[ArtworksAPI] Firestore subscription warning:', err);
     fetchArtworksViaApi().then((data) => {

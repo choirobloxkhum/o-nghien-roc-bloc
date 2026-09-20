@@ -34,7 +34,46 @@
   font-family: 'Baloo 2', 'Fredoka', 'Arial Rounded MT Bold', sans-serif;
 }
 
-/* Super Dessert Style Subtle 3D Title Shadow */
+/* Performance & GPU Acceleration utilities */
+.gpu-accelerated {
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+.content-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 340px;
+}
+
+/* Mobile & Low-Power Performance Optimizations */
+@media (max-width: 640px) {
+  .app-title-3d,
+  .dessert-title-shadow,
+  .sleek-title-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+  }
+  
+  .roblox-text-3d {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  /* Simplify continuous intense keyframes on mobile to preserve 60fps battery & GPU */
+  .animate-slow-spin,
+  .animate-frame-glow,
+  .animate-card-sweep,
+  .animate-podium-gleam {
+    animation-duration: 8s !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 .dessert-title-shadow {
   text-shadow: 
     0 2px 0 #94a3b8,

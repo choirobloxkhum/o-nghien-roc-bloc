@@ -26,12 +26,12 @@ export const RobloxDoodleBackground: React.FC<RobloxDoodleBackgroundProps> = ({
         />
       </div>
 
-      {/* 2. Soft Gaussian Blur Filter (backdrop-blur: blur(6px) / soft focus for UI optimization) */}
+      {/* 2. Soft Semi-Transparent Overlays (Optimized: Replaced heavy backdrop-filter with lightweight rgba layers) */}
       <div
-        className={`absolute inset-0 backdrop-blur-[6px] transition-colors duration-700 ${
+        className={`absolute inset-0 transition-colors duration-500 ${
           isHellMode
-            ? 'bg-gradient-to-b from-[#18031d]/90 via-[#230527]/75 to-[#130117]/90'
-            : 'bg-gradient-to-b from-white/40 via-amber-50/30 to-amber-100/40'
+            ? 'bg-gradient-to-b from-[#18031d]/95 via-[#230527]/85 to-[#130117]/95'
+            : 'bg-gradient-to-b from-white/70 via-amber-50/60 to-amber-100/70'
         }`}
       />
 

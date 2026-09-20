@@ -28,33 +28,45 @@ export interface DeviceStatusResponse {
 
 /**
  * 1. LẮNG NGHE ĐỒNG BỘ THỜI GIAN THỰC (REAL-TIME LISTENER) QUA FIRESTORE onSnapshot
- * Khi một người dùng ở thiết bị A thả Robux/tim, Firestore sẽ bắn sự kiện trực tiếp
- * đến các thiết bị B, C, D... qua WebSocket, tự động cập nhật số lượng hiển thị ngay lập tức!
+ * Với bộ đệm Debounce 300ms chống nghẽn main-thread UI khi có lượng lớn vote dồn dập
  */
 export function subscribeToRobuxCounts(
   onCountsUpdate: (counts: Record<string, number>) => void
 ): () => void {
   try {
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    let pendingCounts: Record<string, number> = {};
+
     const robuxCollection = collection(db, 'robux_counts');
     const unsubscribe = onSnapshot(
       robuxCollection,
       (snapshot) => {
-        const counts: Record<string, number> = {};
         snapshot.forEach((docSnap) => {
           const data = docSnap.data();
           if (data && typeof data.count === 'number') {
-            counts[docSnap.id] = data.count;
+            pendingCounts[docSnap.id] = data.count;
           }
         });
-        if (Object.keys(counts).length > 0) {
-          onCountsUpdate(counts);
+
+        if (debounceTimer) {
+          clearTimeout(debounceTimer);
         }
+
+        debounceTimer = setTimeout(() => {
+          if (Object.keys(pendingCounts).length > 0) {
+            onCountsUpdate({ ...pendingCounts });
+          }
+        }, 300);
       },
       (error) => {
         handleFirestoreError(error, OperationType.GET, 'robux_counts');
       }
     );
-    return unsubscribe;
+
+    return () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      unsubscribe();
+    };
   } catch (err) {
     console.warn('[RobuxAPI] Firestore onSnapshot subscription warning:', err);
     return () => {};

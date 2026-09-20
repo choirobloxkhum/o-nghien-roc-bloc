@@ -48,11 +48,17 @@ export const ArtGalleryPage: React.FC<ArtGalleryPageProps> = ({
 
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(12);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isSecretLetterOpen, setIsSecretLetterOpen] = useState(false);
   const [activeLightboxArtwork, setActiveLightboxArtwork] = useState<Artwork | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Reset visibleCount when character filter changes
+  useEffect(() => {
+    setVisibleCount(12);
+  }, [selectedCharacterId]);
 
   // Subscribe to real-time artworks
   useEffect(() => {
@@ -108,10 +114,10 @@ export const ArtGalleryPage: React.FC<ArtGalleryPageProps> = ({
 
       {/* 2. Top Navigation Bar for Phòng Tranh */}
       <header
-        className={`sticky top-0 z-40 w-full backdrop-blur-xl transition-all duration-500 border-b-2 shadow-lg ${
+        className={`sticky top-0 z-40 w-full transition-all duration-300 border-b-2 shadow-lg ${
           isHellMode
-            ? 'bg-[#140118]/90 border-red-800/80 text-purple-100 shadow-[0_4px_30px_rgba(220,38,38,0.35)]'
-            : 'bg-gradient-to-r from-amber-50/95 via-white/95 to-sky-50/95 border-amber-300/80 text-slate-800 shadow-[0_4px_25px_rgba(245,158,11,0.18)]'
+            ? 'bg-[#140118]/98 border-red-800/80 text-purple-100 shadow-[0_4px_30px_rgba(220,38,38,0.35)]'
+            : 'bg-gradient-to-r from-amber-50/98 via-white/98 to-sky-50/98 border-amber-300/80 text-slate-800 shadow-[0_4px_25px_rgba(245,158,11,0.18)]'
         }`}
       >
         {/* Subtle decorative top shimmer highlight bar */}
@@ -426,6 +432,8 @@ export const ArtGalleryPage: React.FC<ArtGalleryPageProps> = ({
                             <img
                               src={char.avatarUrl}
                               alt={char.name}
+                              loading="lazy"
+                              decoding="async"
                               className={`relative w-full h-full rounded-full object-cover border shrink-0 ${
                                 isMongChe ? 'border-white' : 'border-amber-300'
                               }`}
@@ -478,117 +486,141 @@ export const ArtGalleryPage: React.FC<ArtGalleryPageProps> = ({
           </div>
         </div>
 
-        {/* 4. ARTWORK SHOWCASE GRID */}
+        {/* 4. ARTWORK SHOWCASE GRID (Optimized with Chunked Rendering & Lazy Loading) */}
         {filteredArtworks.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6">
-            {filteredArtworks.map((artwork) => (
-              <motion.div
-                key={artwork.id}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                whileHover={{ y: -4 }}
-                transition={{ duration: 0.25 }}
-                className={`group relative rounded-xl sm:rounded-3xl p-2 sm:p-3 border-2 backdrop-blur-xl shadow-md sm:shadow-lg flex flex-col justify-between overflow-hidden transition-all ${
-                  isHellMode
-                    ? 'bg-[#18031d]/90 border-red-900/70 hover:border-red-500 hover:shadow-[0_8px_30px_rgba(220,38,38,0.4)]'
-                    : 'bg-white/90 border-white hover:border-amber-300 hover:shadow-[0_8px_25px_rgba(245,158,11,0.25)]'
-                }`}
-              >
-                {/* Visual Picture Frame Wrapper */}
-                <div className="relative w-full aspect-square rounded-lg sm:rounded-2xl overflow-hidden bg-black/10 mb-2 sm:mb-3 border">
-                  {/* The Actual Artwork Image */}
-                  <img
-                    src={artwork.imageUrl}
-                    alt={artwork.title || artwork.characterName}
-                    draggable={false}
-                    className="w-full h-full object-cover select-none pointer-events-none transition-transform duration-500 group-hover:scale-105"
-                    style={{
-                      WebkitTouchCallout: 'none',
-                      userSelect: 'none',
-                    }}
-                    referrerPolicy="no-referrer"
-                  />
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6">
+              {filteredArtworks.slice(0, visibleCount).map((artwork) => (
+                <motion.div
+                  key={artwork.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  whileHover={{ y: -4 }}
+                  transition={{ duration: 0.25 }}
+                  className={`group relative rounded-xl sm:rounded-3xl p-2 sm:p-3 border-2 shadow-md sm:shadow-lg flex flex-col justify-between overflow-hidden transition-all gpu-accelerated content-auto ${
+                    isHellMode
+                      ? 'bg-[#18031d]/95 border-red-900/70 hover:border-red-500 hover:shadow-[0_8px_30px_rgba(220,38,38,0.4)]'
+                      : 'bg-white/95 border-white hover:border-amber-300 hover:shadow-[0_8px_25px_rgba(245,158,11,0.25)]'
+                  }`}
+                >
+                  {/* Visual Picture Frame Wrapper */}
+                  <div className="relative w-full aspect-square rounded-lg sm:rounded-2xl overflow-hidden bg-black/10 mb-2 sm:mb-3 border">
+                    {/* The Actual Artwork Image with Lazy Loading */}
+                    <img
+                      src={artwork.imageUrl}
+                      alt={artwork.title || artwork.characterName}
+                      loading="lazy"
+                      decoding="async"
+                      draggable={false}
+                      className="w-full h-full object-cover select-none pointer-events-none transition-transform duration-500 group-hover:scale-105 will-change-transform"
+                      style={{
+                        WebkitTouchCallout: 'none',
+                        userSelect: 'none',
+                      }}
+                      referrerPolicy="no-referrer"
+                    />
 
-                  {/* REQUIREMENT 4: TRANSPARENT INVISIBLE PROTECTIVE SHIELD OVERLAY
-                      Disables right-click, saving, long-press, dragging, and AI scraping */}
-                  <div
-                    onContextMenu={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                    onClick={() => handleOpenLightbox(artwork)}
-                    className="absolute inset-0 z-20 select-none cursor-pointer bg-transparent pointer-events-auto"
-                    title="Bấm để xem chi tiết tranh"
-                    style={{
-                      WebkitTouchCallout: 'none',
-                      userSelect: 'none',
-                    }}
-                  />
+                    {/* Transparent Protective Shield Overlay */}
+                    <div
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      onClick={() => handleOpenLightbox(artwork)}
+                      className="absolute inset-0 z-20 select-none cursor-pointer bg-transparent pointer-events-auto"
+                      title="Bấm để xem chi tiết tranh"
+                      style={{
+                        WebkitTouchCallout: 'none',
+                        userSelect: 'none',
+                      }}
+                    />
 
-                  {/* Corner Badge: Character Name */}
-                  <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 z-10 pointer-events-none">
-                    <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-lg sm:rounded-xl text-[9px] sm:text-[11px] font-black bg-black/60 text-white backdrop-blur-md border border-white/30 shadow-xs flex items-center gap-1">
-                      <span className="truncate max-w-[85px] sm:max-w-none">{artwork.characterName}</span>
-                    </span>
-                  </div>
-
-                  {/* Anti-AI Protected Seal Watermark */}
-                  <div className="absolute bottom-1.5 right-1.5 sm:bottom-2 sm:right-2 z-10 pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity">
-                    <span className="px-1.5 py-0.5 rounded-md sm:rounded-lg text-[8px] sm:text-[9px] font-black bg-red-900/70 text-red-200 border border-red-400/50 backdrop-blur-xs flex items-center gap-0.5 sm:gap-1">
-                      <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-red-400" />
-                      <span>NO AI</span>
-                    </span>
-                  </div>
-
-                  {/* Hover Quick View Pill */}
-                  <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 backdrop-blur-[2px]">
-                    <span className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-black bg-white text-slate-900 shadow-lg flex items-center gap-1 sm:gap-1.5 transform scale-90 group-hover:scale-100 transition-transform">
-                      <Eye className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-sky-600" />
-                      <span>Xem tranh</span>
-                    </span>
-                  </div>
-                </div>
-
-                {/* Artwork Metadata */}
-                <div className="space-y-0.5 sm:space-y-1 text-left px-0.5 sm:px-1">
-                  {artwork.title && (
-                    <h3
-                      className={`text-[11px] sm:text-sm font-black truncate leading-tight ${
-                        isHellMode ? 'text-amber-200' : 'text-slate-800'
-                      }`}
-                      title={artwork.title}
-                    >
-                      {artwork.title}
-                    </h3>
-                  )}
-
-                  {artwork.message && (
-                    <p
-                      className={`text-[10px] sm:text-[11px] line-clamp-1 sm:line-clamp-2 italic font-medium ${
-                        isHellMode ? 'text-purple-300/80' : 'text-slate-500'
-                      }`}
-                      title={artwork.message}
-                    >
-                      "{artwork.message}"
-                    </p>
-                  )}
-
-                  <div className="flex items-center justify-between text-[10px] sm:text-[11px] pt-0.5 sm:pt-1">
-                    {/* Artist name */}
-                    <div className="flex items-center gap-1 min-w-0 text-slate-500 dark:text-purple-300">
-                      <User className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-500 shrink-0" />
-                      <span className="truncate font-bold max-w-[70px] sm:max-w-none">{artwork.authorName}</span>
+                    {/* Corner Badge: Character Name */}
+                    <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 z-10 pointer-events-none">
+                      <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-lg sm:rounded-xl text-[9px] sm:text-[11px] font-black bg-black/75 text-white border border-white/30 shadow-xs flex items-center gap-1">
+                        <span className="truncate max-w-[85px] sm:max-w-none">{artwork.characterName}</span>
+                      </span>
                     </div>
 
-                    {/* Formatted Date */}
-                    <span className="text-[9px] sm:text-[10px] text-slate-400 shrink-0">
-                      {new Date(artwork.createdAt).toLocaleDateString('vi-VN')}
-                    </span>
+                    {/* Anti-AI Protected Seal Watermark */}
+                    <div className="absolute bottom-1.5 right-1.5 sm:bottom-2 sm:right-2 z-10 pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity">
+                      <span className="px-1.5 py-0.5 rounded-md sm:rounded-lg text-[8px] sm:text-[9px] font-black bg-red-900/80 text-red-200 border border-red-400/50 flex items-center gap-0.5 sm:gap-1">
+                        <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-red-400" />
+                        <span>NO AI</span>
+                      </span>
+                    </div>
+
+                    {/* Hover Quick View Pill */}
+                    <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/35">
+                      <span className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-black bg-white text-slate-900 shadow-lg flex items-center gap-1 sm:gap-1.5 transform scale-90 group-hover:scale-100 transition-transform">
+                        <Eye className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-sky-600" />
+                        <span>Xem tranh</span>
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+
+                  {/* Artwork Metadata */}
+                  <div className="space-y-0.5 sm:space-y-1 text-left px-0.5 sm:px-1">
+                    {artwork.title && (
+                      <h3
+                        className={`text-[11px] sm:text-sm font-black truncate leading-tight ${
+                          isHellMode ? 'text-amber-200' : 'text-slate-800'
+                        }`}
+                        title={artwork.title}
+                      >
+                        {artwork.title}
+                      </h3>
+                    )}
+
+                    {artwork.message && (
+                      <p
+                        className={`text-[10px] sm:text-[11px] line-clamp-1 sm:line-clamp-2 italic font-medium ${
+                          isHellMode ? 'text-purple-300/80' : 'text-slate-500'
+                        }`}
+                        title={artwork.message}
+                      >
+                        "{artwork.message}"
+                      </p>
+                    )}
+
+                    <div className="flex items-center justify-between text-[10px] sm:text-[11px] pt-0.5 sm:pt-1">
+                      {/* Artist name */}
+                      <div className="flex items-center gap-1 min-w-0 text-slate-500 dark:text-purple-300">
+                        <User className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-500 shrink-0" />
+                        <span className="truncate font-bold max-w-[70px] sm:max-w-none">{artwork.authorName}</span>
+                      </div>
+
+                      {/* Formatted Date */}
+                      <span className="text-[9px] sm:text-[10px] text-slate-400 shrink-0">
+                        {new Date(artwork.createdAt).toLocaleDateString('vi-VN')}
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Load More Pagination Button */}
+            {filteredArtworks.length > visibleCount && (
+              <div className="flex justify-center pt-4 pb-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    playUiClick(soundEnabled);
+                    setVisibleCount((prev) => prev + 12);
+                  }}
+                  className={`px-6 py-2.5 sm:py-3 rounded-2xl font-black text-xs sm:text-sm border-2 transition-all cursor-pointer shadow-md active:scale-95 flex items-center gap-2 ${
+                    isHellMode
+                      ? 'bg-gradient-to-r from-red-900 via-purple-900 to-black hover:from-red-800 hover:to-purple-800 border-red-500 text-red-200 hover:text-white shadow-red-950/60'
+                      : 'bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 border-amber-300 text-white shadow-amber-500/30'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Xem thêm tranh ({filteredArtworks.length - visibleCount} tác phẩm còn lại)</span>
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           /* Empty state */

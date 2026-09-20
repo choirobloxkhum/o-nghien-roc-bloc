@@ -88,7 +88,7 @@ export const RPCharacterCard: React.FC<RPCharacterCardProps> = ({
       id={`char-${character.id}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`relative flex flex-col rounded-2xl sm:rounded-3xl p-2.5 sm:p-3.5 md:p-4 transition-all duration-300 transform hover:-translate-y-1 group ${
+      className={`relative flex flex-col rounded-2xl sm:rounded-3xl p-2.5 sm:p-3.5 md:p-4 transition-all duration-300 transform hover:-translate-y-1 group gpu-accelerated content-auto ${
         isHellMode
           ? 'bg-gradient-to-b from-[#18051a] via-[#100312] to-[#09010b] border border-red-900/60 sm:border-2 shadow-[0_4px_20px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_36px_rgba(220,38,38,0.35)] hover:border-red-500/80'
           : 'bg-white border border-slate-100 sm:border-2 shadow-[0_4px_16px_rgba(0,0,0,0.05)] sm:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:shadow-[0_16px_36px_rgba(2,132,199,0.14)] hover:border-sky-300'
@@ -120,8 +120,10 @@ export const RPCharacterCard: React.FC<RPCharacterCardProps> = ({
           <img
             src={character.avatarUrl}
             alt={character.name}
+            loading="lazy"
+            decoding="async"
             referrerPolicy="no-referrer"
-            className={`w-full h-full object-cover object-[center_15%] sm:object-center transition-transform duration-500 ${
+            className={`w-full h-full object-cover object-[center_15%] sm:object-center transition-transform duration-500 will-change-transform ${
               isSpeaking ? 'scale-110' : 'group-hover:scale-105'
             }`}
           />
@@ -144,7 +146,7 @@ export const RPCharacterCard: React.FC<RPCharacterCardProps> = ({
         >
           {/* Subtle Censor Tape / Restricted Strip in Hell Mode near bottom */}
           {isHellMode && (
-            <div className="w-[85%] mx-auto py-0.5 rounded bg-black/80 border-y border-red-500/60 flex items-center justify-center gap-1 shadow-[0_0_12px_rgba(0,0,0,0.95)] backdrop-blur-xs mb-0.5 transition-opacity duration-300 group-hover:opacity-75">
+            <div className="w-[85%] mx-auto py-0.5 rounded bg-black/90 border-y border-red-500/60 flex items-center justify-center gap-1 shadow-[0_0_12px_rgba(0,0,0,0.95)] mb-0.5 transition-opacity duration-300 group-hover:opacity-75">
               <span className="text-[7.5px] sm:text-[8.5px] font-black tracking-widest text-red-400 uppercase select-none flex items-center gap-1">
                 <span className="text-amber-400 text-[9px]">🔞</span> CENSORED 18+
               </span>
@@ -170,8 +172,8 @@ export const RPCharacterCard: React.FC<RPCharacterCardProps> = ({
                   ? 'bg-gradient-to-r from-red-600 via-purple-600 to-amber-500 text-white animate-pulse shadow-red-500/50'
                   : 'bg-gradient-to-r from-pink-500 via-rose-500 to-pink-500 text-white animate-pulse shadow-pink-500/50'
                 : isHellMode
-                ? 'bg-black/80 border border-purple-500/40 text-purple-200 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0'
-                : 'bg-black/65 backdrop-blur-md text-white/95 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0'
+                ? 'bg-black/85 border border-purple-500/40 text-purple-200 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0'
+                : 'bg-black/75 text-white/95 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0'
             }`}
           >
             {isSpeaking ? (
