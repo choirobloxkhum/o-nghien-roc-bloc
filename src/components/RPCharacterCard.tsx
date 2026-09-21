@@ -81,15 +81,11 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
   };
 
   return (
-    <motion.div
-      layout="position"
-      initial={{ opacity: 0.8, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.35, ease: 'easeOut' }}
+    <div
       id={`char-${character.id}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`relative flex flex-col rounded-2xl sm:rounded-3xl p-2.5 sm:p-3.5 md:p-4 transition-all duration-300 transform hover:-translate-y-1 group gpu-accelerated content-auto ${
+      className={`relative flex flex-col rounded-2xl sm:rounded-3xl p-2.5 sm:p-3.5 md:p-4 transition-transform duration-200 hover:-translate-y-1 group will-change-transform content-auto ${
         isHellMode
           ? 'bg-gradient-to-b from-[#18051a] via-[#100312] to-[#09010b] border border-red-900/60 sm:border-2 shadow-[0_4px_20px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_36px_rgba(220,38,38,0.35)] hover:border-red-500/80'
           : 'bg-white border border-slate-100 sm:border-2 shadow-[0_4px_16px_rgba(0,0,0,0.05)] sm:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:shadow-[0_16px_36px_rgba(2,132,199,0.14)] hover:border-sky-300'
@@ -377,8 +373,15 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
         characterRole={character.roleTag}
         isHellMode={isHellMode}
         commentCount={commentCount}
+        hasPassword={
+          Boolean(character.password) ||
+          Boolean(character.hasDynamicPassword) ||
+          character.tags?.some((t) => t.toLowerCase() === '🔒' || t.toLowerCase() === 'pass') ||
+          character.id === 'char-11-lucifer' ||
+          character.id === 'char-16-hoang-nhat-thien'
+        }
       />
-    </motion.div>
+    </div>
   );
 };
 

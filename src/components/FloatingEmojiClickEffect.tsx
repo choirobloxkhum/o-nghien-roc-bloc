@@ -36,12 +36,12 @@ export const FloatingEmojiClickEffect: React.FC = () => {
     const randomEmoji = EMOJI_POOL[Math.floor(Math.random() * EMOJI_POOL.length)];
     const spreadX = (Math.random() - 0.5) * 40; // slight horizontal drift
     const spreadY = -90 - Math.random() * 50; // float up 90px to 140px
-    const size = 28 + Math.random() * 10; // 28px to 38px
-    const rotation = (Math.random() - 0.5) * 35; // gentle tilt
-    const duration = 3.0; // 3 seconds duration
+    const size = 26 + Math.random() * 8; // 26px to 34px
+    const rotation = (Math.random() - 0.5) * 30; // gentle tilt
+    const duration = 1.2; // 1.2 seconds duration for swift, snappy cleanup
 
     const isMobile = window.innerWidth < 768;
-    const maxItems = isMobile ? 5 : 12;
+    const maxItems = isMobile ? 3 : 5;
 
     const newItem: FloatingEmoji = {
       id: Date.now() + Math.random(),
@@ -55,7 +55,7 @@ export const FloatingEmojiClickEffect: React.FC = () => {
       duration,
     };
 
-    setEmojis((prev) => [...prev.slice(-maxItems), newItem]);
+    setEmojis((prev) => [...prev.slice(-(maxItems - 1)), newItem]);
   }, []);
 
   useEffect(() => {
@@ -75,19 +75,19 @@ export const FloatingEmojiClickEffect: React.FC = () => {
               x: item.x - item.size / 2,
               y: item.y - item.size / 2,
               opacity: 0,
-              scale: 0.5,
+              scale: 0.6,
               rotate: 0,
             }}
             animate={{
               x: item.x - item.size / 2 + item.angle,
               y: item.y - item.size / 2 + item.distance,
               opacity: [0, 1, 1, 0],
-              scale: [0.5, 1.15, 1.2, 1],
+              scale: [0.6, 1.1, 1.15, 1],
               rotate: item.rotation,
             }}
             transition={{
               duration: item.duration,
-              times: [0, 0.1, 0.7, 1], // Stays clearly visible from 0.3s to 2.1s, then fades out gently in last 0.9s
+              times: [0, 0.15, 0.75, 1],
               ease: 'easeOut',
             }}
             onAnimationComplete={() => {
@@ -99,7 +99,7 @@ export const FloatingEmojiClickEffect: React.FC = () => {
               top: 0,
               fontSize: `${item.size}px`,
               willChange: 'transform, opacity',
-              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.18))',
+              textShadow: '0 2px 5px rgba(0,0,0,0.15)',
             }}
           >
             {item.emoji}

@@ -11,19 +11,17 @@ export const RobloxBackground: React.FC = () => {
       {/* Sky Gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#1d7bf8] via-[#52a7ff] to-[#a2d8ff]" />
 
-      {/* Radiant Sunburst Rays (Desktop/Tablet only for max 60FPS mobile performance) */}
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 90, repeat: Infinity, ease: 'linear' }}
-        className="absolute -top-24 -left-24 w-[600px] h-[600px] opacity-20 pointer-events-none hidden md:block"
+      {/* Radiant Sunburst Rays (Optimized static CSS element for silky 60FPS performance) */}
+      <div
+        className="absolute -top-24 -left-24 w-[600px] h-[600px] opacity-15 pointer-events-none hidden md:block select-none transform-gpu"
         style={{
           background:
-            'conic-gradient(from 0deg, transparent 0deg 15deg, rgba(255,255,255,0.7) 15deg 30deg, transparent 30deg 45deg, rgba(255,255,255,0.7) 45deg 60deg, transparent 60deg 75deg, rgba(255,255,255,0.7) 75deg 90deg, transparent 90deg 105deg, rgba(255,255,255,0.7) 105deg 120deg, transparent 120deg 135deg, rgba(255,255,255,0.7) 135deg 150deg, transparent 150deg 165deg, rgba(255,255,255,0.7) 165deg 180deg, transparent 180deg 195deg, rgba(255,255,255,0.7) 195deg 210deg, transparent 210deg 225deg, rgba(255,255,255,0.7) 225deg 240deg, transparent 240deg 255deg, rgba(255,255,255,0.7) 255deg 270deg, transparent 270deg 285deg, rgba(255,255,255,0.7) 285deg 300deg, transparent 300deg 315deg, rgba(255,255,255,0.7) 315deg 330deg, transparent 330deg 345deg, rgba(255,255,255,0.7) 345deg 360deg)',
+            'conic-gradient(from 0deg, transparent 0deg 15deg, rgba(255,255,255,0.6) 15deg 30deg, transparent 30deg 45deg, rgba(255,255,255,0.6) 45deg 60deg, transparent 60deg 75deg, rgba(255,255,255,0.6) 75deg 90deg, transparent 90deg 105deg, rgba(255,255,255,0.6) 105deg 120deg, transparent 120deg 135deg, rgba(255,255,255,0.6) 135deg 150deg, transparent 150deg 165deg, rgba(255,255,255,0.6) 165deg 180deg, transparent 180deg 195deg, rgba(255,255,255,0.6) 195deg 210deg, transparent 210deg 225deg, rgba(255,255,255,0.6) 225deg 240deg, transparent 240deg 255deg, rgba(255,255,255,0.6) 255deg 270deg, transparent 270deg 285deg, rgba(255,255,255,0.6) 285deg 300deg, transparent 300deg 315deg, rgba(255,255,255,0.6) 315deg 330deg, transparent 330deg 345deg, rgba(255,255,255,0.6) 345deg 360deg)',
         }}
       />
 
-      {/* Sun with intense glow and rays */}
-      <div className="absolute top-8 left-8 sm:top-14 sm:left-14 w-28 h-28 sm:w-40 sm:h-40 bg-yellow-200 rounded-full blur-[1px] opacity-95 shadow-[0_0_40px_15px_rgba(253,224,71,0.5)] md:shadow-[0_0_90px_35px_rgba(253,224,71,0.65)]">
+      {/* Sun with gentle warm glow */}
+      <div className="absolute top-8 left-8 sm:top-14 sm:left-14 w-28 h-28 sm:w-40 sm:h-40 bg-yellow-200 rounded-full blur-[1px] opacity-95 shadow-[0_0_30px_10px_rgba(253,224,71,0.4)] md:shadow-[0_0_45px_15px_rgba(253,224,71,0.45)] select-none pointer-events-none">
         {/* Sun inner core */}
         <div className="absolute inset-3 bg-gradient-to-tr from-amber-300 via-yellow-100 to-white rounded-full blur-xs" />
       </div>
@@ -93,49 +91,29 @@ export const RobloxBackground: React.FC = () => {
       {/* ========================================================================= */}
       {/* 4. FLOATING 3D ROBLOX STUDS & SPARKLE GEMS (Whimsical bobbing)            */}
       {/* ========================================================================= */}
-      {/* Floating Yellow Stud */}
-      <motion.div
-        animate={{ y: [0, -18, 0], rotate: [0, 20, 0] }}
-        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-36 left-[8%] hidden sm:flex w-9 h-9 rounded-xl bg-gradient-to-br from-yellow-300 to-amber-500 border-2 border-white shadow-lg items-center justify-center"
-      >
+      {/* Yellow Stud */}
+      <div className="absolute top-36 left-[8%] hidden sm:flex w-9 h-9 rounded-xl bg-gradient-to-br from-yellow-300 to-amber-500 border-2 border-white shadow-md items-center justify-center rotate-6 select-none pointer-events-none">
         <div className="w-4 h-4 rounded-full bg-white/80 shadow-xs" />
-      </motion.div>
+      </div>
 
-      {/* Floating Cyan Stud */}
-      <motion.div
-        animate={{ y: [0, 20, 0], rotate: [0, -25, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-        className="absolute top-52 right-[8%] hidden sm:flex w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-300 to-blue-500 border-2 border-white shadow-lg items-center justify-center"
-      >
+      {/* Cyan Stud */}
+      <div className="absolute top-52 right-[8%] hidden sm:flex w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-300 to-blue-500 border-2 border-white shadow-md items-center justify-center -rotate-12 select-none pointer-events-none">
         <div className="w-4 h-4 rounded-full bg-white/80 shadow-xs" />
-      </motion.div>
+      </div>
 
-      {/* Floating Pink Heart Gem */}
-      <motion.div
-        animate={{ y: [0, -14, 0], scale: [0.9, 1.1, 0.9] }}
-        transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-        className="absolute bottom-40 left-[18%] hidden sm:flex w-8 h-8 rounded-full bg-pink-400/80 border-2 border-white shadow-md items-center justify-center text-white"
-      >
+      {/* Pink Heart Gem */}
+      <div className="absolute bottom-40 left-[18%] hidden sm:flex w-8 h-8 rounded-full bg-pink-400/80 border-2 border-white shadow-sm items-center justify-center text-white select-none pointer-events-none">
         <Heart className="w-4 h-4 fill-white text-white" />
-      </motion.div>
+      </div>
 
-      {/* Floating Twinkle Sparkles */}
-      <motion.div
-        animate={{ opacity: [0.4, 1, 0.4], scale: [0.8, 1.3, 0.8] }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-28 left-[35%] text-yellow-200 pointer-events-none"
-      >
+      {/* Twinkle Sparkles */}
+      <div className="absolute top-28 left-[35%] text-yellow-200 opacity-80 pointer-events-none select-none">
         <Sparkles className="w-6 h-6 fill-yellow-200" />
-      </motion.div>
+      </div>
 
-      <motion.div
-        animate={{ opacity: [0.3, 0.9, 0.3], scale: [0.8, 1.2, 0.8] }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
-        className="absolute top-44 right-[30%] text-white pointer-events-none"
-      >
+      <div className="absolute top-44 right-[30%] text-white opacity-75 pointer-events-none select-none">
         <Sparkles className="w-5 h-5 fill-white" />
-      </motion.div>
+      </div>
 
       {/* ========================================================================= */}
       {/* 5. FLOATING DETAILED FLUFFY CLOUDS                                        */}
@@ -144,12 +122,12 @@ export const RobloxBackground: React.FC = () => {
       <motion.div
         animate={{ x: [-20, 25, -20] }}
         transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-24 left-[12%] opacity-85"
+        className="absolute top-24 left-[12%] opacity-90 transform-gpu will-change-transform"
       >
-        <div className="relative w-52 h-16 bg-white rounded-full backdrop-blur-xs shadow-[0_12px_24px_rgba(2,132,199,0.15)] border-2 border-white/60">
-          <div className="absolute -top-7 left-6 w-18 h-18 bg-white rounded-full border-t border-white" />
-          <div className="absolute -top-11 left-18 w-26 h-26 bg-white rounded-full border-t border-white" />
-          <div className="absolute -top-5 right-8 w-16 h-16 bg-white rounded-full border-t border-white" />
+        <div className="relative w-52 h-16 bg-white/95 rounded-full shadow-[0_8px_20px_rgba(2,132,199,0.12)] border-2 border-white/80">
+          <div className="absolute -top-7 left-6 w-18 h-18 bg-white/95 rounded-full border-t border-white" />
+          <div className="absolute -top-11 left-18 w-26 h-26 bg-white/95 rounded-full border-t border-white" />
+          <div className="absolute -top-5 right-8 w-16 h-16 bg-white/95 rounded-full border-t border-white" />
         </div>
       </motion.div>
 
@@ -157,12 +135,12 @@ export const RobloxBackground: React.FC = () => {
       <motion.div
         animate={{ x: [25, -25, 25] }}
         transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-14 left-[58%] opacity-75"
+        className="absolute top-14 left-[58%] opacity-85 transform-gpu will-change-transform"
       >
-        <div className="relative w-68 h-20 bg-white rounded-full backdrop-blur-xs shadow-[0_14px_28px_rgba(2,132,199,0.15)] border-2 border-white/60">
-          <div className="absolute -top-11 left-10 w-26 h-26 bg-white rounded-full border-t border-white" />
-          <div className="absolute -top-16 left-26 w-34 h-34 bg-white rounded-full border-t border-white" />
-          <div className="absolute -top-9 right-12 w-22 h-22 bg-white rounded-full border-t border-white" />
+        <div className="relative w-68 h-20 bg-white/95 rounded-full shadow-[0_10px_22px_rgba(2,132,199,0.12)] border-2 border-white/80">
+          <div className="absolute -top-11 left-10 w-26 h-26 bg-white/95 rounded-full border-t border-white" />
+          <div className="absolute -top-16 left-26 w-34 h-34 bg-white/95 rounded-full border-t border-white" />
+          <div className="absolute -top-9 right-12 w-22 h-22 bg-white/95 rounded-full border-t border-white" />
         </div>
       </motion.div>
 
@@ -207,40 +185,28 @@ export const RobloxBackground: React.FC = () => {
         {/* Subtle Roblox Stud pattern overlay */}
         <div className="absolute inset-0 roblox-stud-pattern opacity-15" />
 
-        {/* Animated cute flower 1 (left) */}
-        <motion.div
-          animate={{ rotate: [-4, 6, -4] }}
-          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-4 left-[8%] flex items-center justify-center"
-        >
+        {/* Cute flower 1 (left) */}
+        <div className="absolute top-4 left-[8%] flex items-center justify-center select-none pointer-events-none -rotate-3">
           <div className="w-5 h-5 rounded-full bg-rose-400 border-2 border-white shadow-sm flex items-center justify-center">
             <div className="w-2 h-2 rounded-full bg-amber-300" />
           </div>
           <div className="absolute top-5 w-1 h-5 bg-[#1b5e20] rounded-full" />
-        </motion.div>
+        </div>
 
-        {/* Animated cute flower 2 (right) */}
-        <motion.div
-          animate={{ rotate: [5, -5, 5] }}
-          transition={{ duration: 3.6, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-5 right-[14%] flex items-center justify-center"
-        >
+        {/* Cute flower 2 (right) */}
+        <div className="absolute top-5 right-[14%] flex items-center justify-center select-none pointer-events-none rotate-3">
           <div className="w-5 h-5 rounded-full bg-amber-300 border-2 border-white shadow-sm flex items-center justify-center">
             <div className="w-2 h-2 rounded-full bg-amber-700" />
           </div>
           <div className="absolute top-5 w-1 h-6 bg-[#1b5e20] rounded-full" />
-        </motion.div>
+        </div>
 
-        {/* Animated cute flower 3 (mid right) */}
-        <motion.div
-          animate={{ rotate: [-6, 4, -6] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-          className="absolute top-7 right-[32%] hidden sm:flex items-center justify-center"
-        >
+        {/* Cute flower 3 (mid right) */}
+        <div className="absolute top-7 right-[32%] hidden sm:flex items-center justify-center select-none pointer-events-none -rotate-6">
           <div className="w-4 h-4 rounded-full bg-sky-300 border-2 border-white shadow-sm flex items-center justify-center">
             <div className="w-1.5 h-1.5 rounded-full bg-white" />
           </div>
-        </motion.div>
+        </div>
 
         {/* Foreground Decorative Details (Grass blades) */}
         <div className="absolute top-4 left-[15%] w-3 h-8 bg-[#4caf50] rounded-t-full rotate-[-15deg] blur-[0.5px]" />

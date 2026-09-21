@@ -39,10 +39,10 @@ export const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
       >
         {/* Inner Capsule Container - Cursed Parchment (Màu vàng da cổ & Nâu đất) in Hell Mode */}
         <div
-          className={`relative flex items-center gap-2 sm:gap-3.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-[10px] sm:rounded-[14px] backdrop-blur-md overflow-hidden border ${
+          className={`relative flex items-center gap-2 sm:gap-3.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-[10px] sm:rounded-[14px] overflow-hidden border shadow-sm ${
             isHellMode
-              ? 'bg-[#fffbeb]/95 border-[#fde68a]/90 text-stone-900 shadow-inner'
-              : 'bg-white/95 border-amber-200/80'
+              ? 'bg-[#fffbeb] border-[#fde68a] text-stone-900 shadow-inner'
+              : 'bg-white border-amber-200'
           }`}
         >
           {/* Decorative Corner Accents */}

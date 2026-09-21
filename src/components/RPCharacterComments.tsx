@@ -27,6 +27,7 @@ interface RPCharacterCommentsProps {
   characterRole?: string;
   isHellMode?: boolean;
   commentCount?: number;
+  hasPassword?: boolean;
 }
 
 // Format relative time in Vietnamese
@@ -54,7 +55,12 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
   characterRole,
   isHellMode = false,
   commentCount = 0,
+  hasPassword = false,
 }) => {
+  const isLockedChar =
+    hasPassword ||
+    characterId === 'char-11-lucifer' ||
+    characterId === 'char-16-hoang-nhat-thien';
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [comments, setComments] = useState<CharacterComment[]>([]);
   const [visibleCommentsCount, setVisibleCommentsCount] = useState(15);
@@ -617,17 +623,19 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
                         </span>
                       </button>
 
-                      {/* Caution reminder inside modal */}
-                      <div
-                        className={`w-full py-1.5 px-2.5 rounded-xl text-[10.5px] sm:text-[11px] font-medium font-vietnamese text-center leading-tight border transition-all flex items-center justify-center gap-1.5 ${
-                          isHellMode
-                            ? 'bg-red-950/40 border-red-900/60 text-red-300'
-                            : 'bg-amber-50/90 border-amber-200 text-amber-900 shadow-2xs'
-                        }`}
-                      >
-                        <span className="shrink-0 text-xs">⚠️</span>
-                        <span>Các bồ iu thương mộng chè bằng cách không spoil pass nhóe🥹</span>
-                      </div>
+                      {/* Caution reminder inside modal - ONLY for characters with password */}
+                      {isLockedChar && (
+                        <div
+                          className={`w-full py-1.5 px-2.5 rounded-xl text-[10.5px] sm:text-[11px] font-medium font-vietnamese text-center leading-tight border transition-all flex items-center justify-center gap-1.5 ${
+                            isHellMode
+                              ? 'bg-red-950/40 border-red-900/60 text-red-300'
+                              : 'bg-amber-50/90 border-amber-200 text-amber-900 shadow-2xs'
+                          }`}
+                        >
+                          <span className="shrink-0 text-xs">⚠️</span>
+                          <span>Các bồ iu thương mộng chè bằng cách không spoil pass nhóe🥹</span>
+                        </div>
+                      )}
                     </form>
                   </div>
                 </motion.div>

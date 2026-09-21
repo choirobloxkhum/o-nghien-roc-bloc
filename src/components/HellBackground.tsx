@@ -26,14 +26,12 @@ export const HellBackground: React.FC = () => {
       {/* Bottom glowing dual red-purple magma and soul-fire accent */}
       <div className="absolute bottom-0 inset-x-0 h-44 bg-gradient-to-t from-red-950/40 via-purple-900/25 to-transparent" />
 
-      {/* 3. ROTATING DIÊM VƯƠNG ANCIENT TALISMAN RUNIC GLYPH */}
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 160, repeat: Infinity, ease: 'linear' }}
-        className="absolute -top-40 -left-40 w-[600px] h-[600px] opacity-15 pointer-events-none transform-gpu will-change-transform"
+      {/* 3. DIÊM VƯƠNG ANCIENT TALISMAN RUNIC GLYPH (Optimized static decorative glyph) */}
+      <div
+        className="absolute -top-40 -left-40 w-[600px] h-[600px] opacity-15 pointer-events-none transform-gpu select-none"
         style={{
           background:
-            'conic-gradient(from 0deg, transparent 0deg 20deg, rgba(220,38,38,0.7) 20deg 35deg, transparent 35deg 60deg, rgba(168,85,247,0.7) 60deg 75deg, transparent 75deg 120deg, rgba(220,38,38,0.7) 120deg 135deg, transparent 135deg 180deg, rgba(147,51,234,0.7) 180deg 195deg, transparent 195deg 240deg, rgba(239,68,68,0.7) 240deg 255deg, transparent 255deg 300deg, rgba(168,85,247,0.7) 300deg 315deg, transparent 315deg 360deg)',
+            'conic-gradient(from 0deg, transparent 0deg 20deg, rgba(220,38,38,0.6) 20deg 35deg, transparent 35deg 60deg, rgba(168,85,247,0.6) 60deg 75deg, transparent 75deg 120deg, rgba(220,38,38,0.6) 120deg 135deg, transparent 135deg 180deg, rgba(147,51,234,0.6) 180deg 195deg, transparent 195deg 240deg, rgba(239,68,68,0.6) 240deg 255deg, transparent 255deg 300deg, rgba(168,85,247,0.6) 300deg 315deg, transparent 315deg 360deg)',
         }}
       />
 
@@ -46,13 +44,9 @@ export const HellBackground: React.FC = () => {
         <Flame className="w-5 h-5 text-red-400 fill-purple-500 animate-pulse" />
       </motion.div>
 
-      {/* 5. BLOOD-AMETHYST MOON AURA PULSE IN TOP RIGHT */}
-      <div className="absolute top-12 right-[12%] hidden sm:block w-36 h-36 rounded-full pointer-events-none">
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.35, 0.65, 0.35] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-full h-full rounded-full bg-gradient-to-tr from-red-600/30 to-purple-600/30 blur-2xl transform-gpu will-change-transform"
-        />
+      {/* 5. BLOOD-AMETHYST MOON AURA (Optimized zero-blur radial glow for silky performance) */}
+      <div className="absolute top-12 right-[12%] hidden sm:block w-36 h-36 rounded-full pointer-events-none select-none">
+        <div className="w-full h-full rounded-full bg-[radial-gradient(circle,_rgba(220,38,38,0.45)_0%,_rgba(147,51,234,0.3)_40%,_transparent_70%)] opacity-80" />
       </div>
 
       {/* 6. UPWARD FLOATING SOUL EMBERS & MA TRƠI / SPIRIT SPARKS (Lightweight GPU batching: hidden on mobile) */}
