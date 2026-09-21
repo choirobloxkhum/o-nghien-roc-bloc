@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -12,6 +12,8 @@ import {
   CheckCircle2,
   AlertCircle,
   MessageCircle,
+  Reply,
+  CornerDownRight,
 } from 'lucide-react';
 import {
   CharacterComment,
@@ -66,6 +68,15 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
   const [visibleCommentsCount, setVisibleCommentsCount] = useState(15);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Replying state (reply to a comment or thread)
+  const [replyingTo, setReplyingTo] = useState<{
+    parentId: string;
+    targetUserName: string;
+  } | null>(null);
+
+  // Collapse/expand state for threads with replies (key: parent comment ID)
+  const [collapsedThreads, setCollapsedThreads] = useState<Record<string, boolean>>({});
+
   // Form states
   const [userName, setUserName] = useState<string>(() => {
     if (typeof window !== 'undefined') {
@@ -83,6 +94,69 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
 
   const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
   const commentsContainerRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // Group comments into root comments and their replies
+  const { rootComments, repliesMap, totalCount } = useMemo(() => {
+    const roots: CharacterComment[] = [];
+    const replies: Record<string, CharacterComment[]> = {};
+    const commentIdSet = new Set(comments.map((c) => c.id));
+
+    comments.forEach((c) => {
+      // If it has parentId and the parent exists, group under parent
+      if (c.parentId && commentIdSet.has(c.parentId)) {
+        if (!replies[c.parentId]) {
+          replies[c.parentId] = [];
+        }
+        replies[c.parentId].push(c);
+      } else {
+        roots.push(c);
+      }
+    });
+
+    // Sort replies chronologically (oldest first so it reads naturally like a conversation)
+    Object.values(replies).forEach((list) => {
+      list.sort((a, b) => a.createdAt - b.createdAt);
+    });
+
+    return {
+      rootComments: roots,
+      repliesMap: replies,
+      totalCount: comments.length,
+    };
+  }, [comments]);
+
+  // Handle start replying to a comment or reply
+  const handleStartReply = (item: CharacterComment) => {
+    const parentId = item.parentId || item.id;
+    setReplyingTo({
+      parentId,
+      targetUserName: item.userName,
+    });
+    // Ensure parent thread is expanded
+    setCollapsedThreads((prev) => ({
+      ...prev,
+      [parentId]: false,
+    }));
+    // Auto-focus textarea smoothly
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 60);
+  };
+
+  const handleCancelReply = () => {
+    setReplyingTo(null);
+  };
+
+  const toggleThread = (parentId: string) => {
+    setCollapsedThreads((prev) => ({
+      ...prev,
+      [parentId]: !prev[parentId],
+    }));
+  };
 
   // Lock body scroll when modal is open and handle Escape key
   useEffect(() => {
@@ -139,7 +213,7 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
     };
   }, [rateLimitSeconds]);
 
-  // Handle submit comment
+  // Handle submit comment or reply
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -152,7 +226,10 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
       return;
     }
     if (!trimmedText) {
-      setFeedbackMessage({ type: 'error', text: 'Vui lòng nhập Lời nhắn cho chồng!' });
+      setFeedbackMessage({
+        type: 'error',
+        text: replyingTo ? 'Vui lòng nhập nội dung phản hồi!' : 'Vui lòng nhập Lời nhắn cho chồng!',
+      });
       return;
     }
 
@@ -176,21 +253,37 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
       // Ignore
     }
 
-    const res = await postCharacterComment(characterId, trimmedName, trimmedText);
+    const wasReply = !!replyingTo;
+    const targetParentId = replyingTo?.parentId || null;
+    const targetReplyTo = replyingTo?.targetUserName || null;
+
+    const res = await postCharacterComment(
+      characterId,
+      trimmedName,
+      trimmedText,
+      targetParentId,
+      targetReplyTo
+    );
 
     setIsSubmitting(false);
 
     if (res.success) {
       setCommentText('');
+      setReplyingTo(null);
       setRateLimitSeconds(5);
       setFeedbackMessage({
         type: 'success',
-        text: 'Đã gửi lời nhắn thành công! ✨',
+        text: wasReply ? 'Đã gửi phản hồi thành công! 💬' : 'Đã gửi lời nhắn thành công! ✨',
       });
 
-      // Scroll to top of comment list
-      if (commentsContainerRef.current) {
-        commentsContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      if (targetParentId) {
+        // Expand the thread where reply was added
+        setCollapsedThreads((prev) => ({ ...prev, [targetParentId]: false }));
+      } else {
+        // Scroll to top of comment list for new root comment
+        if (commentsContainerRef.current) {
+          commentsContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       }
 
       setTimeout(() => {
@@ -207,7 +300,7 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
     }
   };
 
-  const displayCount = Math.max(comments.length, commentCount);
+  const displayCount = Math.max(totalCount, commentCount);
   const isValidForm = userName.trim().length > 0 && commentText.trim().length > 0;
   const isButtonDisabled = !isValidForm || isSubmitting || rateLimitSeconds > 0;
 
@@ -400,7 +493,7 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
                       </div>
                     )}
 
-                    {!isLoading && comments.length === 0 && (
+                    {!isLoading && rootComments.length === 0 && (
                       <div
                         className={`py-10 px-4 text-center rounded-2xl border border-dashed flex flex-col items-center justify-center ${
                           isHellMode
@@ -426,60 +519,179 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
                       </div>
                     )}
 
-                    {comments.slice(0, visibleCommentsCount).map((item) => (
-                      <div
-                        key={item.id}
-                        className={`p-3 rounded-2xl border text-xs transition-all gpu-accelerated content-auto ${
-                          isHellMode
-                            ? 'bg-red-950/30 border-red-900/50 hover:border-red-700/70 text-red-100'
-                            : 'bg-slate-50 hover:bg-white border-slate-200/80 hover:border-sky-200 text-slate-800 shadow-2xs'
-                        }`}
-                      >
-                        {/* Header: Author Name (Bold) + Timestamp */}
-                        <div className="flex items-center justify-between gap-2 mb-1.5">
-                          <div className="flex items-center gap-2 min-w-0">
-                            {/* Roblox Avatar Initial Chip */}
-                            <div
-                              className={`w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center font-black text-[10px] sm:text-xs uppercase shrink-0 shadow-2xs ${
-                                isHellMode
-                                  ? 'bg-gradient-to-br from-red-600 to-rose-900 text-white'
-                                  : 'bg-gradient-to-br from-sky-400 to-blue-600 text-white'
-                              }`}
-                            >
-                              {item.userName ? item.userName.charAt(0) : 'R'}
+                    {rootComments.slice(0, visibleCommentsCount).map((item) => {
+                      const replies = repliesMap[item.id] || [];
+                      const isCollapsed = !!collapsedThreads[item.id];
+
+                      return (
+                        <div
+                          key={item.id}
+                          className={`p-3 rounded-2xl border text-xs transition-all gpu-accelerated content-auto ${
+                            isHellMode
+                              ? 'bg-red-950/30 border-red-900/50 hover:border-red-700/70 text-red-100'
+                              : 'bg-slate-50 hover:bg-white border-slate-200/80 hover:border-sky-200 text-slate-800 shadow-2xs'
+                          }`}
+                        >
+                          {/* Header: Author Name (Bold) + Timestamp */}
+                          <div className="flex items-center justify-between gap-2 mb-1.5">
+                            <div className="flex items-center gap-2 min-w-0">
+                              {/* Roblox Avatar Initial Chip */}
+                              <div
+                                className={`w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center font-black text-[10px] sm:text-xs uppercase shrink-0 shadow-2xs ${
+                                  isHellMode
+                                    ? 'bg-gradient-to-br from-red-600 to-rose-900 text-white'
+                                    : 'bg-gradient-to-br from-sky-400 to-blue-600 text-white'
+                                }`}
+                              >
+                                {item.userName ? item.userName.charAt(0) : 'R'}
+                              </div>
+                              <span
+                                className={`font-black text-xs sm:text-sm truncate ${
+                                  isHellMode ? 'text-white' : 'text-slate-900'
+                                }`}
+                              >
+                                {item.userName}
+                              </span>
                             </div>
+
                             <span
-                              className={`font-black text-xs sm:text-sm truncate ${
-                                isHellMode ? 'text-white' : 'text-slate-900'
+                              className={`text-[10px] sm:text-xs font-medium flex items-center gap-1 shrink-0 ${
+                                isHellMode ? 'text-red-400/70' : 'text-slate-400'
                               }`}
                             >
-                              {item.userName}
+                              <Clock className="w-3 h-3" />
+                              {formatRelativeTime(item.createdAt)}
                             </span>
                           </div>
 
-                          <span
-                            className={`text-[10px] sm:text-xs font-medium flex items-center gap-1 shrink-0 ${
-                              isHellMode ? 'text-red-400/70' : 'text-slate-400'
+                          {/* Comment Content */}
+                          <p
+                            className={`leading-relaxed break-words whitespace-pre-wrap pl-7 sm:pl-8 text-xs sm:text-[13px] font-medium font-vietnamese ${
+                              isHellMode ? 'text-red-100/90' : 'text-slate-700'
                             }`}
                           >
-                            <Clock className="w-3 h-3" />
-                            {formatRelativeTime(item.createdAt)}
-                          </span>
-                        </div>
+                            {item.commentText}
+                          </p>
 
-                        {/* Comment Content */}
-                        <p
-                          className={`leading-relaxed break-words whitespace-pre-wrap pl-7 sm:pl-8 text-xs sm:text-[13px] font-medium font-vietnamese ${
-                            isHellMode ? 'text-red-100/90' : 'text-slate-700'
-                          }`}
-                        >
-                          {item.commentText}
-                        </p>
-                      </div>
-                    ))}
+                          {/* Action Row: Reply button & Collapse/Expand replies button */}
+                          <div className="flex items-center justify-between gap-2 pl-7 sm:pl-8 mt-2 pt-1 border-t border-slate-200/40 dark:border-red-900/30">
+                            <button
+                              type="button"
+                              onClick={() => handleStartReply(item)}
+                              className={`inline-flex items-center gap-1 font-bold text-[11px] px-2 py-0.5 rounded-lg transition-all cursor-pointer select-none active:scale-95 ${
+                                isHellMode
+                                  ? 'text-red-400 hover:text-red-200 hover:bg-red-900/40'
+                                  : 'text-sky-600 hover:text-sky-800 hover:bg-sky-100/70'
+                              }`}
+                              title={`Phản hồi nhận xét của ${item.userName}`}
+                            >
+                              <Reply className="w-3 h-3" />
+                              <span>Phản hồi</span>
+                            </button>
+
+                            {replies.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => toggleThread(item.id)}
+                                className={`inline-flex items-center gap-1 font-bold text-[10.5px] px-2 py-0.5 rounded-lg transition-all cursor-pointer select-none active:scale-95 ${
+                                  isHellMode
+                                    ? 'text-red-300/80 hover:text-red-100 hover:bg-red-950/60'
+                                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/60'
+                                }`}
+                              >
+                                <CornerDownRight className="w-3 h-3 stroke-[2.5]" />
+                                <span>
+                                  {isCollapsed
+                                    ? `Xem ${replies.length} phản hồi`
+                                    : `Ẩn ${replies.length} phản hồi`}
+                                </span>
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Nested Replies Thread */}
+                          {!isCollapsed && replies.length > 0 && (
+                            <div className="mt-2.5 ml-4 sm:ml-6 pl-2.5 sm:pl-3.5 border-l-2 space-y-2 border-sky-200/80 dark:border-red-900/50">
+                              {replies.map((reply) => (
+                                <div
+                                  key={reply.id}
+                                  className={`p-2.5 rounded-xl border text-xs transition-all ${
+                                    isHellMode
+                                      ? 'bg-[#18041a]/95 border-red-900/40 text-red-100'
+                                      : 'bg-white border-slate-200/70 text-slate-800 shadow-2xs'
+                                  }`}
+                                >
+                                  {/* Reply header */}
+                                  <div className="flex items-center justify-between gap-2 mb-1">
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                      <div
+                                        className={`w-5 h-5 rounded-md flex items-center justify-center font-black text-[9.5px] uppercase shrink-0 shadow-2xs ${
+                                          isHellMode
+                                            ? 'bg-gradient-to-br from-red-600 to-rose-900 text-white'
+                                            : 'bg-gradient-to-br from-sky-400 to-blue-600 text-white'
+                                        }`}
+                                      >
+                                        {reply.userName ? reply.userName.charAt(0) : 'R'}
+                                      </div>
+                                      <span
+                                        className={`font-black text-xs truncate ${
+                                          isHellMode ? 'text-white' : 'text-slate-900'
+                                        }`}
+                                      >
+                                        {reply.userName}
+                                      </span>
+                                    </div>
+
+                                    <span
+                                      className={`text-[9.5px] sm:text-[10px] font-medium flex items-center gap-1 shrink-0 ${
+                                        isHellMode ? 'text-red-400/70' : 'text-slate-400'
+                                      }`}
+                                    >
+                                      <Clock className="w-2.5 h-2.5" />
+                                      {formatRelativeTime(reply.createdAt)}
+                                    </span>
+                                  </div>
+
+                                  {/* Reply content with @mention */}
+                                  <p className="leading-relaxed break-words whitespace-pre-wrap pl-6 text-xs font-medium font-vietnamese">
+                                    {reply.replyToUserName && (
+                                      <span
+                                        className={`font-bold mr-1.5 ${
+                                          isHellMode ? 'text-amber-400' : 'text-sky-600'
+                                        }`}
+                                      >
+                                        @{reply.replyToUserName}
+                                      </span>
+                                    )}
+                                    {reply.commentText}
+                                  </p>
+
+                                  {/* Sub-reply action */}
+                                  <div className="flex justify-end pl-6 mt-1">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleStartReply(reply)}
+                                      className={`inline-flex items-center gap-1 font-bold text-[10.5px] px-1.5 py-0.5 rounded transition-colors cursor-pointer select-none active:scale-95 ${
+                                        isHellMode
+                                          ? 'text-red-400/90 hover:text-red-200 hover:bg-red-900/30'
+                                          : 'text-sky-600 hover:text-sky-800 hover:bg-sky-100/60'
+                                      }`}
+                                      title={`Phản hồi lại ${reply.userName}`}
+                                    >
+                                      <Reply className="w-2.5 h-2.5" />
+                                      <span>Phản hồi</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
 
                     {/* Load More Older Comments Button */}
-                    {comments.length > visibleCommentsCount && (
+                    {rootComments.length > visibleCommentsCount && (
                       <div className="flex justify-center pt-2 pb-1">
                         <button
                           type="button"
@@ -492,7 +704,7 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
                               : 'bg-white hover:bg-sky-50 border-slate-200 hover:border-sky-300 text-slate-700'
                           }`}
                         >
-                          <span>Xem thêm nhận xét cũ hơn ({comments.length - visibleCommentsCount})</span>
+                          <span>Xem thêm nhận xét cũ hơn ({rootComments.length - visibleCommentsCount})</span>
                         </button>
                       </div>
                     )}
@@ -507,6 +719,33 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
                     }`}
                   >
                     <form onSubmit={handleSubmit} className="space-y-2">
+                      {/* Active Reply Banner Indicator */}
+                      {replyingTo && (
+                        <div
+                          className={`flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-vietnamese border transition-all ${
+                            isHellMode
+                              ? 'bg-red-950/70 border-red-800 text-red-200'
+                              : 'bg-sky-100/80 border-sky-200 text-sky-800 shadow-2xs'
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5 truncate">
+                            <Reply className="w-3.5 h-3.5 text-sky-600 dark:text-red-400 shrink-0" />
+                            <span className="font-semibold text-[11px] sm:text-xs">Đang phản hồi:</span>
+                            <span className="font-black text-[11px] sm:text-xs text-sky-700 dark:text-amber-300 truncate">
+                              @{replyingTo.targetUserName}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleCancelReply}
+                            className="p-1 hover:opacity-75 cursor-pointer rounded-md transition-opacity shrink-0 text-slate-500 hover:text-slate-800 dark:text-red-300 dark:hover:text-white"
+                            title="Hủy phản hồi"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+
                       {/* Stylized "Biệt danh" Text Input */}
                       <div>
                         <div className="flex items-center justify-between mb-1">
@@ -553,7 +792,7 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
                                 isHellMode ? 'text-amber-400' : 'text-amber-500'
                               }`}
                             />
-                            <span>Nội dung nhận xét:</span>
+                            <span>{replyingTo ? 'Nội dung phản hồi:' : 'Nội dung nhận xét:'}</span>
                           </label>
                           <span
                             className={`text-[10px] font-mono ${
@@ -566,11 +805,16 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
                           </span>
                         </div>
                         <textarea
+                          ref={textareaRef}
                           rows={2}
                           value={commentText}
                           onChange={(e) => setCommentText(e.target.value)}
                           maxLength={250}
-                          placeholder={`Để lại lời nhắn yêu thương cho ${characterName}...`}
+                          placeholder={
+                            replyingTo
+                              ? `Phản hồi lại cho @${replyingTo.targetUserName}...`
+                              : `Để lại lời nhắn yêu thương cho ${characterName}...`
+                          }
                           className={`w-full px-3 py-1.5 text-xs sm:text-sm rounded-xl border font-medium font-vietnamese outline-hidden transition-all resize-none ${
                             isHellMode
                               ? 'bg-red-950/40 border-red-800/80 text-white placeholder:text-red-400/50 focus:border-red-500 focus:bg-red-950/70'
@@ -597,7 +841,7 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
                         </div>
                       )}
 
-                      {/* Prominent "Gửi nhận xét" Button */}
+                      {/* Prominent "Gửi nhận xét / phản hồi" Button */}
                       <button
                         type="submit"
                         disabled={isButtonDisabled}
@@ -618,8 +862,8 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
                           {rateLimitSeconds > 0
                             ? `Đợi ${rateLimitSeconds}s trước khi gửi tiếp`
                             : isSubmitting
-                              ? 'Đang gửi nhận xét...'
-                              : 'Gửi nhận xét'}
+                              ? (replyingTo ? 'Đang gửi phản hồi...' : 'Đang gửi nhận xét...')
+                              : (replyingTo ? 'Gửi phản hồi' : 'Gửi nhận xét')}
                         </span>
                       </button>
 

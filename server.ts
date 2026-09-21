@@ -234,6 +234,8 @@ app.get('/api/comments/:characterId', async (req, res) => {
       userName: string;
       commentText: string;
       createdAt: number;
+      parentId?: string | null;
+      replyToUserName?: string | null;
     }> = [];
 
     for (const docSnap of snapshot.docs) {
@@ -259,6 +261,8 @@ app.get('/api/comments/:characterId', async (req, res) => {
         userName: data.userName || 'Vô danh',
         commentText: data.commentText || '',
         createdAt: data.createdAt || Date.now(),
+        parentId: data.parentId || null,
+        replyToUserName: data.replyToUserName || null,
       });
     }
 
@@ -274,11 +278,11 @@ app.get('/api/comments/:characterId', async (req, res) => {
   }
 });
 
-// 7. POST /api/comments/:characterId - Add new public comment with rate-limiting
+// 7. POST /api/comments/:characterId - Add new public comment or reply with rate-limiting
 app.post('/api/comments/:characterId', async (req, res) => {
   try {
     const { characterId } = req.params;
-    const { userName, commentText, fingerprint } = req.body;
+    const { userName, commentText, fingerprint, parentId, replyToUserName } = req.body;
 
     if (!characterId) {
       return res.status(400).json({ success: false, message: 'Missing characterId' });
@@ -286,6 +290,8 @@ app.post('/api/comments/:characterId', async (req, res) => {
 
     const trimmedName = typeof userName === 'string' ? userName.trim() : '';
     const trimmedText = typeof commentText === 'string' ? commentText.trim() : '';
+    const validParentId = typeof parentId === 'string' && parentId.trim() ? parentId.trim().slice(0, 128) : null;
+    const validReplyTo = typeof replyToUserName === 'string' && replyToUserName.trim() ? replyToUserName.trim().slice(0, 50) : null;
 
     if (!trimmedName) {
       return res.status(400).json({ success: false, message: 'Vui lòng nhập Tên của bạn / Biệt danh!' });
@@ -320,12 +326,14 @@ app.post('/api/comments/:characterId', async (req, res) => {
     commentRateLimits[clientKey] = now;
 
     // Save to Firestore subcollection: /rp_comments/{characterId}/items/{commentId}
-    const commentPayload = {
+    const commentPayload: Record<string, any> = {
       characterId,
       userName: trimmedName,
       commentText: trimmedText,
       createdAt: now,
     };
+    if (validParentId) commentPayload.parentId = validParentId;
+    if (validReplyTo) commentPayload.replyToUserName = validReplyTo;
 
     const itemsRef = collection(db, 'rp_comments', characterId, 'items');
     const docRef = await addDoc(itemsRef, commentPayload);
@@ -343,7 +351,7 @@ app.post('/api/comments/:characterId', async (req, res) => {
       console.warn('Could not update count document:', countErr);
     }
 
-    console.log(`[New Comment] "${trimmedName}" commented on "${characterId}": "${trimmedText.slice(0, 30)}..."`);
+    console.log(`[New Comment] "${trimmedName}" commented on "${characterId}" (parent: ${validParentId || 'none'}): "${trimmedText.slice(0, 30)}..."`);
 
     res.json({
       success: true,
@@ -351,7 +359,7 @@ app.post('/api/comments/:characterId', async (req, res) => {
         id: docRef.id,
         ...commentPayload,
       },
-      message: 'Gửi nhận xét thành công!',
+      message: validParentId ? 'Đã gửi phản hồi thành công! 💬' : 'Gửi nhận xét thành công!',
     });
   } catch (err) {
     console.error(err);
@@ -381,6 +389,7 @@ app.get('/api/artworks', async (req, res) => {
       title?: string;
       message?: string;
       createdAt: number;
+      likesCount: number;
     }> = [];
 
     snapshot.forEach((docSnap) => {
@@ -395,6 +404,7 @@ app.get('/api/artworks', async (req, res) => {
         title: data.title || '',
         message: data.message || '',
         createdAt: data.createdAt || data.created_at || Date.now(),
+        likesCount: Number(data.likesCount || data.likes_count || 0),
       });
     });
 
@@ -468,6 +478,8 @@ app.post('/api/artworks', async (req, res) => {
       message: trimmedMessage.slice(0, 300),
       createdAt: now,
       created_at: now,
+      likesCount: 0,
+      likes_count: 0,
     };
 
     const artworksRef = collection(db, 'artworks');
@@ -487,6 +499,7 @@ app.post('/api/artworks', async (req, res) => {
         title: trimmedTitle.slice(0, 120),
         message: trimmedMessage.slice(0, 300),
         createdAt: now,
+        likesCount: 0,
       },
       message: 'Đăng tranh thành công! Tác phẩm đã được lưu vào Phòng Tranh.',
     });
@@ -496,7 +509,48 @@ app.post('/api/artworks', async (req, res) => {
   }
 });
 
-// 10. POST /api/artworks/clear-all - Clear all artworks
+// 10. POST /api/artworks/:artworkId/like - Like or unlike an artwork
+app.post('/api/artworks/:artworkId/like', async (req, res) => {
+  try {
+    const { artworkId } = req.params;
+    const { action } = req.body; // 'like' or 'unlike'
+    if (!artworkId) {
+      return res.status(400).json({ success: false, message: 'Thiếu mã tác phẩm!' });
+    }
+
+    const artworkRef = doc(db, 'artworks', artworkId);
+    const artworkSnap = await getDoc(artworkRef);
+    if (!artworkSnap.exists()) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy tác phẩm này!' });
+    }
+
+    const currentData = artworkSnap.data();
+    const currentLikes = Number(currentData.likesCount || currentData.likes_count || 0);
+
+    const isUnlike = action === 'unlike';
+    const delta = isUnlike ? -1 : 1;
+    const newLikesCount = Math.max(0, currentLikes + delta);
+
+    await updateDoc(artworkRef, {
+      likesCount: newLikesCount,
+      likes_count: newLikesCount,
+    });
+
+    console.log(`[Artwork Like] ${artworkId}: ${isUnlike ? '-1' : '+1'} => ${newLikesCount} likes`);
+
+    res.json({
+      success: true,
+      artworkId,
+      likesCount: newLikesCount,
+      liked: !isUnlike,
+    });
+  } catch (err) {
+    console.error('[Artwork Like Error]:', err);
+    res.status(500).json({ success: false, error: String(err) });
+  }
+});
+
+// 11. POST /api/artworks/clear-all - Clear all artworks
 app.post('/api/artworks/clear-all', async (req, res) => {
   try {
     const artworksRef = collection(db, 'artworks');

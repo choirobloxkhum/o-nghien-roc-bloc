@@ -1,4 +1,4 @@
-import { collection, onSnapshot, query, orderBy, addDoc, limit } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, addDoc, limit, doc, updateDoc, increment, getDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Artwork } from '../types';
 
@@ -32,6 +32,7 @@ export function subscribeToArtworks(
               title: data.title || '',
               message: data.message || '',
               createdAt: data.createdAt || data.created_at || Date.now(),
+              likesCount: Number(data.likesCount || data.likes_count || 0),
             });
           });
         }
@@ -72,10 +73,103 @@ export async function fetchArtworksViaApi(characterId?: string): Promise<Artwork
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    return data.artworks || [];
+    return (data.artworks || []).map((item: Artwork & { likes_count?: number }) => ({
+      ...item,
+      likesCount: Number(item.likesCount || item.likes_count || 0),
+    }));
   } catch (e) {
     console.warn('[fetchArtworksViaApi] error:', e);
     return [];
+  }
+}
+
+/**
+ * Helper to check if current device has liked an artwork
+ */
+export function isArtworkLikedLocally(artworkId: string): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return localStorage.getItem(`roblox_rp_liked_artwork_${artworkId}`) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Toggle heart/like for an artwork (supports like & unlike)
+ * Persists in Firestore and LocalStorage, returns new state and count
+ */
+export async function toggleArtworkLike(
+  artworkId: string,
+  currentlyLiked: boolean,
+  currentLikesCount = 0
+): Promise<{ success: boolean; likesCount: number; isLiked: boolean }> {
+  const targetAction = currentlyLiked ? 'unlike' : 'like';
+  const expectedNewLiked = !currentlyLiked;
+  const expectedCount = Math.max(0, currentLikesCount + (currentlyLiked ? -1 : 1));
+
+  // 1. Update localStorage immediately for optimistic client UX
+  try {
+    if (expectedNewLiked) {
+      localStorage.setItem(`roblox_rp_liked_artwork_${artworkId}`, 'true');
+    } else {
+      localStorage.removeItem(`roblox_rp_liked_artwork_${artworkId}`);
+    }
+  } catch {
+    // Ignore storage issues
+  }
+
+  // 2. Call backend server endpoint
+  try {
+    const res = await fetch(`/api/artworks/${encodeURIComponent(artworkId)}/like`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: targetAction }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success) {
+        return {
+          success: true,
+          likesCount: Number(data.likesCount ?? expectedCount),
+          isLiked: expectedNewLiked,
+        };
+      }
+    }
+  } catch (apiErr) {
+    console.warn('[toggleArtworkLike] API call failed, falling back to direct Firestore:', apiErr);
+  }
+
+  // 3. Fallback to direct Firestore updateDoc
+  try {
+    const artworkRef = doc(db, 'artworks', artworkId);
+    const snap = await getDoc(artworkRef);
+    let newLikes = expectedCount;
+    if (snap.exists()) {
+      const data = snap.data();
+      const dbLikes = Number(data.likesCount || data.likes_count || 0);
+      newLikes = Math.max(0, dbLikes + (currentlyLiked ? -1 : 1));
+    }
+
+    await updateDoc(artworkRef, {
+      likesCount: newLikes,
+      likes_count: newLikes,
+    });
+
+    return {
+      success: true,
+      likesCount: newLikes,
+      isLiked: expectedNewLiked,
+    };
+  } catch (fsErr) {
+    console.error('[toggleArtworkLike] Direct Firestore failed:', fsErr);
+    // Return optimistic values so user UI doesn't break
+    return {
+      success: true,
+      likesCount: expectedCount,
+      isLiked: expectedNewLiked,
+    };
   }
 }
 

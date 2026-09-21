@@ -366,5 +366,115 @@
   -webkit-mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
 }
 
+/* ========================================================================= */
+/* GPU-Accelerated Zero-Lag Animations for Server Loading & Maruko 3D Runner */
+/* ========================================================================= */
+@keyframes celestialSunburstSpin {
+  from {
+    transform: translate3d(-50%, 0, 0) rotateZ(0deg);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0) rotateZ(360deg);
+  }
+}
+
+.animate-sunburst-spin {
+  will-change: transform;
+  transform: translate3d(-50%, 0, 0);
+  animation: celestialSunburstSpin 45s linear infinite;
+  backface-visibility: hidden;
+}
+
+@keyframes marukoRunBody {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotateZ(10deg);
+  }
+  25% {
+    transform: translate3d(0, -4px, 0) rotateZ(8deg);
+  }
+  50% {
+    transform: translate3d(0, 0, 0) rotateZ(10deg);
+  }
+  75% {
+    transform: translate3d(0, -4px, 0) rotateZ(8deg);
+  }
+}
+
+@keyframes marukoRunArmLeft {
+  0%, 100% {
+    transform: rotateZ(45deg);
+  }
+  50% {
+    transform: rotateZ(-50deg);
+  }
+}
+
+@keyframes marukoRunArmRight {
+  0%, 100% {
+    transform: rotateZ(-55deg);
+  }
+  50% {
+    transform: rotateZ(45deg);
+  }
+}
+
+@keyframes marukoRunLegLeft {
+  0%, 100% {
+    transform: rotateZ(-48deg) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: rotateZ(48deg) translate3d(0, -2px, 0);
+  }
+}
+
+@keyframes marukoRunLegRight {
+  0%, 100% {
+    transform: rotateZ(48deg) translate3d(0, -2px, 0);
+  }
+  50% {
+    transform: rotateZ(-48deg) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes marukoCompletedHop {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0) scale(1.08);
+  }
+}
+
+.maruko-run-body {
+  animation: marukoRunBody 0.32s ease-in-out infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.maruko-run-arm-l {
+  animation: marukoRunArmLeft 0.32s ease-in-out infinite;
+  will-change: transform;
+}
+
+.maruko-run-arm-r {
+  animation: marukoRunArmRight 0.32s ease-in-out infinite;
+  will-change: transform;
+}
+
+.maruko-run-leg-l {
+  animation: marukoRunLegLeft 0.32s ease-in-out infinite;
+  will-change: transform;
+}
+
+.maruko-run-leg-r {
+  animation: marukoRunLegRight 0.32s ease-in-out infinite;
+  will-change: transform;
+}
+
+.maruko-completed {
+  animation: marukoCompletedHop 0.5s ease-in-out infinite;
+  will-change: transform;
+}
+
 
 

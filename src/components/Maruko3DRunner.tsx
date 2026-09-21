@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'motion/react';
 
 const marukoFaceImg = 'https://i.ibb.co/sLXrS2L/FB-IMG-1787048727875.jpg';
 
@@ -11,25 +10,10 @@ export const Maruko3DRunner: React.FC<Maruko3DRunnerProps> = ({ isCompleted = fa
   return (
     <div className="relative flex flex-col items-center justify-end select-none pointer-events-none">
       {/* Dynamic Runner Container with Forward Lean and Stride Bobbing */}
-      <motion.div
-        animate={
-          !isCompleted
-            ? {
-                y: [0, -5, 0, -5, 0],
-                rotate: [10, 7, 10, 7, 10],
-              }
-            : {
-                y: [0, -12, 0],
-                rotate: [0, -3, 3, 0],
-                scale: [1, 1.1, 1],
-              }
-        }
-        transition={{
-          duration: !isCompleted ? 0.34 : 0.55,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-        className="relative flex flex-col items-center origin-bottom filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.5)]"
+      <div
+        className={`relative flex flex-col items-center origin-bottom filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)] ${
+          isCompleted ? 'maruko-completed' : 'maruko-run-body'
+        }`}
       >
         {/* === 1. HEAD (The girl with yellow roller & Roblox woman face) === */}
         <div className="relative z-30 mb-[-4px] flex flex-col items-center">
@@ -56,26 +40,14 @@ export const Maruko3DRunner: React.FC<Maruko3DRunnerProps> = ({ isCompleted = fa
         {/* === 2. 3D BLOCKY TORSO & ARMS === */}
         <div className="relative z-20 flex items-center justify-center">
           {/* BACK/LEFT ARM (Swings opposite to Right Arm) */}
-          <motion.div
-            animate={
-              !isCompleted
-                ? {
-                    rotate: [45, -50, 45],
-                  }
-                : {
-                    rotate: [-30, -50, -30],
-                  }
-            }
-            transition={{
-              duration: !isCompleted ? 0.34 : 0.55,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-            className="w-2.5 h-6 bg-gradient-to-b from-white via-white to-[#fecaca] rounded-md border-[1.5px] border-black/80 origin-top absolute -left-2 top-0.5 shadow-sm -z-10"
+          <div
+            className={`w-2.5 h-6 bg-gradient-to-b from-white via-white to-[#fecaca] rounded-md border-[1.5px] border-black/80 origin-top absolute -left-2 top-0.5 shadow-sm -z-10 ${
+              isCompleted ? '' : 'maruko-run-arm-l'
+            }`}
           >
             {/* Hand */}
             <div className="w-2.5 h-2 bg-[#fed7aa] rounded-full border-t border-black/60 absolute bottom-0" />
-          </motion.div>
+          </div>
 
           {/* 3D BLOCKY TORSO (Red Pinafore Dress over White Top) */}
           <div className="w-8 sm:w-9 h-7 sm:h-8 rounded-md bg-gradient-to-b from-white via-[#dc2626] to-[#b91c1c] border-[1.5px] border-black/90 shadow-md relative overflow-hidden flex flex-col items-center">
@@ -92,99 +64,47 @@ export const Maruko3DRunner: React.FC<Maruko3DRunnerProps> = ({ isCompleted = fa
           </div>
 
           {/* FRONT/RIGHT ARM (Swings with running motion) */}
-          <motion.div
-            animate={
-              !isCompleted
-                ? {
-                    rotate: [-55, 45, -55],
-                  }
-                : {
-                    rotate: [30, 60, 30],
-                  }
-            }
-            transition={{
-              duration: !isCompleted ? 0.34 : 0.55,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-            className="w-2.5 h-6 bg-gradient-to-b from-white via-white to-[#fecaca] rounded-md border-[1.5px] border-black/80 origin-top absolute -right-2 top-0.5 shadow-sm z-30"
+          <div
+            className={`w-2.5 h-6 bg-gradient-to-b from-white via-white to-[#fecaca] rounded-md border-[1.5px] border-black/80 origin-top absolute -right-2 top-0.5 shadow-sm z-30 ${
+              isCompleted ? '' : 'maruko-run-arm-r'
+            }`}
           >
             {/* Hand */}
             <div className="w-2.5 h-2 bg-[#fed7aa] rounded-full border-t border-black/60 absolute bottom-0" />
-          </motion.div>
+          </div>
         </div>
 
         {/* === 3. 3D BLOCKY RUNNING LEGS (Alternating realistic sprint stride) === */}
         <div className="relative z-10 flex gap-1 mt-[-2px]">
           {/* LEFT LEG (Back stride) */}
-          <motion.div
-            animate={
-              !isCompleted
-                ? {
-                    rotate: [-50, 50, -50],
-                    y: [0, -2, 0],
-                  }
-                : {
-                    rotate: [-10, 0, -10],
-                    y: [0, 0, 0],
-                  }
-            }
-            transition={{
-              duration: !isCompleted ? 0.34 : 0.55,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-            className="w-3 h-6 bg-gradient-to-b from-[#fed7aa] via-white to-[#dc2626] rounded-b-sm border-[1.5px] border-black/90 origin-top shadow-sm flex flex-col justify-end items-center"
+          <div
+            className={`w-3 h-6 bg-gradient-to-b from-[#fed7aa] via-white to-[#dc2626] rounded-b-sm border-[1.5px] border-black/90 origin-top shadow-sm flex flex-col justify-end items-center ${
+              isCompleted ? '' : 'maruko-run-leg-l'
+            }`}
           >
             {/* Red Sneaker/Shoe */}
             <div className="w-3.5 h-2.5 bg-[#991b1b] rounded-sm border-t border-black/60 relative -right-0.5 shadow-inner" />
-          </motion.div>
+          </div>
 
           {/* RIGHT LEG (Front stride - Opposite phase) */}
-          <motion.div
-            animate={
-              !isCompleted
-                ? {
-                    rotate: [50, -50, 50],
-                    y: [-2, 0, -2],
-                  }
-                : {
-                    rotate: [10, 0, 10],
-                    y: [0, 0, 0],
-                  }
-            }
-            transition={{
-              duration: !isCompleted ? 0.34 : 0.55,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-            className="w-3 h-6 bg-gradient-to-b from-[#fed7aa] via-white to-[#dc2626] rounded-b-sm border-[1.5px] border-black/90 origin-top shadow-sm flex flex-col justify-end items-center"
+          <div
+            className={`w-3 h-6 bg-gradient-to-b from-[#fed7aa] via-white to-[#dc2626] rounded-b-sm border-[1.5px] border-black/90 origin-top shadow-sm flex flex-col justify-end items-center ${
+              isCompleted ? '' : 'maruko-run-leg-r'
+            }`}
           >
             {/* Red Sneaker/Shoe */}
             <div className="w-3.5 h-2.5 bg-[#991b1b] rounded-sm border-t border-black/60 relative -right-0.5 shadow-inner" />
-          </motion.div>
+          </div>
         </div>
-      </motion.div>
+      </div>
 
-      {/* === 4. RUNNING SPEED PARTICLES & DUST PUFFS ON THE PROGRESS BAR === */}
+      {/* === 4. RUNNING SPEED PARTICLES ON PROGRESS BAR === */}
       {!isCompleted && (
-        <div className="absolute -bottom-0.5 -left-4 flex items-center gap-0.5 pointer-events-none">
-          <motion.span
-            animate={{
-              opacity: [0, 0.9, 0],
-              x: [-2, -14],
-              scale: [0.5, 1],
-            }}
-            transition={{
-              duration: 0.28,
-              repeat: Infinity,
-              ease: 'easeOut',
-            }}
-            className="text-[10px] text-white/90 font-bold"
-          >
+        <div className="absolute -bottom-0.5 -left-4 flex items-center gap-0.5 pointer-events-none opacity-80">
+          <span className="text-[10px] text-white/90 font-bold animate-pulse">
             💨
-          </motion.span>
-          <div className="w-3 h-1 bg-white/40 rounded-full blur-[0.5px] animate-pulse" />
+          </span>
+          <div className="w-2.5 h-1 bg-white/50 rounded-full" />
         </div>
       )}
     </div>

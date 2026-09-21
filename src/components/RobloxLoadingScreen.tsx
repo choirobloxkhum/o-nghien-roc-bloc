@@ -69,7 +69,7 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
           }
           return Math.max(prev, rawProgress);
         });
-      }, 40);
+      }, 65);
 
       return () => {
         clearInterval(interval);
@@ -113,7 +113,7 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
         }
         return Math.max(prev, rawProgress);
       });
-    }, 40);
+    }, 65);
   };
 
   if (!isOpen) return null;
@@ -121,7 +121,7 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-hidden select-none font-dessert">
       {/* ========================================================================= */}
-      {/* 1. DYNAMIC CELESTIAL SKY BACKGROUND WITH SPECIAL EFFECTS */}
+      {/* 1. DYNAMIC CELESTIAL SKY BACKGROUND (GPU-Optimized, Zero CPU Lag) */}
       {/* ========================================================================= */}
       {/* Primary Vibrant Sky Gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#0284c7] via-[#38bdf8] to-[#93c5fd] z-0" />
@@ -133,7 +133,7 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
       <motion.div
         animate={{ rotate: 360 }}
         transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
-        className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[900px] opacity-15 pointer-events-none"
+        className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[900px] opacity-15 pointer-events-none will-change-transform"
         style={{
           background: 'conic-gradient(from 0deg, transparent 0deg 20deg, rgba(255,255,255,0.7) 20deg 40deg, transparent 40deg 60deg, rgba(255,255,255,0.7) 60deg 80deg, transparent 80deg 100deg, rgba(255,255,255,0.7) 100deg 120deg, transparent 120deg 140deg, rgba(255,255,255,0.7) 140deg 160deg, transparent 160deg 180deg, rgba(255,255,255,0.7) 180deg 200deg, transparent 200deg 220deg, rgba(255,255,255,0.7) 220deg 240deg, transparent 240deg 260deg, rgba(255,255,255,0.7) 260deg 280deg, transparent 280deg 300deg, rgba(255,255,255,0.7) 300deg 320deg, transparent 320deg 340deg, rgba(255,255,255,0.7) 340deg 360deg)',
         }}
@@ -180,8 +180,8 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
             initial={{ opacity: 0.2, scale: 0.7 }}
             animate={{
               opacity: [0.3, 0.9, 0.3],
-              scale: [0.8, 1.25, 0.8],
-              y: [0, -12, 0],
+              scale: [0.8, 1.2, 0.8],
+              y: [0, -10, 0],
             }}
             transition={{
               duration: 3 + idx * 0.4,
@@ -199,22 +199,22 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
         {/* Floating 3D Roblox Stud Cubes */}
         <motion.div
           animate={{
-            y: [0, -20, 0],
+            y: [0, -16, 0],
             rotate: [0, 25, 0],
           }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-20 left-[15%] hidden md:flex w-10 h-10 rounded-lg bg-white/25 border-2 border-white/50 backdrop-blur-xs shadow-lg items-center justify-center text-xs font-black text-white/90"
+          className="absolute top-20 left-[15%] hidden md:flex w-10 h-10 rounded-lg bg-white/25 border-2 border-white/50 backdrop-blur-xs shadow-md items-center justify-center text-xs font-black text-white/90"
         >
           <div className="w-4 h-4 rounded-full bg-white/40" />
         </motion.div>
 
         <motion.div
           animate={{
-            y: [0, 25, 0],
+            y: [0, 20, 0],
             rotate: [0, -30, 0],
           }}
           transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-          className="absolute bottom-24 right-[12%] hidden md:flex w-11 h-11 rounded-lg bg-pink-400/25 border-2 border-pink-200/50 backdrop-blur-xs shadow-lg items-center justify-center text-xs font-black text-white/90"
+          className="absolute bottom-24 right-[12%] hidden md:flex w-11 h-11 rounded-lg bg-pink-400/25 border-2 border-pink-200/50 backdrop-blur-xs shadow-md items-center justify-center text-xs font-black text-white/90"
         >
           <Heart className="w-5 h-5 fill-pink-300/80 text-pink-300" />
         </motion.div>
@@ -227,7 +227,7 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
           onPlayClickSound();
           onClose();
         }}
-        className="absolute top-5 right-5 sm:top-7 sm:right-7 z-30 p-2.5 sm:p-3 rounded-full bg-white/20 hover:bg-rose-500/80 text-white border-2 border-white/40 backdrop-blur-md transition-all shadow-xl hover:scale-110 active:scale-95 cursor-pointer"
+        className="absolute top-5 right-5 sm:top-7 sm:right-7 z-30 p-2.5 sm:p-3 rounded-full bg-white/20 hover:bg-rose-500/80 text-white border-2 border-white/40 backdrop-blur-sm transition-all shadow-xl hover:scale-110 active:scale-95 cursor-pointer"
         title="Đóng màn hình load"
       >
         <X className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
@@ -284,42 +284,33 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
             
             {/* ANIMATED NPC RUNNING DIRECTLY ON TOP OF PROGRESS BAR LEADING EDGE */}
             <div
-              className="absolute bottom-[calc(100%-2px)] transform -translate-x-1/2 transition-all duration-75 pointer-events-none z-20"
+              className="absolute bottom-[calc(100%-2px)] transform -translate-x-1/2 transition-[left] duration-75 ease-linear pointer-events-none z-20 will-change-[left]"
               style={{
                 left: `${Math.max(4, Math.min(96, progress))}%`,
               }}
             >
-              {/* Running Dust Clouds Behind Maruko */}
+              {/* Running Dust Trail Behind Maruko (CSS Accelerated) */}
               {!isCompleted && (
-                <div className="absolute -left-5 bottom-1 pointer-events-none flex gap-1">
-                  <motion.span
-                    animate={{ scale: [0.5, 1.2, 0], opacity: [0.8, 0.4, 0], x: [-2, -12] }}
-                    transition={{ duration: 0.35, repeat: Infinity }}
-                    className="w-2.5 h-2.5 rounded-full bg-white/70 blur-[0.5px]"
-                  />
-                  <motion.span
-                    animate={{ scale: [0.4, 1, 0], opacity: [0.7, 0.3, 0], x: [-1, -8] }}
-                    transition={{ duration: 0.35, repeat: Infinity, delay: 0.15 }}
-                    className="w-2 h-2 rounded-full bg-emerald-200/80 blur-[0.5px]"
-                  />
+                <div className="absolute -left-4 bottom-1 pointer-events-none flex items-center gap-1 opacity-70">
+                  <span className="w-2.5 h-2.5 rounded-full bg-white/80 animate-ping" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-200/80" />
                 </div>
               )}
 
               <Maruko3DRunner isCompleted={isCompleted} />
             </div>
 
-            {/* Glowing Green Progress Fill */}
-            <motion.div
-              className="h-full bg-gradient-to-r from-emerald-500 via-green-400 to-[#4ade80] rounded-full relative shadow-[0_0_20px_rgba(74,222,128,0.9)] overflow-hidden"
+            {/* Glowing Green Progress Fill (Hardware accelerated CSS width transition) */}
+            <div
+              className="h-full bg-gradient-to-r from-emerald-500 via-green-400 to-[#4ade80] rounded-full relative shadow-[0_0_16px_rgba(74,222,128,0.8)] overflow-hidden transition-[width] duration-75 ease-linear will-change-[width]"
               style={{ width: `${progress}%` }}
-              transition={{ ease: 'linear' }}
             >
               {/* High-gloss 3D Shimmer Highlight */}
               <div className="absolute inset-0 bg-gradient-to-b from-white/45 via-white/10 to-transparent rounded-full pointer-events-none" />
               
               {/* Leading Sparkle Head */}
-              <div className="absolute right-0 top-0 bottom-0 w-5 bg-white rounded-full blur-[2px] opacity-90 animate-pulse" />
-            </motion.div>
+              <div className="absolute right-0 top-0 bottom-0 w-4 bg-white/90 rounded-full blur-[1px]" />
+            </div>
           </div>
         </div>
 

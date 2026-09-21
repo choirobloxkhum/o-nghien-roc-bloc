@@ -9,6 +9,8 @@ export interface CharacterComment {
   userName: string;
   commentText: string;
   createdAt: number;
+  parentId?: string | null;
+  replyToUserName?: string | null;
 }
 
 const RATE_LIMIT_KEY = 'roblox_rp_last_comment_time';
@@ -82,6 +84,8 @@ export function subscribeToCharacterComments(
             userName: data.userName || 'Vô danh',
             commentText: data.commentText || '',
             createdAt: data.createdAt || Date.now(),
+            parentId: data.parentId || null,
+            replyToUserName: data.replyToUserName || null,
           });
         });
         // Sort newest first
@@ -155,10 +159,14 @@ export function subscribeToAllCommentCounts(
 export async function postCharacterComment(
   characterId: string,
   userName: string,
-  commentText: string
+  commentText: string,
+  parentId?: string | null,
+  replyToUserName?: string | null
 ): Promise<{ success: boolean; comment?: CharacterComment; message?: string; error?: string }> {
   const trimmedName = userName.trim();
   const trimmedText = commentText.trim();
+  const validParentId = parentId ? parentId.trim() : null;
+  const validReplyTo = replyToUserName ? replyToUserName.trim() : null;
 
   if (!trimmedName) {
     return { success: false, message: 'Vui lòng nhập Tên của bạn / Biệt danh!' };
@@ -197,6 +205,8 @@ export async function postCharacterComment(
         userName: trimmedName,
         commentText: trimmedText,
         fingerprint,
+        parentId: validParentId,
+        replyToUserName: validReplyTo,
       }),
     });
 
@@ -207,7 +217,7 @@ export async function postCharacterComment(
         return {
           success: true,
           comment: data.comment,
-          message: 'Đã gửi lời nhắn thành công!',
+          message: validParentId ? 'Đã gửi phản hồi thành công! 💬' : 'Đã gửi lời nhắn thành công!',
         };
       } else {
         return {
@@ -222,12 +232,14 @@ export async function postCharacterComment(
 
   // Direct Firestore write fallback (essential for GitHub Pages and offline resilience)
   try {
-    const commentPayload = {
+    const commentPayload: Record<string, any> = {
       characterId,
       userName: trimmedName,
       commentText: trimmedText,
       createdAt: now,
     };
+    if (validParentId) commentPayload.parentId = validParentId;
+    if (validReplyTo) commentPayload.replyToUserName = validReplyTo;
 
     const itemsRef = collection(db, 'rp_comments', characterId, 'items');
     const docRef = await addDoc(itemsRef, commentPayload);
@@ -251,9 +263,14 @@ export async function postCharacterComment(
       success: true,
       comment: {
         id: docRef.id,
-        ...commentPayload,
+        characterId,
+        userName: trimmedName,
+        commentText: trimmedText,
+        createdAt: now,
+        parentId: validParentId,
+        replyToUserName: validReplyTo,
       },
-      message: 'Đã gửi lời nhắn thành công!',
+      message: validParentId ? 'Đã gửi phản hồi thành công! 💬' : 'Đã gửi lời nhắn thành công!',
     };
   } catch (fsErr) {
     console.error('[CommentsAPI] Direct Firestore write error:', fsErr);

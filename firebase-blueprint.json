@@ -32,6 +32,14 @@
         "createdAt": {
           "type": "number",
           "description": "Timestamp when the comment was created in ms"
+        },
+        "parentId": {
+          "type": "string",
+          "description": "Optional ID of the parent comment being replied to"
+        },
+        "replyToUserName": {
+          "type": "string",
+          "description": "Optional name of the user being replied to"
         }
       },
       "required": ["characterId", "userName", "commentText", "createdAt"]
@@ -68,6 +76,10 @@
         "createdAt": {
           "type": "number",
           "description": "Timestamp in milliseconds"
+        },
+        "likesCount": {
+          "type": "number",
+          "description": "Total hearts / likes received"
         }
       },
       "required": ["imageUrl", "characterId", "characterName", "authorName", "createdAt"]

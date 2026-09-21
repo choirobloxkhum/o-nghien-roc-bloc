@@ -607,6 +607,37 @@ export function playRobuxDonateSound(enabled = true) {
   }
 }
 
+export function playHeartPopSound(enabled = true) {
+  if (!enabled) return;
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    // Warm bubbly heart pop: G5 -> C6 -> E6
+    const freqs = [783.99, 1046.50, 1318.51];
+    freqs.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.04);
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.15, now + idx * 0.04 + 0.05);
+
+      gain.gain.setValueAtTime(0, now + idx * 0.04);
+      gain.gain.linearRampToValueAtTime(0.25, now + idx * 0.04 + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.04 + 0.28);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now + idx * 0.04);
+      osc.stop(now + idx * 0.04 + 0.3);
+    });
+  } catch {
+    // Ignore audio errors
+  }
+}
+
 export function playGachaRevealFanfare(enabled = true) {
   if (!enabled) return;
   try {

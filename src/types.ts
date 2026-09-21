@@ -45,4 +45,5 @@ export interface Artwork {
   title?: string;
   message?: string;
   createdAt: number;
+  likesCount?: number;
 }
