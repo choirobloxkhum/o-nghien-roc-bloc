@@ -165,7 +165,7 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
       triggerConfetti(180);
     }
 
-    // Add floating text
+    // Add floating text (Optimized: max 3 concurrent items to prevent DOM/GC thrashing)
     const id = Date.now() + Math.random();
     const texts = ['TÙNG! 🥁', 'CẮC! ⚡', 'OẠP! 🐸', 'KIỆN TRỜI! ☁️', '+1 LƯỢT 💥'];
     const randomText = texts[Math.floor(Math.random() * texts.length)];
@@ -175,15 +175,15 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
     const newFloating: FloatingBeat = {
       id,
       text: nextCombo > 15 && nextCombo % 5 === 0 ? `COMBO x${nextCombo}! 🔥` : randomText,
-      x: (Math.random() - 0.5) * 140,
-      y: -20 - Math.random() * 40,
+      x: (Math.random() - 0.5) * 120,
+      y: 0,
       color: randomColor,
     };
 
-    setFloatingBeats((prev) => [...prev.slice(-6), newFloating]);
+    setFloatingBeats((prev) => [...prev.slice(-2), newFloating]);
     setTimeout(() => {
       setFloatingBeats((prev) => prev.filter((item) => item.id !== id));
-    }, 900);
+    }, 650);
   }, [beatsMap, combo, selectedChar, soundEnabled]);
 
   // Keyboard support: Space or Enter key strikes the drum only in 'drum_strikes' view
@@ -500,23 +500,20 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
 
                 {/* DRUM STAGE AREA */}
                 <div className="relative rounded-3xl bg-gradient-to-b from-[#fde68a] via-[#fcd34d] to-[#f59e0b] border-4 border-[#b45309] shadow-inner p-4 sm:p-6 flex flex-col items-center justify-center overflow-hidden">
-                  {/* Floating Hit Texts */}
+                  {/* Floating Hit Texts (Hardware Accelerated Pure CSS Animation) */}
                   <div className="absolute inset-0 pointer-events-none overflow-hidden z-30">
-                    <AnimatePresence>
-                      {floatingBeats.map((item) => (
-                        <motion.div
-                          key={item.id}
-                          initial={{ opacity: 1, scale: 0.8, x: item.x, y: 80 }}
-                          animate={{ opacity: 0, scale: 1.4, y: item.y }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.7, ease: 'easeOut' }}
-                          className="absolute left-1/2 top-1/3 -translate-x-1/2 font-black text-sm sm:text-base drop-shadow-md select-none pointer-events-none whitespace-nowrap"
-                          style={{ color: item.color }}
-                        >
-                          {item.text}
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
+                    {floatingBeats.map((item) => (
+                      <div
+                        key={item.id}
+                        className="floating-beat-item absolute top-1/3 font-black text-sm sm:text-base drop-shadow-md select-none pointer-events-none whitespace-nowrap"
+                        style={{
+                          left: `calc(50% + ${item.x}px)`,
+                          color: item.color,
+                        }}
+                      >
+                        {item.text}
+                      </div>
+                    ))}
                   </div>
 
                   {/* Header counters */}
@@ -531,41 +528,35 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
 
                     {/* Streak combo indicator */}
                     {combo > 2 && (
-                      <motion.div
-                        initial={{ scale: 0.8 }}
-                        animate={{ scale: [1, 1.15, 1] }}
-                        className="px-2.5 py-0.5 rounded-full bg-red-600 text-white font-black text-xs border border-red-300 shadow-xs animate-pulse"
-                      >
+                      <div className="px-2.5 py-0.5 rounded-full bg-red-600 text-white font-black text-xs border border-red-300 shadow-xs animate-pulse">
                         🔥 COMBO x{combo}
-                      </motion.div>
+                      </div>
                     )}
                   </div>
 
                   {/* The Drum & Mascot Stage */}
                   <div className="relative flex items-center justify-center my-2 sm:my-3">
-                    {/* Left Mascot (Toad Cóc Cậu Ông Trời with Mallet) */}
-                    <motion.div
-                      animate={isDrumActive ? { rotate: [-15, 15, -15], y: [0, -6, 0] } : { y: [0, -3, 0] }}
-                      transition={{ duration: isDrumActive ? 0.12 : 2, repeat: isDrumActive ? 0 : Infinity }}
-                      className="hidden sm:flex absolute -left-16 sm:-left-20 bottom-1 flex-col items-center pointer-events-none z-10"
+                    {/* Left Mascot (Toad Cóc Cậu Ông Trời with Mallet - GPU Animated) */}
+                    <div
+                      className={`hidden sm:flex absolute -left-16 sm:-left-20 bottom-1 flex-col items-center pointer-events-none z-10 ${
+                        isDrumActive ? 'mascot-frog-hit' : 'mascot-frog-idle'
+                      }`}
                     >
                       <span className="text-4xl sm:text-5xl drop-shadow-md">🐸</span>
                       <span className="px-2 py-0.5 rounded-md bg-amber-900 text-yellow-200 text-[10px] font-black border border-yellow-300 shadow-xs mt-1">
                         Cóc Kiện
                       </span>
-                    </motion.div>
+                    </div>
 
-                    {/* BIG INTERACTIVE DRUM (TRỐNG ĐĂNG VĂN) */}
-                    <motion.button
+                    {/* BIG INTERACTIVE DRUM (TRỐNG ĐĂNG VĂN - GPU Optimized) */}
+                    <button
                       id="drum-strike-target"
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.94 }}
                       onClick={handleStrikeDrum}
                       aria-label="Gõ Trống Đăng Văn"
-                      className={`relative w-44 h-44 sm:w-56 sm:h-56 rounded-full border-8 border-[#78350f] shadow-[0_15px_30px_rgba(120,53,15,0.6),inset_0_4px_12px_rgba(255,255,255,0.7)] flex flex-col items-center justify-center cursor-pointer transition-all duration-75 overflow-hidden ${
+                      className={`relative w-44 h-44 sm:w-56 sm:h-56 rounded-full border-8 border-[#78350f] shadow-[0_15px_30px_rgba(120,53,15,0.6),inset_0_4px_12px_rgba(255,255,255,0.7)] flex flex-col items-center justify-center cursor-pointer transition-transform duration-75 active:scale-95 will-change-transform overflow-hidden select-none ${
                         isDrumActive
                           ? 'bg-gradient-to-b from-[#fef08a] to-[#eab308] ring-8 ring-red-500/80 scale-95'
-                          : 'bg-gradient-to-b from-[#fef9c3] via-[#fde047] to-[#eab308] hover:shadow-[0_20px_40px_rgba(120,53,15,0.8)]'
+                          : 'bg-gradient-to-b from-[#fef9c3] via-[#fde047] to-[#eab308] hover:scale-[1.02]'
                       }`}
                     >
                       {/* Drum Rim Studs */}
@@ -582,23 +573,18 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                           GÕ ĐỂ KIỆN TRỜI ⚡
                         </span>
 
-                        {/* Mallet strike indicator */}
+                        {/* Mallet strike indicator shockwave */}
                         {isDrumActive && (
-                          <motion.div
-                            initial={{ opacity: 1, scale: 0.6 }}
-                            animate={{ opacity: 0, scale: 1.6 }}
-                            transition={{ duration: 0.2 }}
-                            className="absolute inset-0 rounded-full bg-white/40 pointer-events-none"
-                          />
+                          <div className="absolute inset-0 rounded-full bg-white/50 pointer-events-none animate-drum-shockwave" />
                         )}
                       </div>
-                    </motion.button>
+                    </button>
 
-                    {/* Right Mascot (Cô bé Ngọc Hoàng) */}
-                    <motion.div
-                      animate={isDrumActive ? { scale: [1, 1.15, 1], rotate: [0, 5, -5, 0] } : { y: [0, -3, 0] }}
-                      transition={{ duration: isDrumActive ? 0.15 : 2.5, repeat: isDrumActive ? 0 : Infinity }}
-                      className="hidden sm:flex absolute -right-16 sm:-right-20 bottom-1 flex-col items-center pointer-events-none z-10"
+                    {/* Right Mascot (Cô bé Ngọc Hoàng - GPU Animated) */}
+                    <div
+                      className={`hidden sm:flex absolute -right-16 sm:-right-20 bottom-1 flex-col items-center pointer-events-none z-10 ${
+                        isDrumActive ? 'mascot-emperor-hit' : 'mascot-emperor-idle'
+                      }`}
                     >
                       <div className="w-12 h-12 rounded-full border-2 border-yellow-300 shadow-md overflow-hidden bg-amber-100">
                         <img
@@ -611,7 +597,7 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                       <span className="px-2 py-0.5 rounded-md bg-amber-900 text-yellow-200 text-[10px] font-black border border-yellow-300 shadow-xs mt-1">
                         Ngọc Hoàng
                       </span>
-                    </motion.div>
+                    </div>
                   </div>
 
                   {/* Instructional Tip */}
