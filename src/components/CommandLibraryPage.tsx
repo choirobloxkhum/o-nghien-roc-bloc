@@ -49,23 +49,23 @@ const SummarizedCodeViewer: React.FC<{
   }, [code, category]);
 
   return (
-    <div className="relative font-mono text-[12px] sm:text-[13px] leading-relaxed select-text">
+    <div className="relative font-mono text-[9px] sm:text-[12px] md:text-[13px] leading-relaxed select-text">
       {/* Excerpt text */}
-      <pre className="text-slate-200 whitespace-pre-wrap break-words max-h-24 overflow-hidden">
+      <pre className="text-slate-200 whitespace-pre-wrap break-words max-h-14 sm:max-h-24 overflow-hidden">
         {summarySnippet}
       </pre>
 
       {/* Subtle fade gradient overlay indicating summary truncation */}
-      <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-6 sm:h-10 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pointer-events-none" />
 
       {/* Summarized notice badge */}
-      <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between gap-1.5 text-[11px] text-amber-300 font-bold font-sans">
-        <span className="flex items-center gap-1.5">
-          <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-          <span>Nội dung đã được thu gọn</span>
+      <div className="mt-1 sm:mt-2 pt-1 sm:pt-2 border-t border-slate-800/80 flex items-center justify-between gap-1 text-[8px] sm:text-[11px] text-amber-300 font-bold font-sans">
+        <span className="flex items-center gap-1">
+          <Lock className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-amber-400 shrink-0" />
+          <span className="truncate">Thu gọn</span>
         </span>
-        <span className="text-[10px] text-slate-400 font-medium">
-          (Bấm sao chép để lấy trọn vẹn)
+        <span className="text-[7px] sm:text-[10px] text-slate-400 font-medium truncate">
+          (Bấm copy để lấy hết)
         </span>
       </div>
     </div>
@@ -88,7 +88,15 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
 
   // Pagination / Virtualized chunk rendering for 60fps
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 9;
+  const [itemsPerPage, setItemsPerPage] = useState(window.innerWidth >= 640 ? 9 : 10);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setItemsPerPage(window.innerWidth >= 640 ? 9 : 10);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Search Debounce (250ms)
   useEffect(() => {
@@ -424,7 +432,7 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
         </div>
       </div>
 
-      {/* 3. COMMAND CARDS GRID */}
+      {/* 3. COMMAND CARDS GRID: 2 COLUMNS ON MOBILE (grid-cols-2) JUST LIKE CHARACTER LIST */}
       {paginatedCommands.length === 0 ? (
         <div
           className={`text-center py-16 px-4 rounded-3xl border-2 backdrop-blur-md ${
@@ -440,7 +448,7 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 md:gap-6">
           {paginatedCommands.map((command) => {
             const isCopied = copiedId === command.id;
             const isPrompt = command.category === 'prompt';
@@ -453,7 +461,7 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25 }}
-                className={`relative rounded-3xl p-4 sm:p-5 flex flex-col justify-between border-2 transition-all duration-300 group hover:-translate-y-1 shadow-lg backdrop-blur-md overflow-hidden ${
+                className={`relative rounded-2xl sm:rounded-3xl p-2.5 sm:p-4 md:p-5 flex flex-col justify-between border-2 transition-all duration-300 group hover:-translate-y-1 shadow-lg backdrop-blur-md overflow-hidden ${
                   isHellMode
                     ? 'bg-[#18031e]/90 border-red-900/60 hover:border-red-500/80 shadow-[0_6px_25px_rgba(220,38,38,0.2)]'
                     : 'bg-white/90 border-white hover:border-sky-300 shadow-[0_8px_25px_rgba(2,132,199,0.18)]'
@@ -461,9 +469,9 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
               >
                 {/* Top Header inside Card */}
                 <div>
-                  <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                     <h3
-                      className={`text-base sm:text-lg md:text-xl font-black leading-tight flex-1 tracking-tight ${
+                      className={`text-xs sm:text-base md:text-xl font-black leading-tight flex-1 tracking-tight line-clamp-2 ${
                         isHellMode ? 'text-white' : 'text-slate-800'
                       }`}
                     >
@@ -472,7 +480,7 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
 
                     {/* Distinct Category Tag */}
                     <span
-                      className={`px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider shrink-0 flex items-center gap-1 border shadow-xs ${
+                      className={`px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-lg sm:rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-wider shrink-0 flex items-center gap-0.5 sm:gap-1 border shadow-xs ${
                         isPrompt
                           ? 'bg-rose-500/20 text-rose-300 border-rose-400/50'
                           : isHtml
@@ -482,17 +490,18 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
                     >
                       {isPrompt ? (
                         <>
-                          <Sparkles className="w-3 h-3 stroke-[2.5]" />
-                          <span>PROMPT</span>
+                          <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 stroke-[2.5]" />
+                          <span className="hidden xs:inline sm:inline">PROMPT</span>
+                          <span className="xs:hidden sm:hidden">PR</span>
                         </>
                       ) : isHtml ? (
                         <>
-                          <Code className="w-3 h-3 stroke-[2.5]" />
+                          <Code className="w-2.5 h-2.5 sm:w-3 sm:h-3 stroke-[2.5]" />
                           <span>HTML</span>
                         </>
                       ) : (
                         <>
-                          <Type className="w-3 h-3 stroke-[2.5]" />
+                          <Type className="w-2.5 h-2.5 sm:w-3 sm:h-3 stroke-[2.5]" />
                           <span>CHỮ</span>
                         </>
                       )}
@@ -502,7 +511,7 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
                   {/* Description */}
                   {command.description && (
                     <p
-                      className={`text-xs sm:text-[13px] font-bold mb-3 ${
+                      className={`text-[10px] sm:text-xs md:text-[13px] font-bold mb-2 sm:mb-3 line-clamp-2 ${
                         isHellMode ? 'text-purple-200/85' : 'text-slate-600'
                       }`}
                     >
@@ -511,19 +520,19 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
                   )}
 
                   {/* Summarized Code/Text Preview Box */}
-                  <div className="relative mb-3 rounded-2xl overflow-hidden border border-slate-700/80 bg-slate-950/95 shadow-inner p-3.5">
+                  <div className="relative mb-2 sm:mb-3 rounded-xl sm:rounded-2xl overflow-hidden border border-slate-700/80 bg-slate-950/95 shadow-inner p-2 sm:p-3.5">
                     {/* Top bar */}
-                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-[10px] text-slate-400 font-mono">
-                      <span className="flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />
-                        <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-                        <span className="ml-1 text-slate-300 font-semibold">
-                          {isPrompt ? 'Bản xem trước tóm tắt Prompt' : 'Bản xem trước cú pháp'}
+                    <div className="flex items-center justify-between pb-1.5 sm:pb-2 mb-1.5 sm:mb-2 border-b border-slate-800 text-[8px] sm:text-[10px] text-slate-400 font-mono">
+                      <span className="flex items-center gap-1 sm:gap-1.5 truncate mr-1">
+                        <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 inline-block shrink-0" />
+                        <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-500 inline-block shrink-0" />
+                        <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 inline-block shrink-0" />
+                        <span className="ml-0.5 sm:ml-1 text-slate-300 font-semibold truncate">
+                          {isPrompt ? 'Prompt' : 'Cú pháp'}
                         </span>
                       </span>
-                      <span className="text-slate-400 font-semibold">
-                        Toàn bộ: {command.commandText.length} ký tự
+                      <span className="text-slate-400 font-semibold text-[8px] sm:text-[10px] shrink-0">
+                        {command.commandText.length} ký tự
                       </span>
                     </div>
 
@@ -537,11 +546,11 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
 
                   {/* Tags list */}
                   {command.tags && command.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-3.5">
+                    <div className="flex flex-wrap gap-1 sm:gap-1.5 mb-2.5 sm:mb-3.5">
                       {command.tags.map((tag, idx) => (
                         <span
                           key={idx}
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border ${
+                          className={`text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md sm:rounded-lg border ${
                             tag.includes('NSFW')
                               ? 'bg-red-500/20 text-red-300 border-red-500/40'
                               : isHellMode
@@ -560,7 +569,7 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
                 <button
                   type="button"
                   onClick={() => handleCopyCommand(command)}
-                  className={`w-full py-2.5 sm:py-3 px-4 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 border-2 transition-all cursor-pointer shadow-md active:scale-95 ${
+                  className={`w-full py-1.5 sm:py-2.5 md:py-3 px-2 sm:px-4 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs md:text-sm flex items-center justify-center gap-1 sm:gap-2 border-2 transition-all cursor-pointer shadow-md active:scale-95 ${
                     isCopied
                       ? 'bg-gradient-to-r from-emerald-500 to-green-600 text-white border-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.7)]'
                       : isHellMode
@@ -570,13 +579,13 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
                 >
                   {isCopied ? (
                     <>
-                      <Check className="w-4 h-4 stroke-[3] animate-bounce" />
-                      <span>✓ Đã copy toàn bộ lệnh!</span>
+                      <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3] animate-bounce shrink-0" />
+                      <span className="truncate">✓ Đã copy!</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-4 h-4 stroke-[2.5]" />
-                      <span>Sao Chép Toàn Bộ Lệnh</span>
+                      <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5] shrink-0" />
+                      <span className="truncate">Sao Chép Lệnh</span>
                     </>
                   )}
                 </button>
