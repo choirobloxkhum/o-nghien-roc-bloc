@@ -208,21 +208,10 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
   const hasHint1 = beats >= 1000;
   const hasHint2 = beats >= 10000;
 
-  // Specific hint content for Lucifer & fallback for others
-  const hint1Text =
-    selectedChar?.hint1 ||
-    (selectedChar?.id === 'char-11-lucifer' ? 'Facebook của Ngọc Hoàng' : selectedChar?.passwordHint || 'Gợi ý từ Thiên Đình');
-  const hint1Link =
-    selectedChar?.hint1Url ||
-    (selectedChar?.id === 'char-11-lucifer'
-      ? 'https://www.facebook.com/profile.php?id=61590620211736'
-      : undefined);
-
-  const hint2Text =
-    selectedChar?.hint2 ||
-    (selectedChar?.id === 'char-11-lucifer'
-      ? 'Bio mô tả của Ngọc Hoàng'
-      : 'Xem kỹ phần mô tả cốt truyện và thông tin của Ngọc Hoàng');
+  // Character-specific hints: each hint is completely independent and new
+  const hint1Text = selectedChar?.hint1 || selectedChar?.passwordHint || 'Gợi ý từ Thiên Đình';
+  const hint1Link = selectedChar?.hint1Url;
+  const hint2Text = selectedChar?.hint2 || 'Gợi ý đặc biệt từ Thiên Đình';
 
   // Switch to Password Modal
   const handleGoToPassword = () => {
@@ -711,7 +700,7 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black transition-all shadow-xs active:scale-95 cursor-pointer"
                             >
-                              <span>Mở Facebook Ngọc Hoàng</span>
+                              <span>{selectedChar?.id === 'char-11-lucifer' ? 'Mở Facebook Ngọc Hoàng' : 'Mở Liên Kết Gợi Ý'}</span>
                               <ExternalLink className="w-3.5 h-3.5" />
                             </a>
                           )}
@@ -765,19 +754,13 @@ export const CocKienTroiModal: React.FC<CocKienTroiModalProps> = ({
 
                     {/* Unlocked Hint 2 Content */}
                     {hasHint2 ? (
-                      <div className="mt-2.5 p-3 rounded-xl bg-white border border-blue-300 shadow-xs space-y-1">
+                      <div className="mt-2.5 p-3 rounded-xl bg-white border border-blue-300 shadow-xs">
                         <div className="flex items-center gap-2">
                           <span className="text-base">💡</span>
                           <span className="text-xs sm:text-sm font-bold text-blue-950">
                             {hint2Text}
                           </span>
                         </div>
-                        <p className="text-[11px] text-stone-600 italic">
-                          (Đọc kỹ dòng tiểu sử / bio trên trang Ngọc Hoàng để giải mật mã!)
-                        </p>
-                        <p className="text-[10px] text-amber-800 font-semibold mt-1">
-                          📌 Quy tắc: Password không viết hoa, không dấu, không cách
-                        </p>
                       </div>
                     ) : (
                       <div className="mt-2 text-xs font-medium text-stone-400 italic">
