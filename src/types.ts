@@ -29,6 +29,8 @@ export interface RPCharacter {
   hint1Url?: string;
   hint2?: string;
   hint2Url?: string;
+  isLinkLocked?: boolean;
+  linkLockReason?: string;
 }
 
 export interface PlayScenarioModalData {
@@ -46,4 +48,15 @@ export interface Artwork {
   message?: string;
   createdAt: number;
   likesCount?: number;
+}
+
+export interface RPCommand {
+  id: string;
+  title: string;
+  category: 'html' | 'text' | 'prompt';
+  commandText: string;
+  description?: string;
+  tags?: string[];
+  createdAt: number;
+  authorName?: string;
 }

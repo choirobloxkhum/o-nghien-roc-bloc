@@ -45,5 +45,17 @@ service cloud.firestore {
       allow delete: if true;
       allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount', 'likes_count']);
     }
+
+    match /rp_commands/{commandId} {
+      allow read: if true;
+      allow create: if request.resource.data.title is string &&
+                       request.resource.data.title.size() > 0 &&
+                       request.resource.data.title.size() <= 120 &&
+                       request.resource.data.commandText is string &&
+                       request.resource.data.commandText.size() > 0 &&
+                       request.resource.data.commandText.size() <= 3000 &&
+                       (request.resource.data.category == 'html' || request.resource.data.category == 'text');
+      allow update, delete: if true;
+    }
   }
 }

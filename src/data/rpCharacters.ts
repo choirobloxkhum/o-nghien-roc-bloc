@@ -293,6 +293,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     plotUrl: 'https://rentry.org/kenji_choirobloxkhum',
     voiceUrl: 'https://res.cloudinary.com/ygmarp6t/video/upload/v1787311945/ElevenLabs_2026-08-20T16_28_52_Xinghe_Jiang_-_Magnetic_Conversational_pvc_sp110_s50_sb75_v3_1.mp3',
     createdAt: now - 5000,
+    isLinkLocked: true,
   },
   {
     id: 'char-7-james',
@@ -311,6 +312,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     plotUrl: 'https://rentry.org/james_choirobloxkhum',
     voiceUrl: 'https://res.cloudinary.com/ygmarp6t/video/upload/v1787324849/ElevenLabs_2026-08-21T15_04_24_Elomi_pvc_sp95_s30_sb75_v3_1.mp3',
     createdAt: now - 6000,
+    isLinkLocked: true,
   },
   {
     id: 'char-8-votran',
@@ -329,6 +331,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     plotUrl: 'https://rentry.org/votran_choirobloxkhum',
     voiceUrl: 'https://res.cloudinary.com/ygmarp6t/video/upload/v1787311691/ElevenLabs_2026-08-21T10_33_31_Xinghe_Jiang_-_Magnetic_Conversational_pvc_sp110_s50_sb75_v3.mp3',
     createdAt: now - 7000,
+    isLinkLocked: true,
   },
   {
     id: 'char-9-nolan',
@@ -347,6 +350,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     plotUrl: 'https://rentry.org/nolan_choirobloxkhum',
     voiceUrl: 'https://res.cloudinary.com/ygmarp6t/video/upload/v1787311889/ElevenLabs_2026-08-21T05_00_02_Oliver_-_Clean_British_and_Steady_pvc_sp100_s100_sb100_v3.mp3',
     createdAt: now - 8000,
+    isLinkLocked: true,
   },
 ];
 

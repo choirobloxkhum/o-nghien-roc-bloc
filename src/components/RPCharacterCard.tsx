@@ -36,6 +36,7 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
 
   const isSpeaking = playingId === character.id;
   const isLuciferLocked = character.id === 'char-11-lucifer' || character.name.toLowerCase().includes('lucifer') || Boolean(character.password);
+  const isLinkLocked = Boolean(character.isLinkLocked);
 
   const handleImageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -269,12 +270,27 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
           {/* Play Button in Hell Mode */}
           <button
             onClick={() => onPlay(character)}
-            title={isLuciferLocked ? 'Nhập mật khẩu để mở khóa' : '"Chơi"'}
-            aria-label={isLuciferLocked ? 'Mật khẩu' : '"Chơi"'}
-            className="w-full py-2 sm:py-2.5 px-2 rounded-xl text-white font-extrabold text-sm sm:text-base shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer bg-gradient-to-b from-[#dc2626] via-[#991b1b] to-[#7f1d1d] hover:from-[#ef4444] hover:to-[#991b1b] border-t border-red-300/50 border-b-2 border-[#450a0a] shadow-red-950"
+            title={
+              isLuciferLocked
+                ? 'Nhập mật khẩu để mở khóa'
+                : isLinkLocked
+                ? 'Link hiện đang tạm khóa'
+                : '"Chơi"'
+            }
+            aria-label={isLuciferLocked ? 'Mật khẩu' : isLinkLocked ? 'Tạm khóa' : '"Chơi"'}
+            className={`w-full py-2 sm:py-2.5 px-2 rounded-xl text-white font-extrabold text-sm sm:text-base shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer ${
+              isLinkLocked
+                ? 'bg-gradient-to-b from-[#3f3f46] via-[#27272a] to-[#18181b] hover:from-[#52525b] hover:to-[#27272a] border-t border-zinc-500/40 border-b-2 border-black text-amber-200'
+                : 'bg-gradient-to-b from-[#dc2626] via-[#991b1b] to-[#7f1d1d] hover:from-[#ef4444] hover:to-[#991b1b] border-t border-red-300/50 border-b-2 border-[#450a0a] shadow-red-950'
+            }`}
           >
             {isLuciferLocked ? (
               <Lock className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+            ) : isLinkLocked ? (
+              <>
+                <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5] text-amber-300" />
+                <span>"Tạm khóa"</span>
+              </>
             ) : (
               <>
                 <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-white stroke-none" />
@@ -288,12 +304,27 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
           {/* Play Button in Normal Mode (no quotes) */}
           <button
             onClick={() => onPlay(character)}
-            title={isLuciferLocked ? 'Nhập mật khẩu để mở khóa' : 'Chơi'}
-            aria-label={isLuciferLocked ? 'Mật khẩu' : 'Chơi'}
-            className="w-full py-1.5 sm:py-2.5 px-2 rounded-xl text-white font-extrabold text-xs sm:text-sm shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer bg-gradient-to-b from-[#22c55e] to-[#16a34a] hover:from-[#4ade80] hover:to-[#22c55e] border-t border-white/40 border-b-2 border-[#15803d] hover:shadow-green-500/20"
+            title={
+              isLuciferLocked
+                ? 'Nhập mật khẩu để mở khóa'
+                : isLinkLocked
+                ? 'Link hiện đang tạm khóa'
+                : 'Chơi'
+            }
+            aria-label={isLuciferLocked ? 'Mật khẩu' : isLinkLocked ? 'Tạm khóa' : 'Chơi'}
+            className={`w-full py-1.5 sm:py-2.5 px-2 rounded-xl text-white font-extrabold text-xs sm:text-sm shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer ${
+              isLinkLocked
+                ? 'bg-gradient-to-b from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 border-t border-slate-400/40 border-b-2 border-slate-900 text-amber-200 shadow-xs'
+                : 'bg-gradient-to-b from-[#22c55e] to-[#16a34a] hover:from-[#4ade80] hover:to-[#22c55e] border-t border-white/40 border-b-2 border-[#15803d] hover:shadow-green-500/20'
+            }`}
           >
             {isLuciferLocked ? (
               <Lock className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2.5]" />
+            ) : isLinkLocked ? (
+              <>
+                <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5] text-amber-300" />
+                <span>Tạm khóa</span>
+              </>
             ) : (
               <>
                 <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-white stroke-none" />

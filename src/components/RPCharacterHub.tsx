@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Sparkles, Users, Search, X, Flame, SunMedium, ArrowUp, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Sparkles, Users, Search, X, Flame, SunMedium, ArrowUp, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { RPCharacter } from '../types';
 import { RPTopNavBar } from './RPTopNavBar';
@@ -20,6 +20,9 @@ import { PasswordModal } from './PasswordModal';
 import { CocKienTroiModal } from './CocKienTroiModal';
 import { ArtGalleryEntranceCard } from './ArtGalleryEntranceCard';
 import { ArtGalleryPage } from './ArtGalleryPage';
+import { RPNavigationSubBar, MainSubTab } from './RPNavigationSubBar';
+import { CommandLibraryPage } from './CommandLibraryPage';
+import { INITIAL_RP_COMMANDS } from '../data/initialCommands';
 import {
   getStoredRPCharacters,
   saveStoredRPCharacters,
@@ -60,6 +63,8 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
   const [votedIds, setVotedIds] = useState<string[]>(() =>
     getLocalVotedCharactersList(getStoredRPCharacters().map((c) => c.id))
   );
+  // Navigation Sub-Bar Tab State: 'home' (Trang Chủ) vs 'commands' (Kho Lệnh)
+  const [activeSubTab, setActiveSubTab] = useState<MainSubTab>('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
@@ -83,6 +88,17 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
   // Password Modal states
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [selectedPasswordChar, setSelectedPasswordChar] = useState<RPCharacter | null>(null);
+
+  // Locked link toast message
+  const [lockedToastMessage, setLockedToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!lockedToastMessage) return;
+    const timer = setTimeout(() => {
+      setLockedToastMessage(null);
+    }, 3800);
+    return () => clearTimeout(timer);
+  }, [lockedToastMessage]);
 
   // Cóc Kiện Trời Modal states (Đánh trống xin gợi ý password)
   const [isCocKienTroiOpen, setIsCocKienTroiOpen] = useState(false);
@@ -368,6 +384,11 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
   // Quick Open Play
   const handlePlay = (char: RPCharacter) => {
     playUiClick(soundEnabled);
+    if (char.isLinkLocked) {
+      setLockedToastMessage(`🔒 Link của ${char.name} đang tạm thời khóa theo yêu cầu của tác giả! Vui lòng quay lại sau nha ✨`);
+      return;
+    }
+
     if (char.password) {
       setSelectedPasswordChar(char);
       setIsPasswordModalOpen(true);
@@ -451,9 +472,26 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
         onOpenGallery={handleOpenGallery}
       />
 
-      {/* 2. MAIN CONTENT AREA */}
-      <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-2.5 sm:px-6 md:px-12 py-4 sm:py-8">
-        {/* Large Header Banner at Top */}
+      {/* 1.1 DUAL-TAB NAVIGATION SUB-BAR (Trang Chủ & Kho Lệnh) */}
+      <RPNavigationSubBar
+        activeTab={activeSubTab}
+        onTabChange={setActiveSubTab}
+        isHellMode={isHellMode}
+        soundEnabled={soundEnabled}
+        totalCharacters={characters.length}
+        totalCommands={INITIAL_RP_COMMANDS.length}
+      />
+
+
+      {/* 2. DYNAMIC MAIN VIEW: TRANG CHỦ vs KHO LỆNH */}
+      {activeSubTab === 'commands' ? (
+        <CommandLibraryPage
+          isHellMode={isHellMode}
+          soundEnabled={soundEnabled}
+        />
+      ) : (
+        <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-2.5 sm:px-6 md:px-12 py-4 sm:py-8">
+          {/* Large Header Banner at Top */}
         <div
           className={`flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 pb-4 sm:pb-6 border-b backdrop-blur-xs ${
             isHellMode ? 'border-red-900/50' : 'border-white/30'
@@ -842,9 +880,12 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
           )}
         </section>
       </main>
+      )}
 
-      {/* Tribute Footer with AI Họa Thần Rapunzel */}
-      <RapunzelTributeFooter soundEnabled={soundEnabled} isHellMode={isHellMode} />
+      {/* Tribute Footer with AI Họa Thần Rapunzel (chỉ hiển thị ở Trang Chủ) */}
+      {activeSubTab === 'home' && (
+        <RapunzelTributeFooter soundEnabled={soundEnabled} isHellMode={isHellMode} />
+      )}
 
       {/* Floating "Trở về Hạ Giới" (Return to Earth) Button when in Hell Mode */}
       {isHellMode && (
@@ -933,6 +974,33 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
         onComplete={handleFallingOverlayComplete}
         soundEnabled={soundEnabled}
       />
+
+      {/* Toast Notification when clicking a temporarily locked link */}
+      <AnimatePresence>
+        {lockedToastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[150] max-w-[92vw] sm:max-w-md px-4 py-3 rounded-2xl bg-slate-950/95 text-white border-2 border-amber-400 shadow-[0_10px_35px_rgba(0,0,0,0.65)] backdrop-blur-md flex items-center gap-3"
+          >
+            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0 border border-amber-400/40">
+              <Lock className="w-4 h-4 stroke-[2.5]" />
+            </div>
+            <p className="text-xs sm:text-sm font-bold text-slate-100 flex-1 leading-snug">
+              {lockedToastMessage}
+            </p>
+            <button
+              onClick={() => setLockedToastMessage(null)}
+              className="text-slate-400 hover:text-white p-1 rounded-lg transition-colors cursor-pointer shrink-0"
+              title="Đóng thông báo"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

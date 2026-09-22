@@ -83,6 +83,43 @@
         }
       },
       "required": ["imageUrl", "characterId", "characterName", "authorName", "createdAt"]
+    },
+    "RPCommand": {
+      "title": "RPCommand",
+      "description": "Roblox RP command or HTML snippet in the Command Library",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Command or snippet title"
+        },
+        "category": {
+          "type": "string",
+          "description": "html or text",
+          "enum": ["html", "text"]
+        },
+        "commandText": {
+          "type": "string",
+          "description": "The actual snippet or prompt code"
+        },
+        "description": {
+          "type": "string",
+          "description": "Usage guide or description"
+        },
+        "tags": {
+          "type": "array",
+          "description": "List of tag keywords"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Timestamp in milliseconds"
+        },
+        "authorName": {
+          "type": "string",
+          "description": "Contributor name"
+        }
+      },
+      "required": ["title", "category", "commandText", "createdAt"]
     }
   },
   "firestore": {
@@ -97,6 +134,11 @@
     "/artworks/{artworkId}": {
       "schema": "Artwork",
       "description": "Public artworks contributed by fans"
+    },
+    "/rp_commands/{commandId}": {
+      "schema": "RPCommand",
+      "description": "Public library of Roblox RP commands and HTML snippets"
     }
   }
 }
+

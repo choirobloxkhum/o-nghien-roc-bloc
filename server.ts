@@ -569,6 +569,26 @@ app.post('/api/artworks/clear-all', async (req, res) => {
 });
 
 // ==========================================
+// 12. COMMAND LIBRARY (KHO LỆNH) API
+// ==========================================
+
+// GET /api/commands - Return admin-uploaded commands
+app.get('/api/commands', async (req, res) => {
+  try {
+    const { INITIAL_RP_COMMANDS } = await import('./src/data/initialCommands');
+    res.json({
+      success: true,
+      commands: INITIAL_RP_COMMANDS,
+      total: INITIAL_RP_COMMANDS.length,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: String(err) });
+  }
+});
+
+
+
+// ==========================================
 // VITE / STATIC SERVING SETUP
 // ==========================================
 
