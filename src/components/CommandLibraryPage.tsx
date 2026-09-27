@@ -14,11 +14,17 @@ import {
   Lock,
   FileText,
   Flame,
+  ShieldAlert,
+  ExternalLink,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { RPCommand } from '../types';
 import { INITIAL_RP_COMMANDS } from '../data/initialCommands';
 import { playUiClick } from '../utils/audio';
+import { AgeVerificationModal } from './AgeVerificationModal';
+
+const NSFW_EXTERNAL_LINK =
+  'https://ellipsus.com/read/3j5tv2LCFAlyI6rrHXdBq8/Chi-Roblox-Khum_TNG-HP-LNH-NSFW';
 
 interface CommandLibraryPageProps {
   isHellMode?: boolean;
@@ -28,15 +34,15 @@ interface CommandLibraryPageProps {
 // Truncated & Summarized Syntax Preview Box Component
 const SummarizedCodeViewer: React.FC<{
   code: string;
-  category: 'html' | 'text' | 'prompt';
+  category: 'html' | 'text' | 'prompt' | 'nsfw';
   isHellMode?: boolean;
 }> = ({ code, category, isHellMode = false }) => {
   // Generate a concise summary/excerpt for the card preview
   const summarySnippet = useMemo(() => {
     const lines = code.trim().split('\n').filter(Boolean);
 
-    if (category === 'prompt') {
-      // For prompt commands, show key summary highlights
+    if (category === 'prompt' || category === 'nsfw') {
+      // For prompt & NSFW commands, show key summary highlights
       const displayLines = lines.slice(0, 4);
       return displayLines.join('\n');
     }
@@ -82,6 +88,9 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<'all' | 'prompt' | 'html' | 'text'>('all');
 
+  // NSFW 18+ Age Verification Modal State
+  const [isNsfwAgeModalOpen, setIsNsfwAgeModalOpen] = useState(false);
+
   // Copy Feedback State (Map of commandId => boolean)
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -111,11 +120,26 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
     setCurrentPage(1);
   }, [debouncedQuery, activeCategory]);
 
+  // Handle clicking on NSFW Button with Age Gate
+  const handleClickNsfwButton = () => {
+    playUiClick(soundEnabled);
+    setIsNsfwAgeModalOpen(true);
+  };
+
+  const handleConfirmNsfwAge = () => {
+    setIsNsfwAgeModalOpen(false);
+    try {
+      window.open(NSFW_EXTERNAL_LINK, '_blank', 'noopener,noreferrer');
+    } catch {
+      window.location.href = NSFW_EXTERNAL_LINK;
+    }
+  };
+
   // Filtered Commands
   const filteredCommands = useMemo(() => {
     const q = debouncedQuery.trim().toLowerCase();
     return commands.filter((cmd) => {
-      // Category filter
+      // Specific categories
       if (activeCategory === 'prompt' && cmd.category !== 'prompt') return false;
       if (activeCategory === 'html' && cmd.category !== 'html') return false;
       if (activeCategory === 'text' && cmd.category !== 'text') return false;
@@ -196,6 +220,24 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
 
   return (
     <div className="relative w-full max-w-7xl mx-auto px-2.5 sm:px-6 md:px-12 py-4 sm:py-8 font-dessert">
+      {/* NSFW Age Verification Modal */}
+      <AgeVerificationModal
+        isOpen={isNsfwAgeModalOpen}
+        onClose={() => setIsNsfwAgeModalOpen(false)}
+        onConfirm={handleConfirmNsfwAge}
+        soundEnabled={soundEnabled}
+        title="XÁC NHẬN ĐỘ TUỔI 18+"
+        badgeText="18+ ADULT CONTENT / NSFW DIRECTIVES"
+        questionText="Bạn đã đủ 18 tuổi để truy cập mục Lệnh NSFW chưa?"
+        descriptionText={
+          <>
+            Chuyên mục <span className="text-rose-400 font-black">Lệnh NSFW (18+)</span> chứa các chỉ thị kịch bản ân ái, cảnh nóng và mô tả chi tiết dành riêng cho người trưởng thành được lưu trữ tại liên kết ngoài.
+          </>
+        }
+        subNoteText="Vui lòng xác nhận bạn đã đủ tuổi trước khi chuyển sang liên kết."
+        confirmButtonText="Tôi đã đủ 18 tuổi • Chuyển đến liên kết"
+      />
+
       {/* Toast Notification - Nằm ở DƯỚI, CHÍNH GIỮA MÀN HÌNH */}
       <AnimatePresence>
         {toastMessage && (
@@ -270,8 +312,45 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
         </div>
       </div>
 
-      {/* 2. SEARCH BAR & CATEGORY FILTER BAR */}
+      {/* 2. DEDICATED NSFW 18+ BUTTON (PLACED ABOVE THE SEARCH BAR) & SEARCH / FILTER SECTION */}
       <div className="mb-6 sm:mb-8 space-y-4">
+        {/* Dedicated NSFW Entry Button */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={handleClickNsfwButton}
+            className={`group relative overflow-hidden w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-2xl sm:rounded-3xl font-black text-xs sm:text-sm md:text-base transition-all duration-300 transform active:scale-95 cursor-pointer border-2 shadow-xl flex items-center justify-center gap-2.5 sm:gap-3.5 select-none ${
+              isHellMode
+                ? 'bg-gradient-to-r from-[#2a041c] via-[#40062a] to-[#2a041c] text-rose-200 border-red-500/60 hover:border-red-400 hover:shadow-[0_0_25px_rgba(239,68,68,0.6)]'
+                : 'bg-gradient-to-r from-rose-900 via-red-900 to-rose-950 text-white border-rose-300/80 hover:border-rose-400 hover:shadow-[0_8px_30px_rgba(225,29,72,0.65)]'
+            }`}
+          >
+            {/* Background shimmer animation on hover */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
+
+            {/* Flame Icon with badge wrapper */}
+            <span className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-500/30 border border-red-300/50 shadow-inner shrink-0">
+              <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-rose-400 fill-rose-500 animate-pulse" />
+            </span>
+
+            {/* Main Label & 18+ Tag */}
+            <div className="flex items-center gap-2">
+              <span className="tracking-wide uppercase font-black drop-shadow-sm">
+                LỆNH NSFW
+              </span>
+              <span className="px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-black bg-gradient-to-r from-red-500 to-rose-600 text-white border border-rose-200 shadow-sm uppercase tracking-wider">
+                18+
+              </span>
+            </div>
+
+            {/* Status indicator */}
+            <span className="text-[10px] sm:text-xs px-2.5 py-1 rounded-xl font-black backdrop-blur-md bg-black/40 text-rose-200 border border-white/10 flex items-center gap-1.5">
+              <span>Mở kho lệnh</span>
+              <ExternalLink className="w-3.5 h-3.5 stroke-[2.5]" />
+            </span>
+          </button>
+        </div>
+
         {/* Search Input Box */}
         <div className="relative w-full max-w-3xl mx-auto">
           <div
@@ -292,7 +371,7 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm kiếm lệnh theo tên, từ khóa, tag (#NSFW, #Chống YSL)..."
+                placeholder="Tìm kiếm lệnh theo tên, từ khóa, tag (#Red Flag, #AU)..."
                 className={`w-full bg-transparent text-sm sm:text-base md:text-lg font-bold outline-none placeholder:font-medium placeholder:italic ${
                   isHellMode
                     ? 'text-white placeholder:text-purple-300/60'
@@ -316,7 +395,7 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
           </div>
         </div>
 
-        {/* Category Filter Pills: Tất cả, Lệnh Prompt, Lệnh HTML, Lệnh Chữ */}
+        {/* Category Filter Pills: Tất cả, Lệnh Prompt, Lệnh HTML, Lệnh Chữ (NSFW đã tách thành nút riêng phía trên) */}
         <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
           {/* All */}
           <button
@@ -346,7 +425,7 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
             </span>
           </button>
 
-          {/* Lệnh Prompt (MỚI THEO YÊU CẦU) */}
+          {/* Lệnh Prompt */}
           <button
             type="button"
             onClick={() => {
@@ -451,6 +530,7 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 md:gap-6">
           {paginatedCommands.map((command) => {
             const isCopied = copiedId === command.id;
+            const isNsfw = command.category === 'nsfw' || command.isNsfw;
             const isPrompt = command.category === 'prompt';
             const isHtml = command.category === 'html';
 
@@ -462,7 +542,11 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25 }}
                 className={`relative rounded-2xl sm:rounded-3xl p-2.5 sm:p-4 md:p-5 flex flex-col justify-between border-2 transition-all duration-300 group hover:-translate-y-1 shadow-lg backdrop-blur-md overflow-hidden ${
-                  isHellMode
+                  isNsfw
+                    ? isHellMode
+                      ? 'bg-gradient-to-b from-[#22041e] to-[#150212] border-red-700/80 hover:border-red-400 shadow-[0_6px_25px_rgba(239,68,68,0.35)]'
+                      : 'bg-gradient-to-b from-rose-50/90 to-white/95 border-rose-300 hover:border-red-400 shadow-[0_8px_25px_rgba(244,63,94,0.22)]'
+                    : isHellMode
                     ? 'bg-[#18031e]/90 border-red-900/60 hover:border-red-500/80 shadow-[0_6px_25px_rgba(220,38,38,0.2)]'
                     : 'bg-white/90 border-white hover:border-sky-300 shadow-[0_8px_25px_rgba(2,132,199,0.18)]'
                 }`}
@@ -472,7 +556,13 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
                   <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                     <h3
                       className={`text-xs sm:text-base md:text-xl font-black leading-tight flex-1 tracking-tight line-clamp-2 ${
-                        isHellMode ? 'text-white' : 'text-slate-800'
+                        isNsfw
+                          ? isHellMode
+                            ? 'text-rose-200'
+                            : 'text-red-900'
+                          : isHellMode
+                          ? 'text-white'
+                          : 'text-slate-800'
                       }`}
                     >
                       {command.title}
@@ -481,14 +571,21 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
                     {/* Distinct Category Tag */}
                     <span
                       className={`px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-lg sm:rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-wider shrink-0 flex items-center gap-0.5 sm:gap-1 border shadow-xs ${
-                        isPrompt
-                          ? 'bg-rose-500/20 text-rose-300 border-rose-400/50'
+                        isNsfw
+                          ? 'bg-gradient-to-r from-red-600/30 to-rose-600/30 text-red-600 dark:text-rose-300 border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.3)]'
+                          : isPrompt
+                          ? 'bg-rose-500/20 text-rose-500 dark:text-rose-300 border-rose-400/50'
                           : isHtml
-                          ? 'bg-emerald-500/20 text-emerald-400 border-emerald-400/40'
-                          : 'bg-indigo-500/20 text-indigo-400 border-indigo-400/40'
+                          ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-400/40'
+                          : 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-400/40'
                       }`}
                     >
-                      {isPrompt ? (
+                      {isNsfw ? (
+                        <>
+                          <Flame className="w-2.5 h-2.5 sm:w-3 sm:h-3 stroke-[2.5] text-red-500 fill-red-500 animate-pulse" />
+                          <span>NSFW 18+</span>
+                        </>
+                      ) : isPrompt ? (
                         <>
                           <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 stroke-[2.5]" />
                           <span className="hidden xs:inline sm:inline">PROMPT</span>
@@ -512,7 +609,13 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
                   {command.description && (
                     <p
                       className={`text-[10px] sm:text-xs md:text-[13px] font-bold mb-2 sm:mb-3 line-clamp-2 ${
-                        isHellMode ? 'text-purple-200/85' : 'text-slate-600'
+                        isNsfw
+                          ? isHellMode
+                            ? 'text-rose-200/90'
+                            : 'text-red-800/90'
+                          : isHellMode
+                          ? 'text-purple-200/85'
+                          : 'text-slate-600'
                       }`}
                     >
                       {command.description}
@@ -528,7 +631,7 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
                         <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-500 inline-block shrink-0" />
                         <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 inline-block shrink-0" />
                         <span className="ml-0.5 sm:ml-1 text-slate-300 font-semibold truncate">
-                          {isPrompt ? 'Prompt' : 'Cú pháp'}
+                          {isNsfw ? 'NSFW Prompt' : isPrompt ? 'Prompt' : 'Cú pháp'}
                         </span>
                       </span>
                       <span className="text-slate-400 font-semibold text-[8px] sm:text-[10px] shrink-0">
@@ -551,8 +654,8 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
                         <span
                           key={idx}
                           className={`text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md sm:rounded-lg border ${
-                            tag.includes('NSFW')
-                              ? 'bg-red-500/20 text-red-300 border-red-500/40'
+                            tag.includes('NSFW') || tag.includes('18+')
+                              ? 'bg-red-500/20 text-red-600 dark:text-red-300 border-red-500/40'
                               : isHellMode
                               ? 'bg-purple-950/60 text-purple-300 border-purple-800/40'
                               : 'bg-sky-50 text-sky-700 border-sky-200'
@@ -572,6 +675,8 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
                   className={`w-full py-1.5 sm:py-2.5 md:py-3 px-2 sm:px-4 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs md:text-sm flex items-center justify-center gap-1 sm:gap-2 border-2 transition-all cursor-pointer shadow-md active:scale-95 ${
                     isCopied
                       ? 'bg-gradient-to-r from-emerald-500 to-green-600 text-white border-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.7)]'
+                      : isNsfw
+                      ? 'bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white border-red-400 shadow-[0_4px_15px_rgba(239,68,68,0.45)]'
                       : isHellMode
                       ? 'bg-gradient-to-r from-red-600 to-purple-700 hover:from-red-500 hover:to-purple-600 text-white border-red-400/60 shadow-[0_4px_15px_rgba(220,38,38,0.4)]'
                       : 'bg-gradient-to-r from-sky-500 via-cyan-500 to-sky-600 hover:from-sky-400 hover:to-cyan-400 text-white border-sky-300 shadow-[0_4px_15px_rgba(2,132,199,0.4)]'

@@ -53,10 +53,11 @@ export interface Artwork {
 export interface RPCommand {
   id: string;
   title: string;
-  category: 'html' | 'text' | 'prompt';
+  category: 'html' | 'text' | 'prompt' | 'nsfw';
   commandText: string;
   description?: string;
   tags?: string[];
   createdAt: number;
   authorName?: string;
+  isNsfw?: boolean;
 }

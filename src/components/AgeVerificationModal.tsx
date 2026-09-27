@@ -8,6 +8,12 @@ interface AgeVerificationModalProps {
   onClose: () => void;
   onConfirm: () => void;
   soundEnabled?: boolean;
+  title?: string;
+  badgeText?: string;
+  questionText?: string;
+  descriptionText?: React.ReactNode;
+  subNoteText?: string;
+  confirmButtonText?: string;
 }
 
 export const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
@@ -15,6 +21,16 @@ export const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
   onClose,
   onConfirm,
   soundEnabled = true,
+  title = 'CẢNH BÁO ĐỘ TUỔI',
+  badgeText = 'CAUTION: 18+ CONTENT / HELL REALM',
+  questionText = 'Bạn đã đủ 18 tuổi để tiến vào Địa Ngục chưa?',
+  descriptionText = (
+    <>
+      Khu vực <span className="text-orange-400 font-bold">Địa Ngục 18+ (Hell Realm)</span> chứa các kịch bản hắc ám, ngược tâm, nội dung trưởng thành và giao diện u tối huyền bí.
+    </>
+  ),
+  subNoteText = 'Bạn có thể chuyển về Hạ Giới (Theme gốc) bất cứ lúc nào.',
+  confirmButtonText = 'Xác nhận (18+)',
 }) => {
   if (!isOpen) return null;
 
@@ -58,11 +74,11 @@ export const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
 
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-950/80 border border-red-500/50 text-red-400 text-xs font-black tracking-wider uppercase mb-2 shadow-inner">
               <AlertTriangle className="w-3.5 h-3.5" />
-              <span>CAUTION: 18+ CONTENT / HELL REALM</span>
+              <span>{badgeText}</span>
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-200 via-orange-200 to-red-400 tracking-tight leading-tight">
-              CẢNH BÁO ĐỘ TUỔI
+              {title}
             </h2>
           </div>
 
@@ -70,17 +86,19 @@ export const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
           <div className="space-y-4 mb-8 text-center sm:text-left relative z-10">
             <div className="p-4 rounded-2xl bg-red-950/40 border border-red-800/40 space-y-2">
               <p className="text-base sm:text-lg font-black text-red-100 text-center leading-snug">
-                Bạn đã đủ 18 tuổi để tiến vào Địa Ngục chưa?
+                {questionText}
               </p>
-              <p className="text-xs sm:text-sm text-red-300/80 text-center font-medium leading-relaxed">
-                Khu vực <span className="text-orange-400 font-bold">Địa Ngục 18+ (Hell Realm)</span> chứa các kịch bản hắc ám, ngược tâm, nội dung trưởng thành và giao diện u tối huyền bí.
-              </p>
+              <div className="text-xs sm:text-sm text-red-300/80 text-center font-medium leading-relaxed">
+                {descriptionText}
+              </div>
             </div>
 
-            <div className="flex items-center justify-center gap-2 text-xs text-red-400/90 font-semibold">
-              <ShieldAlert className="w-4 h-4 text-red-400 shrink-0" />
-              <span>Bạn có thể chuyển về Hạ Giới (Theme gốc) bất cứ lúc nào.</span>
-            </div>
+            {subNoteText && (
+              <div className="flex items-center justify-center gap-2 text-xs text-red-400/90 font-semibold">
+                <ShieldAlert className="w-4 h-4 text-red-400 shrink-0" />
+                <span>{subNoteText}</span>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}
@@ -106,7 +124,7 @@ export const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
               className="w-full sm:w-1/2 py-3 px-4 rounded-2xl bg-gradient-to-r from-red-600 via-orange-600 to-red-600 hover:from-red-500 hover:to-orange-500 text-white font-black text-xs sm:text-sm shadow-[0_0_25px_rgba(239,68,68,0.7)] border-t border-red-300 border-b-2 border-red-900 transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95 transform hover:scale-[1.02]"
             >
               <CheckCircle2 className="w-4 h-4 stroke-[3]" />
-              <span>Xác nhận (18+)</span>
+              <span>{confirmButtonText}</span>
             </button>
           </div>
         </motion.div>
