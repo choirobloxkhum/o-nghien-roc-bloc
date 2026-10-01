@@ -13,6 +13,7 @@ interface RPRichLeaderboardProps {
   isHellMode?: boolean;
   remainingHours?: number;
   onRefreshLeaderboard?: () => void;
+  reducedMotion?: boolean;
 }
 
 export const RPRichLeaderboard: React.FC<RPRichLeaderboardProps> = ({
@@ -20,6 +21,7 @@ export const RPRichLeaderboard: React.FC<RPRichLeaderboardProps> = ({
   isHellMode = false,
   remainingHours = 24,
   onRefreshLeaderboard,
+  reducedMotion = false,
 }) => {
   const { playingId, playVoice, stopVoice } = useCharacterVoice();
 
@@ -179,10 +181,10 @@ export const RPRichLeaderboard: React.FC<RPRichLeaderboardProps> = ({
   return (
     <section className="w-full relative overflow-hidden">
       {/* Decorative Floating Elements in Background */}
-      <div className={`absolute top-2 left-6 opacity-60 animate-twinkle pointer-events-none ${isHellMode ? 'text-purple-400' : 'text-amber-300'}`}>
+      <div className={`absolute top-2 left-6 opacity-60 pointer-events-none ${!reducedMotion ? 'animate-twinkle' : ''} ${isHellMode ? 'text-purple-400' : 'text-amber-300'}`}>
         {isHellMode ? <Sparkles className="w-6 h-6 fill-purple-400" /> : <Sparkles className="w-6 h-6" />}
       </div>
-      <div className={`absolute top-8 right-8 opacity-70 animate-twinkle-delay pointer-events-none ${isHellMode ? 'text-amber-400' : 'text-yellow-400'}`}>
+      <div className={`absolute top-8 right-8 opacity-70 pointer-events-none ${!reducedMotion ? 'animate-twinkle-delay' : ''} ${isHellMode ? 'text-amber-400' : 'text-yellow-400'}`}>
         {isHellMode ? <Flame className="w-5 h-5 fill-amber-400" /> : <Star className="w-5 h-5 fill-yellow-300" />}
       </div>
 
@@ -287,7 +289,7 @@ export const RPRichLeaderboard: React.FC<RPRichLeaderboardProps> = ({
               {medal.isChampion && (
                 <div className="absolute -top-16 inset-x-0 flex items-center justify-center pointer-events-none -z-10 overflow-visible">
                   <div
-                    className={`w-48 h-48 sm:w-72 sm:h-72 rounded-full blur-md animate-slow-spin ${
+                    className={`w-48 h-48 sm:w-72 sm:h-72 rounded-full blur-md ${!reducedMotion ? 'animate-slow-spin' : ''} ${
                       isHellMode
                         ? 'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-400/35 via-purple-600/25 to-transparent'
                         : 'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-300/40 via-yellow-200/20 to-transparent'
@@ -302,7 +304,7 @@ export const RPRichLeaderboard: React.FC<RPRichLeaderboardProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: (4 - medal.rank) * 0.15, type: 'spring', stiffness: 100 }}
                 className={`relative flex flex-col items-center w-full mb-3 sm:mb-4 px-1 ${
-                  medal.isChampion ? 'animate-champion-float' : ''
+                  medal.isChampion && !reducedMotion ? 'animate-champion-float' : ''
                 }`}
               >
                 {/* Crown / Flame Indicator */}
@@ -402,9 +404,11 @@ export const RPRichLeaderboard: React.FC<RPRichLeaderboardProps> = ({
                 </div>
 
                 {/* Animated Light Gleam across Podium */}
-                <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
-                  <div className="w-1/2 h-full bg-gradient-to-r from-transparent via-white/25 to-transparent animate-podium-gleam" />
-                </div>
+                {!reducedMotion && (
+                  <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
+                    <div className="w-1/2 h-full bg-gradient-to-r from-transparent via-white/25 to-transparent animate-podium-gleam" />
+                  </div>
+                )}
 
                 {/* Giant 3D Rank Number */}
                 <div className="mt-3 sm:mt-5 z-10 flex flex-col items-center">

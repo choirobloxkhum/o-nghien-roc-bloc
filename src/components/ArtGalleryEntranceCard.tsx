@@ -8,12 +8,14 @@ interface ArtGalleryEntranceCardProps {
   onOpenGallery: () => void;
   isHellMode?: boolean;
   soundEnabled?: boolean;
+  reducedMotion?: boolean;
 }
 
 export const ArtGalleryEntranceCard: React.FC<ArtGalleryEntranceCardProps> = ({
   onOpenGallery,
   isHellMode = false,
   soundEnabled = true,
+  reducedMotion = false,
 }) => {
   const handleClick = () => {
     playUiClick(soundEnabled);
@@ -40,7 +42,9 @@ export const ArtGalleryEntranceCard: React.FC<ArtGalleryEntranceCardProps> = ({
       >
         {/* Glowing border rim */}
         <div
-          className={`absolute inset-0 rounded-2xl sm:rounded-3xl animate-pulse ${
+          className={`absolute inset-0 rounded-2xl sm:rounded-3xl transition-opacity ${
+            !reducedMotion ? 'group-hover:animate-pulse' : ''
+          } ${
             isHellMode
               ? 'bg-gradient-to-r from-red-600 via-purple-600 to-amber-600 opacity-90'
               : 'bg-gradient-to-r from-sky-400 via-amber-300 to-emerald-400 opacity-95'
@@ -86,7 +90,9 @@ export const ArtGalleryEntranceCard: React.FC<ArtGalleryEntranceCardProps> = ({
             {/* Tiêu đề Phòng Tranh với font chữ Vivaldi kẹp giữa 2 biểu tượng ngôi sao lấp lánh */}
             <div className="flex items-center justify-center gap-1.5 sm:gap-3">
               <Sparkles
-                className={`w-4 h-4 sm:w-8 sm:h-8 shrink-0 animate-pulse ${
+                className={`w-4 h-4 sm:w-8 sm:h-8 shrink-0 transition-transform ${
+                  !reducedMotion ? 'group-hover:animate-pulse group-hover:scale-110' : ''
+                } ${
                   isHellMode
                     ? 'text-amber-300 fill-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]'
                     : 'text-yellow-300 fill-yellow-400 drop-shadow-[0_0_12px_rgba(250,204,21,0.9)]'
@@ -103,7 +109,9 @@ export const ArtGalleryEntranceCard: React.FC<ArtGalleryEntranceCardProps> = ({
                 Phòng Tranh
               </h2>
               <Sparkles
-                className={`w-4 h-4 sm:w-8 sm:h-8 shrink-0 animate-pulse ${
+                className={`w-4 h-4 sm:w-8 sm:h-8 shrink-0 transition-transform ${
+                  !reducedMotion ? 'group-hover:animate-pulse group-hover:scale-110' : ''
+                } ${
                   isHellMode
                     ? 'text-amber-300 fill-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]'
                     : 'text-yellow-300 fill-yellow-400 drop-shadow-[0_0_12px_rgba(250,204,21,0.9)]'

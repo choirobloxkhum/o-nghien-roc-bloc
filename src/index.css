@@ -74,6 +74,12 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+.reduced-motion-mode *,
+.reduced-motion-mode *::before,
+.reduced-motion-mode *::after {
+  animation: none !important;
+}
 .dessert-title-shadow {
   text-shadow: 
     0 2px 0 #94a3b8,

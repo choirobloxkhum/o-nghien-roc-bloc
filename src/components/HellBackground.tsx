@@ -3,7 +3,11 @@ import { motion } from 'motion/react';
 import { Flame, Sparkles, Skull } from 'lucide-react';
 import diemVuongBgImage from '../assets/images/diem_vuong_hell_bg_1787400265339.jpg';
 
-export const HellBackground: React.FC = () => {
+interface HellBackgroundProps {
+  reducedMotion?: boolean;
+}
+
+export const HellBackground: React.FC<HellBackgroundProps> = ({ reducedMotion = false }) => {
   return (
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none select-none">
       {/* 1. DIÊM VƯƠNG / DIÊM LA ĐIỆN ARTWORK WALLPAPER */}
@@ -36,51 +40,59 @@ export const HellBackground: React.FC = () => {
       />
 
       {/* 4. FLOATING DIÊM VƯƠNG RUNE EMBLEM */}
-      <motion.div
-        animate={{ y: [0, -18, 0], rotate: [0, 8, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-24 left-[8%] hidden lg:flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-br from-red-900/90 via-purple-900/90 to-black/95 border border-purple-400/60 shadow-[0_0_20px_rgba(220,38,38,0.6)] transform-gpu will-change-transform"
-      >
-        <Flame className="w-5 h-5 text-red-400 fill-purple-500 animate-pulse" />
-      </motion.div>
+      {reducedMotion ? (
+        <div className="absolute top-24 left-[8%] hidden lg:flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-br from-red-900/90 via-purple-900/90 to-black/95 border border-purple-400/60 shadow-[0_0_20px_rgba(220,38,38,0.6)]">
+          <Flame className="w-5 h-5 text-red-400 fill-purple-500" />
+        </div>
+      ) : (
+        <motion.div
+          animate={{ y: [0, -18, 0], rotate: [0, 8, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute top-24 left-[8%] hidden lg:flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-br from-red-900/90 via-purple-900/90 to-black/95 border border-purple-400/60 shadow-[0_0_20px_rgba(220,38,38,0.6)] transform-gpu will-change-transform"
+        >
+          <Flame className="w-5 h-5 text-red-400 fill-purple-500 animate-pulse" />
+        </motion.div>
+      )}
 
       {/* 5. BLOOD-AMETHYST MOON AURA (Optimized zero-blur radial glow for silky performance) */}
       <div className="absolute top-12 right-[12%] hidden sm:block w-36 h-36 rounded-full pointer-events-none select-none">
         <div className="w-full h-full rounded-full bg-[radial-gradient(circle,_rgba(220,38,38,0.45)_0%,_rgba(147,51,234,0.3)_40%,_transparent_70%)] opacity-80" />
       </div>
 
-      {/* 6. UPWARD FLOATING SOUL EMBERS & MA TRƠI / SPIRIT SPARKS (Lightweight GPU batching: hidden on mobile) */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none hidden sm:block">
-        {[...Array(8)].map((_, i) => {
-          const isCrimson = i % 2 === 0;
-          const particleColor = isCrimson
-            ? 'bg-gradient-to-t from-red-600 via-rose-500 to-amber-300 shadow-[0_0_6px_#ef4444]'
-            : 'bg-gradient-to-t from-purple-600 via-fuchsia-400 to-pink-200 shadow-[0_0_6px_#c084fc]';
+      {/* 6. UPWARD FLOATING SOUL EMBERS & MA TRƠI / SPIRIT SPARKS (Tắt hoàn toàn khi bật chế độ mượt mà) */}
+      {!reducedMotion && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none hidden sm:block">
+          {[...Array(8)].map((_, i) => {
+            const isCrimson = i % 2 === 0;
+            const particleColor = isCrimson
+              ? 'bg-gradient-to-t from-red-600 via-rose-500 to-amber-300 shadow-[0_0_6px_#ef4444]'
+              : 'bg-gradient-to-t from-purple-600 via-fuchsia-400 to-pink-200 shadow-[0_0_6px_#c084fc]';
 
-          return (
-            <motion.div
-              key={`hell-ember-${i}`}
-              animate={{
-                y: ['100vh', '-10vh'],
-                x: [0, i % 2 === 0 ? 20 : -20, 0],
-                opacity: [0, 0.75, 0],
-              }}
-              transition={{
-                duration: 4.5 + (i % 4),
-                repeat: Infinity,
-                delay: (i * 0.6) % 4.5,
-                ease: 'easeOut',
-              }}
-              className={`absolute rounded-full ${particleColor} transform-gpu will-change-transform`}
-              style={{
-                left: `${(i * 100) / 8 + 6}%`,
-                width: '4px',
-                height: '4px',
-              }}
-            />
-          );
-        })}
-      </div>
+            return (
+              <motion.div
+                key={`hell-ember-${i}`}
+                animate={{
+                  y: ['100vh', '-10vh'],
+                  x: [0, i % 2 === 0 ? 20 : -20, 0],
+                  opacity: [0, 0.75, 0],
+                }}
+                transition={{
+                  duration: 4.5 + (i % 4),
+                  repeat: Infinity,
+                  delay: (i * 0.6) % 4.5,
+                  ease: 'easeOut',
+                }}
+                className={`absolute rounded-full ${particleColor} transform-gpu will-change-transform`}
+                style={{
+                  left: `${(i * 100) / 8 + 6}%`,
+                  width: '4px',
+                  height: '4px',
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

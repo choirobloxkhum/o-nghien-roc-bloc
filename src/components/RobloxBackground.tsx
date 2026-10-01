@@ -2,7 +2,11 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, Heart } from 'lucide-react';
 
-export const RobloxBackground: React.FC = () => {
+interface RobloxBackgroundProps {
+  reducedMotion?: boolean;
+}
+
+export const RobloxBackground: React.FC<RobloxBackgroundProps> = ({ reducedMotion = false }) => {
   return (
     <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
       {/* ========================================================================= */}
@@ -56,11 +60,15 @@ export const RobloxBackground: React.FC = () => {
       {/* 3. FLOATING ROBLOX HOT AIR BALLOON (Drifts smoothly in background)        */}
       {/* ========================================================================= */}
       <motion.div
-        animate={{
-          x: [-30, 40, -30],
-          y: [-15, 10, -15],
-          rotate: [-2, 3, -2],
-        }}
+        animate={
+          reducedMotion
+            ? false
+            : {
+                x: [-30, 40, -30],
+                y: [-15, 10, -15],
+                rotate: [-2, 3, -2],
+              }
+        }
         transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
         className="absolute top-20 right-[12%] sm:right-[20%] hidden md:flex flex-col items-center z-1 opacity-80 scale-90 sm:scale-100"
       >
@@ -120,7 +128,7 @@ export const RobloxBackground: React.FC = () => {
       {/* ========================================================================= */}
       {/* Cloud 1 (Large, left) */}
       <motion.div
-        animate={{ x: [-20, 25, -20] }}
+        animate={reducedMotion ? false : { x: [-20, 25, -20] }}
         transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
         className="absolute top-24 left-[12%] opacity-90 transform-gpu will-change-transform"
       >
@@ -133,7 +141,7 @@ export const RobloxBackground: React.FC = () => {
 
       {/* Cloud 2 (Huge, right) */}
       <motion.div
-        animate={{ x: [25, -25, 25] }}
+        animate={reducedMotion ? false : { x: [25, -25, 25] }}
         transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
         className="absolute top-14 left-[58%] opacity-85 transform-gpu will-change-transform"
       >
@@ -146,7 +154,7 @@ export const RobloxBackground: React.FC = () => {
 
       {/* Cloud 3 (Small, far right) */}
       <motion.div
-        animate={{ x: [-15, 20, -15] }}
+        animate={reducedMotion ? false : { x: [-15, 20, -15] }}
         transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
         className="absolute top-52 right-[4%] opacity-70"
       >
@@ -158,7 +166,7 @@ export const RobloxBackground: React.FC = () => {
 
       {/* Cloud 4 (Small, far left) */}
       <motion.div
-        animate={{ x: [10, -15, 10] }}
+        animate={reducedMotion ? false : { x: [10, -15, 10] }}
         transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
         className="absolute top-64 -left-6 opacity-60"
       >

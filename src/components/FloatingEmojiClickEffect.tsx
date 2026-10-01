@@ -15,10 +15,20 @@ interface FloatingEmoji {
 
 const EMOJI_POOL = ['⭐️', '☀️', '☁️', '💧', '🌷', '🌱'];
 
-export const FloatingEmojiClickEffect: React.FC = () => {
+interface FloatingEmojiClickEffectProps {
+  disabled?: boolean;
+}
+
+export const FloatingEmojiClickEffect: React.FC<FloatingEmojiClickEffectProps> = ({ disabled = false }) => {
   const [emojis, setEmojis] = useState<FloatingEmoji[]>([]);
 
+  const isMotionDisabled =
+    disabled ||
+    (typeof document !== 'undefined' &&
+      document.documentElement.classList.contains('reduced-motion-mode'));
+
   const handleGlobalClick = useCallback((e: MouseEvent) => {
+    if (isMotionDisabled) return;
     const target = e.target as HTMLElement | null;
     if (!target) return;
 
@@ -56,14 +66,20 @@ export const FloatingEmojiClickEffect: React.FC = () => {
     };
 
     setEmojis((prev) => [...prev.slice(-(maxItems - 1)), newItem]);
-  }, []);
+  }, [isMotionDisabled]);
 
   useEffect(() => {
+    if (isMotionDisabled) {
+      setEmojis([]);
+      return;
+    }
     window.addEventListener('click', handleGlobalClick, { passive: true });
     return () => {
       window.removeEventListener('click', handleGlobalClick);
     };
-  }, [handleGlobalClick]);
+  }, [isMotionDisabled, handleGlobalClick]);
+
+  if (isMotionDisabled) return null;
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden select-none">

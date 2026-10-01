@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Maximize2, Sparkles, Gamepad2, Flame, SunMedium, Skull } from 'lucide-react';
+import { ArrowLeft, Maximize2, Sparkles, Gamepad2, Flame, SunMedium, Skull, Zap } from 'lucide-react';
 import { playUiClick } from '../utils/audio';
 
 interface RPTopNavBarProps {
@@ -12,6 +12,8 @@ interface RPTopNavBarProps {
   onOpenAgeVerification?: () => void;
   onReturnToEarth?: () => void;
   onOpenGallery?: () => void;
+  reducedMotion?: boolean;
+  onToggleReducedMotion?: () => void;
 }
 
 export const RPTopNavBar: React.FC<RPTopNavBarProps> = ({
@@ -21,6 +23,8 @@ export const RPTopNavBar: React.FC<RPTopNavBarProps> = ({
   onOpenAgeVerification,
   onReturnToEarth,
   onOpenGallery,
+  reducedMotion = false,
+  onToggleReducedMotion,
 }) => {
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -133,8 +137,66 @@ export const RPTopNavBar: React.FC<RPTopNavBarProps> = ({
           </div>
         </div>
 
-        {/* Right Section: Fullscreen Action */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        {/* Right Section: Smooth Performance Mode Switch & Fullscreen Action */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          {/* Nút gạt Giảm effect */}
+          {onToggleReducedMotion && (
+            <button
+              id="btn-toggle-reduced-motion"
+              type="button"
+              role="switch"
+              aria-checked={reducedMotion}
+              onClick={onToggleReducedMotion}
+              title={
+                reducedMotion
+                  ? 'Giảm effect: Đang bật (Đã tắt các hạt bay & chuyển động nền để máy mượt hơn)'
+                  : 'Bật Giảm effect (Tắt hạt bay & chuyển động nền cho máy yếu)'
+              }
+              className={`group relative flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-xl sm:rounded-2xl border transition-all cursor-pointer select-none active:scale-95 ${
+                reducedMotion
+                  ? isHellMode
+                    ? 'bg-gradient-to-r from-red-950 via-purple-950 to-black border-amber-400 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.4)]'
+                    : 'bg-emerald-500 hover:bg-emerald-600 border-white text-white shadow-[0_2px_12px_rgba(16,185,129,0.45)]'
+                  : isHellMode
+                  ? 'bg-black/50 hover:bg-black/70 border-white/20 text-purple-200/90'
+                  : 'bg-white/20 hover:bg-white/30 border-white/40 text-white'
+              }`}
+            >
+              <Zap
+                className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 transition-transform ${
+                  reducedMotion ? 'fill-current scale-110 text-yellow-300' : ''
+                }`}
+              />
+
+              <div className="flex flex-col items-start leading-none">
+                <span className="text-[10px] sm:text-xs font-black tracking-tight whitespace-nowrap">
+                  Giảm effect
+                </span>
+              </div>
+
+              {/* Mini Switch Track & Thumb */}
+              <div
+                className={`w-7 sm:w-8 h-4 sm:h-4.5 rounded-full p-0.5 transition-colors duration-200 flex items-center shrink-0 ${
+                  reducedMotion
+                    ? isHellMode
+                      ? 'bg-amber-400 justify-end'
+                      : 'bg-white justify-end'
+                    : 'bg-black/35 justify-start'
+                }`}
+              >
+                <div
+                  className={`w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full transition-transform duration-200 ${
+                    reducedMotion
+                      ? isHellMode
+                        ? 'bg-purple-950 shadow-xs'
+                        : 'bg-emerald-600 shadow-xs'
+                      : 'bg-white/90 shadow-xs'
+                  }`}
+                />
+              </div>
+            </button>
+          )}
+
           {/* Fullscreen Button */}
           <button
             onClick={toggleFullscreen}

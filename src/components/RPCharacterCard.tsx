@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, BookOpen, Sparkles, Crown, Check, Volume2, Flame, Lock } from 'lucide-react';
 import { RPCharacter } from '../types';
-import { useCharacterVoice } from '../utils/characterVoice';
 import { RPCharacterComments } from './RPCharacterComments';
 
 interface RPCharacterCardProps {
   character: RPCharacter;
   hasVoted?: boolean;
+  isSpeaking?: boolean;
+  onToggleVoice: (character: RPCharacter) => void;
   onPlay: (character: RPCharacter) => void;
   onReadPlot: (character: RPCharacter) => void;
   onDonateRobux: (characterId: string) => void;
@@ -18,23 +19,25 @@ interface RPCharacterCardProps {
     label: string;
     color: string;
   };
+  reducedMotion?: boolean;
 }
 
 const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
   character,
   hasVoted = false,
+  isSpeaking = false,
+  onToggleVoice,
   onPlay,
   onReadPlot,
   onDonateRobux,
   isHellMode = false,
   commentCount = 0,
   rankBadge,
+  reducedMotion = false,
 }) => {
   const [floatingPuffs, setFloatingPuffs] = useState<{ id: number; text: string; isWarning?: boolean }[]>([]);
   const [isHovered, setIsHovered] = useState(false);
-  const { playingId, playVoice, stopVoice } = useCharacterVoice();
 
-  const isSpeaking = playingId === character.id;
   const isLuciferLocked = character.id === 'char-11-lucifer' || character.name.toLowerCase().includes('lucifer') || Boolean(character.password);
   const isLinkLocked = Boolean(character.isLinkLocked);
 
@@ -43,11 +46,7 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
 
     if (!character.voiceUrl) return;
 
-    if (isSpeaking) {
-      stopVoice();
-    } else {
-      playVoice(character);
-    }
+    onToggleVoice(character);
   };
 
   const handleRobuxClick = (e: React.MouseEvent) => {
@@ -167,8 +166,8 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
             className={`absolute bottom-2 left-2 right-2 flex items-center justify-center gap-1.5 px-2 py-1 rounded-full text-[10px] sm:text-xs font-black shadow-md transition-all duration-300 pointer-events-none ${
               isSpeaking
                 ? isHellMode
-                  ? 'bg-gradient-to-r from-red-600 via-purple-600 to-amber-500 text-white animate-pulse shadow-red-500/50'
-                  : 'bg-gradient-to-r from-pink-500 via-rose-500 to-pink-500 text-white animate-pulse shadow-pink-500/50'
+                  ? `bg-gradient-to-r from-red-600 via-purple-600 to-amber-500 text-white shadow-red-500/50 ${!reducedMotion ? 'animate-pulse' : ''}`
+                  : `bg-gradient-to-r from-pink-500 via-rose-500 to-pink-500 text-white shadow-pink-500/50 ${!reducedMotion ? 'animate-pulse' : ''}`
                 : isHellMode
                 ? 'bg-black/85 border border-purple-500/40 text-purple-200 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0'
                 : 'bg-black/75 text-white/95 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0'
@@ -178,11 +177,13 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
               <>
                 <Volume2 className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
                 <span className="truncate">Đang phát giọng...</span>
-                <div className="flex items-end gap-0.5 h-3 ml-0.5">
-                  <span className="w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_alternate]" style={{ height: '80%' }} />
-                  <span className="w-0.5 bg-white rounded-full animate-[bounce_0.8s_infinite_alternate_0.2s]" style={{ height: '100%' }} />
-                  <span className="w-0.5 bg-white rounded-full animate-[bounce_0.5s_infinite_alternate_0.4s]" style={{ height: '60%' }} />
-                </div>
+                {!reducedMotion && (
+                  <div className="flex items-end gap-0.5 h-3 ml-0.5">
+                    <span className="w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_alternate]" style={{ height: '80%' }} />
+                    <span className="w-0.5 bg-white rounded-full animate-[bounce_0.8s_infinite_alternate_0.2s]" style={{ height: '100%' }} />
+                    <span className="w-0.5 bg-white rounded-full animate-[bounce_0.5s_infinite_alternate_0.4s]" style={{ height: '60%' }} />
+                  </div>
+                )}
               </>
             ) : (
               <>
@@ -193,16 +194,21 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
           </div>
         )}
 
-        {/* Top-Right NEW / Custom Tag Badge */}
+        {/* Top-Right NEW / Custom Tag Badge (Chỉ kích hoạt hiệu ứng khi hover hoặc phát âm thanh, mặc định không chạy animate) */}
         {(character.isNew || character.cornerTag) && (
           <div
-            className={`absolute top-2 right-2 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full font-black text-[9px] sm:text-[10px] tracking-wide shadow-md border select-none ${
+            className={`absolute top-2 right-2 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full font-black text-[9px] sm:text-[10px] tracking-wide shadow-md border select-none transition-all ${
+              (isHovered || isSpeaking) && !reducedMotion ? 'animate-pulse scale-105' : ''
+            } ${
               isHellMode
                 ? 'bg-gradient-to-r from-red-600 via-purple-600 to-amber-500 text-white border-red-300 shadow-[0_0_10px_rgba(220,38,38,0.7)]'
                 : 'bg-gradient-to-r from-red-500 via-rose-500 to-amber-500 text-white border-white/60 shadow-[0_2px_10px_rgba(244,63,94,0.55)]'
             }`}
           >
-            <Sparkles className="w-2.5 h-2.5 fill-yellow-200 text-yellow-200 animate-spin" style={{ animationDuration: '3s' }} />
+            <Sparkles
+              className={`w-2.5 h-2.5 fill-yellow-200 text-yellow-200 ${(isHovered || isSpeaking) && !reducedMotion ? 'animate-spin' : ''}`}
+              style={{ animationDuration: '3s' }}
+            />
             <span>{character.cornerTag || 'MỚI'}</span>
           </div>
         )}
@@ -210,7 +216,9 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
         {/* Top-Left Voice Icon Pill when speaking */}
         {isSpeaking && (
           <div
-            className={`absolute top-2 left-2 w-7 h-7 rounded-full text-white flex items-center justify-center shadow-lg animate-bounce pointer-events-none z-10 ${
+            className={`absolute top-2 left-2 w-7 h-7 rounded-full text-white flex items-center justify-center shadow-lg pointer-events-none z-10 ${
+              !reducedMotion ? 'animate-bounce' : ''
+            } ${
               isHellMode ? 'bg-red-600' : 'bg-pink-500'
             }`}
           >
@@ -233,7 +241,9 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
           </h3>
           {rankBadge && !isHellMode && (
             <div
-              className="flex items-center gap-0.5 sm:gap-1 px-1.5 py-0.5 rounded-full font-black text-[10px] shadow-sm shrink-0 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950"
+              className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-0.5 rounded-full font-black text-[10px] shadow-sm shrink-0 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 transition-all ${
+                isHovered && !reducedMotion ? 'scale-105 animate-pulse' : ''
+              }`}
             >
               <Crown className="w-2.5 h-2.5 fill-current" />
               <span>#{rankBadge.rank}</span>
@@ -423,8 +433,10 @@ export const RPCharacterCard = React.memo(RPCharacterCardComponent, (prev, next)
     prev.character.avatarUrl === next.character.avatarUrl &&
     prev.character.name === next.character.name &&
     prev.hasVoted === next.hasVoted &&
+    prev.isSpeaking === next.isSpeaking &&
     prev.commentCount === next.commentCount &&
     prev.isHellMode === next.isHellMode &&
+    prev.reducedMotion === next.reducedMotion &&
     prev.rankBadge?.rank === next.rankBadge?.rank
   );
 });

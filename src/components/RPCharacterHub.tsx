@@ -47,6 +47,12 @@ import {
   playRobuxDonateSound,
   playReturnToHeaven,
 } from '../utils/audio';
+import {
+  useCharacterVoice,
+  getCurrentPlayingVoiceCharId,
+  playCharacterVoice,
+  stopCharacterVoice,
+} from '../utils/characterVoice';
 
 interface RPCharacterHubProps {
   onBackToWelcome?: () => void;
@@ -214,8 +220,50 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
     };
   }, [syncServerData]);
 
+  // Nút gạt "Giảm effect" cho người dùng máy yếu
+  const [reducedMotion, setReducedMotion] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('roblox_rp_reduced_motion');
+      if (saved !== null) return saved === 'true';
+      return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('roblox_rp_reduced_motion', String(reducedMotion));
+    } catch {}
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.toggle('reduced-motion-mode', reducedMotion);
+    }
+  }, [reducedMotion]);
+
+  const handleToggleReducedMotion = useCallback(() => {
+    setReducedMotion((prev) => {
+      const next = !prev;
+      playUiClick(soundEnabled);
+      return next;
+    });
+  }, [soundEnabled]);
+
+  // Quản lý playingId ở component cha (RPCharacterHub) để truyền isSpeaking xuống từng thẻ,
+  // kết hợp React.memo ngăn chặn 100% re-render các thẻ không liên quan
+  const { playingId } = useCharacterVoice();
+
+  const handleToggleVoice = useCallback((char: RPCharacter) => {
+    if (!char.voiceUrl) return;
+    const currentId = getCurrentPlayingVoiceCharId();
+    if (currentId === char.id) {
+      stopCharacterVoice();
+    } else {
+      playCharacterVoice(char);
+    }
+  }, []);
+
   // Handle Robux Donation with Anonymous Device Fingerprinting & Real-Time Sync
-  const handleDonateRobux = async (characterId: string) => {
+  const handleDonateRobux = useCallback(async (characterId: string) => {
     // Check if already voted on this device
     if (votedIds.includes(characterId) || isCharacterVotedLocally(characterId)) {
       return;
@@ -257,7 +305,7 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
     } catch {
       // Local optimistic state already applied
     }
-  };
+  }, [soundEnabled, votedIds]);
 
   // Trigger Hell Mode Confirmation flow
   const handleOpenAgeVerification = () => {
@@ -374,15 +422,15 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
   }, [filteredCharacters, currentPage, itemsPerPage]);
 
   // Quick Open Plot
-  const handleReadPlot = (char: RPCharacter) => {
+  const handleReadPlot = useCallback((char: RPCharacter) => {
     playUiClick(soundEnabled);
     if (char.plotUrl) {
       window.open(char.plotUrl, '_blank');
     }
-  };
+  }, [soundEnabled]);
 
   // Quick Open Play
-  const handlePlay = (char: RPCharacter) => {
+  const handlePlay = useCallback((char: RPCharacter) => {
     playUiClick(soundEnabled);
     if (char.isLinkLocked) {
       setLockedToastMessage(`🔒 Link của ${char.name} đang tạm thời khóa theo yêu cầu của tác giả! Vui lòng quay lại sau nha ✨`);
@@ -398,7 +446,7 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
     if (char.playUrl) {
       window.open(char.playUrl, '_blank');
     }
-  };
+  }, [soundEnabled]);
 
   // Open Cóc Kiện Trời Modal
   const handleOpenCocKienTroi = (char?: RPCharacter) => {
@@ -459,7 +507,11 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
       }`}
     >
       {/* Background Switch: Heaven/Meadow vs Hell Landscape */}
-      {isHellMode ? <HellBackground /> : <RobloxBackground />}
+      {isHellMode ? (
+        <HellBackground reducedMotion={reducedMotion} />
+      ) : (
+        <RobloxBackground reducedMotion={reducedMotion} />
+      )}
 
       {/* 1. TOP NAVIGATION BAR */}
       <RPTopNavBar
@@ -470,6 +522,8 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
         onOpenAgeVerification={handleOpenAgeVerification}
         onReturnToEarth={handleReturnToEarth}
         onOpenGallery={handleOpenGallery}
+        reducedMotion={reducedMotion}
+        onToggleReducedMotion={handleToggleReducedMotion}
       />
 
       {/* 1.1 DUAL-TAB NAVIGATION SUB-BAR (Trang Chủ & Kho Lệnh) */}
@@ -599,6 +653,7 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
               isHellMode={false}
               remainingHours={leaderboardInfo.remainingHours}
               onRefreshLeaderboard={handleForceRefreshLeaderboard}
+              reducedMotion={reducedMotion}
             />
           </div>
         )}
@@ -618,6 +673,7 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
               onOpenGallery={handleOpenGallery}
               isHellMode={isHellMode}
               soundEnabled={soundEnabled}
+              reducedMotion={reducedMotion}
             />
           </div>
         )}
@@ -708,12 +764,15 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
                     key={character.id}
                     character={character}
                     hasVoted={votedIds.includes(character.id)}
+                    isSpeaking={playingId === character.id}
+                    onToggleVoice={handleToggleVoice}
                     onPlay={handlePlay}
                     onReadPlot={handleReadPlot}
                     onDonateRobux={handleDonateRobux}
                     rankBadge={rankMap.get(character.id)}
                     isHellMode={isHellMode}
                     commentCount={commentCounts[character.id] || 0}
+                    reducedMotion={reducedMotion}
                   />
                 ))}
               </motion.div>
