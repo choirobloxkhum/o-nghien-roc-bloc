@@ -126,14 +126,14 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
       {/* Primary Vibrant Sky Gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#0284c7] via-[#38bdf8] to-[#93c5fd] z-0" />
 
-      {/* Radiant Sunburst Rays from Top-Center */}
-      <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[750px] h-[750px] bg-gradient-to-b from-yellow-300/35 via-amber-200/20 to-transparent rounded-full blur-3xl pointer-events-none animate-pulse" />
+      {/* Radiant Sunburst Rays from Top-Center (Single-pass GPU Radial Gradient) */}
+      <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[750px] h-[750px] bg-[radial-gradient(circle,_rgba(253,224,71,0.35)_0%,_rgba(251,191,36,0.18)_40%,_transparent_75%)] rounded-full pointer-events-none transform-gpu" />
 
       {/* Rotating Sun Rays Illusion */}
       <motion.div
         animate={{ rotate: 360 }}
         transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
-        className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[900px] opacity-15 pointer-events-none will-change-transform"
+        className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[900px] opacity-15 pointer-events-none transform-gpu will-change-transform"
         style={{
           background: 'conic-gradient(from 0deg, transparent 0deg 20deg, rgba(255,255,255,0.7) 20deg 40deg, transparent 40deg 60deg, rgba(255,255,255,0.7) 60deg 80deg, transparent 80deg 100deg, rgba(255,255,255,0.7) 100deg 120deg, transparent 120deg 140deg, rgba(255,255,255,0.7) 140deg 160deg, transparent 160deg 180deg, rgba(255,255,255,0.7) 180deg 200deg, transparent 200deg 220deg, rgba(255,255,255,0.7) 220deg 240deg, transparent 240deg 260deg, rgba(255,255,255,0.7) 260deg 280deg, transparent 280deg 300deg, rgba(255,255,255,0.7) 300deg 320deg, transparent 320deg 340deg, rgba(255,255,255,0.7) 340deg 360deg)',
         }}
@@ -152,17 +152,17 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
       <motion.div
         animate={{ x: [-80, 80, -80] }}
         transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-12 left-10 w-48 sm:w-64 h-16 bg-white/40 rounded-full blur-md pointer-events-none"
+        className="absolute top-12 left-10 w-48 sm:w-64 h-16 bg-white/40 rounded-full blur-md pointer-events-none transform-gpu will-change-transform"
       />
       <motion.div
         animate={{ x: [60, -60, 60] }}
         transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-28 right-12 w-56 sm:w-80 h-20 bg-white/35 rounded-full blur-md pointer-events-none"
+        className="absolute top-28 right-12 w-56 sm:w-80 h-20 bg-white/35 rounded-full blur-md pointer-events-none transform-gpu will-change-transform"
       />
       <motion.div
         animate={{ x: [-50, 50, -50] }}
         transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute bottom-20 left-1/4 w-72 sm:w-96 h-24 bg-white/30 rounded-full blur-lg pointer-events-none"
+        className="absolute bottom-20 left-1/4 w-72 sm:w-96 h-24 bg-white/30 rounded-full blur-lg pointer-events-none transform-gpu will-change-transform"
       />
 
       {/* FLOATING SPARKLING PARTICLES & CELESTIAL STUDS */}

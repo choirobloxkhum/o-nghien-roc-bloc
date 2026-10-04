@@ -142,8 +142,8 @@ export const NgocHoangCloudModal: React.FC<NgocHoangCloudModalProps> = ({
             transition={{ type: 'spring', damping: 22, stiffness: 260 }}
             className="relative w-full max-w-lg sm:max-w-2xl md:max-w-3xl z-20 my-auto select-none p-1 sm:p-2"
           >
-            {/* Demonic Flame & Obsidian Aura Behind Letter */}
-            <div className="absolute -inset-4 sm:-inset-10 bg-gradient-to-tr from-red-600/40 via-rose-800/30 to-amber-600/30 rounded-3xl blur-2xl opacity-90 pointer-events-none animate-pulse" />
+            {/* Demonic Flame & Obsidian Aura Behind Letter (Single-pass GPU Radial Gradient) */}
+            <div className="absolute -inset-4 sm:-inset-10 bg-[radial-gradient(ellipse_at_center,_rgba(220,38,38,0.45)_0%,_rgba(159,18,57,0.3)_45%,_rgba(217,119,6,0.25)_70%,_transparent_100%)] rounded-3xl opacity-90 pointer-events-none transform-gpu" />
 
             {/* The Cursed Parchment Manuscript */}
             <div className="relative w-full rounded-2xl sm:rounded-3xl bg-[#fdf6e2] text-stone-900 border-4 border-[#78350f] shadow-[0_20px_60px_rgba(0,0,0,0.9),0_0_35px_rgba(220,38,38,0.6)] overflow-hidden">
@@ -281,8 +281,8 @@ export const NgocHoangCloudModal: React.FC<NgocHoangCloudModalProps> = ({
             transition={{ type: 'spring', damping: 20, stiffness: 280 }}
             className="relative w-full max-w-lg sm:max-w-2xl md:max-w-3xl z-20 my-auto select-none p-2 sm:p-4"
           >
-            {/* Ambient Golden Cloud Halo Glow */}
-            <div className="absolute -inset-4 sm:-inset-8 bg-gradient-to-tr from-yellow-300/40 via-amber-200/30 to-sky-300/40 rounded-full blur-2xl opacity-80 pointer-events-none" />
+            {/* Ambient Golden Cloud Halo Glow (Single-pass GPU Radial Gradient) */}
+            <div className="absolute -inset-4 sm:-inset-8 bg-[radial-gradient(ellipse_at_center,_rgba(253,224,71,0.4)_0%,_rgba(251,191,36,0.25)_45%,_rgba(56,189,248,0.2)_70%,_transparent_100%)] rounded-full opacity-85 pointer-events-none transform-gpu" />
 
             {/* THE CLOUD CONTAINER (SVG Puffy Cloud Background Shape & Card) */}
             <div className="relative w-full rounded-[36px] sm:rounded-[48px] bg-gradient-to-b from-[#ffffff] via-[#fffdf0] to-[#fef8d8] text-slate-800 border-4 sm:border-6 border-[#fef08a] shadow-[0_20px_50px_rgba(234,179,8,0.3),0_10px_25px_rgba(0,0,0,0.15)] overflow-hidden">

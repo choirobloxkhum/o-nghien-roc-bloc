@@ -110,9 +110,9 @@ export const JoinGameModal: React.FC<JoinGameModalProps> = ({
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
         className="relative w-full max-w-lg max-h-[90vh] flex flex-col bg-slate-900 border-4 border-emerald-500 rounded-3xl p-6 sm:p-7 shadow-2xl overflow-hidden text-white"
       >
-        {/* Background ambient glow */}
-        <div className="absolute -top-24 -right-24 w-60 h-60 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-60 h-60 bg-yellow-500/15 rounded-full blur-3xl pointer-events-none" />
+        {/* Background ambient glow with zero-blur radial gradients */}
+        <div className="absolute -top-24 -right-24 w-60 h-60 rounded-full bg-[radial-gradient(circle,_rgba(16,185,129,0.22)_0%,_transparent_70%)] pointer-events-none transform-gpu" />
+        <div className="absolute -bottom-24 -left-24 w-60 h-60 rounded-full bg-[radial-gradient(circle,_rgba(234,179,8,0.18)_0%,_transparent_70%)] pointer-events-none transform-gpu" />
 
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-800 relative z-10">

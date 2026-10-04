@@ -39,8 +39,8 @@ export const KhumPrankModal: React.FC<KhumPrankModalProps> = ({
         exit={{ opacity: 0, scale: 0.8 }}
         className="relative w-full max-w-md bg-slate-900 border-4 border-rose-500 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden text-white text-center"
       >
-        {/* Decorative background circle */}
-        <div className="absolute -top-20 -right-20 w-48 h-48 bg-rose-500/20 rounded-full blur-2xl pointer-events-none" />
+        {/* Decorative background circle (Single-pass GPU Radial Gradient) */}
+        <div className="absolute -top-20 -right-20 w-48 h-48 rounded-full bg-[radial-gradient(circle,_rgba(244,63,94,0.3)_0%,_transparent_70%)] pointer-events-none transform-gpu" />
 
         {/* Close Button */}
         <button

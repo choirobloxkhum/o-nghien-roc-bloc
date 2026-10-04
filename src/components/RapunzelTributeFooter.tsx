@@ -136,15 +136,19 @@ export const RapunzelTributeFooter: React.FC<RapunzelTributeFooterProps> = ({
             : 'bg-gradient-to-b from-white/95 via-pink-50/70 to-purple-50/80 hover:from-white hover:to-pink-50 border-pink-200/90 hover:border-pink-300'
         }`}
       >
-        {/* Subtle decorative background glows */}
+        {/* Subtle decorative background glows (Single-pass GPU Radial Gradients) */}
         <div
-          className={`absolute -top-10 -left-10 w-32 h-32 rounded-full blur-2xl pointer-events-none transition-all ${
-            isHellMode ? 'bg-red-600/20 group-hover:bg-red-500/30' : 'bg-pink-300/20 group-hover:bg-pink-400/30'
+          className={`absolute -top-10 -left-10 w-32 h-32 rounded-full pointer-events-none transition-all transform-gpu ${
+            isHellMode
+              ? 'bg-[radial-gradient(circle,_rgba(220,38,38,0.25)_0%,_transparent_70%)]'
+              : 'bg-[radial-gradient(circle,_rgba(244,114,182,0.3)_0%,_transparent_70%)]'
           }`}
         />
         <div
-          className={`absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-2xl pointer-events-none transition-all ${
-            isHellMode ? 'bg-purple-600/20 group-hover:bg-purple-500/30' : 'bg-purple-300/20 group-hover:bg-purple-400/30'
+          className={`absolute -bottom-10 -right-10 w-32 h-32 rounded-full pointer-events-none transition-all transform-gpu ${
+            isHellMode
+              ? 'bg-[radial-gradient(circle,_rgba(147,51,234,0.25)_0%,_transparent_70%)]'
+              : 'bg-[radial-gradient(circle,_rgba(192,132,252,0.3)_0%,_transparent_70%)]'
           }`}
         />
         <div className="absolute inset-0 roblox-stud-pattern opacity-5 pointer-events-none" />

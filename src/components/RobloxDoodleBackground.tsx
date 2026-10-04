@@ -38,17 +38,17 @@ export const RobloxDoodleBackground: React.FC<RobloxDoodleBackgroundProps> = ({
       {/* 3. Subtle Museum Ambient Track Light Cones & Vignette Overlay */}
       <div className="absolute inset-0 bg-radial from-transparent via-transparent to-black/20 pointer-events-none" />
 
-      {/* 4. Atmospheric Light Spots */}
+      {/* 4. Atmospheric Light Spots with Single-Pass CSS Radial-Gradients (Zero GPU blur filter overhead) */}
       {isHellMode ? (
         <>
-          <div className="absolute top-10 left-1/4 w-96 h-96 bg-red-600/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-purple-700/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-10 left-1/4 w-96 h-96 rounded-full bg-[radial-gradient(circle,_rgba(220,38,38,0.18)_0%,_transparent_70%)] pointer-events-none transform-gpu" />
+          <div className="absolute bottom-10 right-1/4 w-96 h-96 rounded-full bg-[radial-gradient(circle,_rgba(126,34,206,0.22)_0%,_transparent_70%)] pointer-events-none transform-gpu" />
         </>
       ) : (
         <>
-          <div className="absolute top-0 left-1/3 w-[500px] h-[350px] bg-amber-300/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute top-0 right-1/4 w-[450px] h-[350px] bg-yellow-200/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-full h-48 bg-amber-900/10 blur-2xl pointer-events-none" />
+          <div className="absolute top-0 left-1/3 w-[500px] h-[350px] rounded-full bg-[radial-gradient(ellipse,_rgba(252,211,77,0.25)_0%,_transparent_70%)] pointer-events-none transform-gpu" />
+          <div className="absolute top-0 right-1/4 w-[450px] h-[350px] rounded-full bg-[radial-gradient(ellipse,_rgba(254,240,138,0.25)_0%,_transparent_70%)] pointer-events-none transform-gpu" />
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-full h-48 rounded-full bg-[radial-gradient(ellipse,_rgba(120,53,15,0.12)_0%,_transparent_75%)] pointer-events-none transform-gpu" />
         </>
       )}
     </div>

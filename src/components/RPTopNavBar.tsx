@@ -46,36 +46,36 @@ export const RPTopNavBar: React.FC<RPTopNavBarProps> = ({
       <div className="absolute inset-0 roblox-stud-pattern opacity-15 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-black/20 pointer-events-none" />
 
-      <div className="relative w-full px-3 sm:px-6 md:px-8 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-3 max-w-7xl mx-auto">
+      <div className="relative w-full px-2 sm:px-6 md:px-8 py-1.5 sm:py-2.5 flex items-center justify-between gap-1.5 sm:gap-3 max-w-7xl mx-auto">
         {/* Left Section: Back button & App Title */}
-        <div className="flex items-center gap-2 sm:gap-4 shrink-0 min-w-0">
+        <div className="flex items-center gap-1.5 sm:gap-4 shrink min-w-0">
           {onBackToWelcome && (
             <button
               onClick={onBackToWelcome}
               title="Quay lại trang chính"
-              className={`group relative p-2 sm:p-2.5 rounded-2xl border-2 text-white transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-95 flex items-center justify-center shrink-0 ${
+              className={`group relative p-1.5 sm:p-2.5 rounded-xl sm:rounded-2xl border-2 text-white transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-95 flex items-center justify-center shrink-0 ${
                 isHellMode
                   ? 'bg-gradient-to-br from-red-950 to-purple-950 hover:from-red-900 hover:to-purple-900 border-red-500/50'
                   : 'bg-sky-800/90 hover:bg-sky-700 border-sky-300/40'
               }`}
             >
-              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 stroke-[3] group-hover:-translate-x-0.5 transition-transform" />
+              <ArrowLeft className="w-3.5 h-3.5 sm:w-5 sm:h-5 stroke-[3] group-hover:-translate-x-0.5 transition-transform" />
             </button>
           )}
 
           {/* App Branding & Title */}
-          <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
+          <div className="flex items-center gap-1.5 sm:gap-3.5 min-w-0">
             {/* 3D Emblem Box */}
             <div className="relative group cursor-pointer shrink-0">
               <div
-                className={`w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-2xl p-0.5 border-2 border-white flex items-center justify-center transform group-hover:rotate-6 group-hover:scale-105 transition-all ${
+                className={`w-7 h-7 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-xl sm:rounded-2xl p-0.5 border sm:border-2 border-white flex items-center justify-center transform group-hover:rotate-6 group-hover:scale-105 transition-all ${
                   isHellMode
                     ? 'bg-gradient-to-br from-red-600 via-purple-600 to-amber-500 shadow-[0_0_20px_rgba(220,38,38,0.8)]'
                     : 'bg-gradient-to-br from-yellow-300 via-amber-400 to-yellow-500 shadow-[0_0_15px_rgba(253,224,71,0.6)]'
                 }`}
               >
                 <div
-                  className={`w-full h-full rounded-[13px] flex items-center justify-center p-1.5 sm:p-2 ${
+                  className={`w-full h-full rounded-[9px] sm:rounded-[13px] flex items-center justify-center p-1 sm:p-2 ${
                     isHellMode ? 'bg-[#0f0312]' : 'bg-sky-950'
                   }`}
                 >
@@ -97,22 +97,22 @@ export const RPTopNavBar: React.FC<RPTopNavBarProps> = ({
               </div>
               {/* Sparkle or Flame pinned on badge */}
               <div
-                className={`absolute -top-1.5 -right-1.5 pointer-events-none animate-pulse ${
+                className={`absolute -top-1 -right-1 pointer-events-none animate-pulse ${
                   isHellMode ? 'text-amber-400' : 'text-yellow-200'
                 }`}
               >
                 {isHellMode ? (
-                  <Flame className="w-4 h-4 fill-red-500 text-purple-300" />
+                  <Flame className="w-3 h-3 sm:w-4 sm:h-4 fill-red-500 text-purple-300" />
                 ) : (
-                  <Sparkles className="w-4 h-4 fill-yellow-300" />
+                  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-300" />
                 )}
               </div>
             </div>
 
             {/* Title & Tagline */}
-            <div className="flex flex-col min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg sm:text-2xl md:text-3xl font-black tracking-tight leading-tight text-white app-title-3d uppercase truncate">
+            <div className="flex flex-col min-w-0 overflow-hidden">
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-sm sm:text-2xl md:text-3xl font-black tracking-tight leading-tight text-white app-title-3d uppercase truncate">
                   {isHellMode ? 'DIÊM LA ĐIỆN ROBLOX' : 'Ổ NGHIỆN ROBLOX'}
                 </h1>
                 <span
@@ -127,18 +127,18 @@ export const RPTopNavBar: React.FC<RPTopNavBarProps> = ({
                 </span>
               </div>
               <span
-                className={`text-[10px] sm:text-xs font-bold tracking-tight drop-shadow-sm flex items-center gap-1 truncate ${
+                className={`text-[9px] sm:text-xs font-bold tracking-tight drop-shadow-sm flex items-center gap-1 truncate ${
                   isHellMode ? 'text-purple-200' : 'text-sky-100'
                 }`}
               >
-                <span>{isHellMode ? 'Khu vực cấm Diêm La Địa Ngục 18+ 🔥🔮' : 'Ổ lưu giữ các chìu ông💖'}</span>
+                <span className="truncate">{isHellMode ? 'Khu vực cấm Diêm La Địa Ngục 18+ 🔥🔮' : 'Ổ lưu giữ các chìu ông💖'}</span>
               </span>
             </div>
           </div>
         </div>
 
         {/* Right Section: Smooth Performance Mode Switch & Fullscreen Action */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           {/* Nút gạt Giảm effect */}
           {onToggleReducedMotion && (
             <button
@@ -152,31 +152,29 @@ export const RPTopNavBar: React.FC<RPTopNavBarProps> = ({
                   ? 'Giảm effect: Đang bật (Đã tắt các hạt bay & chuyển động nền để máy mượt hơn)'
                   : 'Bật Giảm effect (Tắt hạt bay & chuyển động nền cho máy yếu)'
               }
-              className={`group relative flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-xl sm:rounded-2xl border transition-all cursor-pointer select-none active:scale-95 ${
+              className={`group relative flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-xl border transition-all cursor-pointer select-none active:scale-95 shrink-0 ${
                 reducedMotion
                   ? isHellMode
-                    ? 'bg-gradient-to-r from-red-950 via-purple-950 to-black border-amber-400 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.4)]'
-                    : 'bg-emerald-500 hover:bg-emerald-600 border-white text-white shadow-[0_2px_12px_rgba(16,185,129,0.45)]'
+                    ? 'bg-gradient-to-r from-red-950 via-purple-950 to-black border-amber-400 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.4)]'
+                    : 'bg-emerald-500 hover:bg-emerald-600 border-white text-white shadow-[0_2px_10px_rgba(16,185,129,0.4)]'
                   : isHellMode
                   ? 'bg-black/50 hover:bg-black/70 border-white/20 text-purple-200/90'
                   : 'bg-white/20 hover:bg-white/30 border-white/40 text-white'
               }`}
             >
               <Zap
-                className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 transition-transform ${
+                className={`w-[10px] h-[10px] sm:w-[13px] sm:h-[13px] shrink-0 transition-transform ${
                   reducedMotion ? 'fill-current scale-110 text-yellow-300' : ''
                 }`}
               />
 
-              <div className="flex flex-col items-start leading-none">
-                <span className="text-[10px] sm:text-xs font-black tracking-tight whitespace-nowrap">
-                  Giảm effect
-                </span>
-              </div>
+              <span className="text-[8.5px] sm:text-[11px] font-extrabold sm:font-black tracking-tight whitespace-nowrap leading-none">
+                Giảm effect
+              </span>
 
-              {/* Mini Switch Track & Thumb */}
+              {/* Mini Switch Track & Thumb - Tỉ lệ siêu gọn & hài hòa trên điện thoại */}
               <div
-                className={`w-7 sm:w-8 h-4 sm:h-4.5 rounded-full p-0.5 transition-colors duration-200 flex items-center shrink-0 ${
+                className={`w-[18px] sm:w-[24px] h-[10px] sm:h-[14px] rounded-full p-[1px] sm:p-[1.5px] transition-colors duration-200 flex items-center shrink-0 ${
                   reducedMotion
                     ? isHellMode
                       ? 'bg-amber-400 justify-end'
@@ -185,7 +183,7 @@ export const RPTopNavBar: React.FC<RPTopNavBarProps> = ({
                 }`}
               >
                 <div
-                  className={`w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full transition-transform duration-200 ${
+                  className={`w-[8px] h-[8px] sm:w-[11px] sm:h-[11px] rounded-full transition-transform duration-200 ${
                     reducedMotion
                       ? isHellMode
                         ? 'bg-purple-950 shadow-xs'
@@ -201,9 +199,9 @@ export const RPTopNavBar: React.FC<RPTopNavBarProps> = ({
           <button
             onClick={toggleFullscreen}
             title="Toàn màn hình"
-            className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-white/20 hover:bg-white/30 text-white border border-white/40 backdrop-blur-md flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
+            className="p-1 sm:p-2 rounded-md sm:rounded-xl bg-white/20 hover:bg-white/30 text-white border border-white/40 backdrop-blur-md flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer shrink-0"
           >
-            <Maximize2 className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2.5]" />
+            <Maximize2 className="w-3 h-3 sm:w-4 sm:h-4 stroke-[2.5]" />
           </button>
         </div>
       </div>

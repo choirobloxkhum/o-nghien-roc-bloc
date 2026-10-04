@@ -119,8 +119,8 @@ export const GachaModal: React.FC<GachaModalProps> = ({
         >
           {/* Glowing background rays & studs */}
           <div className="absolute inset-0 roblox-stud-pattern opacity-10 pointer-events-none" />
-          <div className="absolute -top-24 -left-24 w-60 h-60 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 w-60 h-60 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-24 -left-24 w-60 h-60 rounded-full bg-[radial-gradient(circle,_rgba(168,85,247,0.22)_0%,_transparent_70%)] pointer-events-none transform-gpu" />
+          <div className="absolute -bottom-24 -right-24 w-60 h-60 rounded-full bg-[radial-gradient(circle,_rgba(245,158,11,0.22)_0%,_transparent_70%)] pointer-events-none transform-gpu" />
 
           {/* Close button */}
           <button

@@ -70,7 +70,7 @@ export const RobloxBackground: React.FC<RobloxBackgroundProps> = ({ reducedMotio
               }
         }
         transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-20 right-[12%] sm:right-[20%] hidden md:flex flex-col items-center z-1 opacity-80 scale-90 sm:scale-100"
+        className="absolute top-20 right-[12%] sm:right-[20%] hidden md:flex flex-col items-center z-1 opacity-80 scale-90 sm:scale-100 transform-gpu will-change-transform"
       >
         {/* Balloon Body */}
         <div className="relative w-16 h-20 bg-gradient-to-b from-rose-500 via-amber-400 to-sky-500 rounded-[50%_50%_45%_45%] shadow-lg border-2 border-white/80 overflow-hidden flex items-center justify-center">
@@ -156,7 +156,7 @@ export const RobloxBackground: React.FC<RobloxBackgroundProps> = ({ reducedMotio
       <motion.div
         animate={reducedMotion ? false : { x: [-15, 20, -15] }}
         transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-52 right-[4%] opacity-70"
+        className="absolute top-52 right-[4%] opacity-70 transform-gpu will-change-transform"
       >
         <div className="relative w-40 h-12 bg-white rounded-full shadow-[0_8px_16px_rgba(2,132,199,0.12)] border border-white/60">
           <div className="absolute -top-6 left-5 w-14 h-14 bg-white rounded-full" />
@@ -168,7 +168,7 @@ export const RobloxBackground: React.FC<RobloxBackgroundProps> = ({ reducedMotio
       <motion.div
         animate={reducedMotion ? false : { x: [10, -15, 10] }}
         transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-        className="absolute top-64 -left-6 opacity-60"
+        className="absolute top-64 -left-6 opacity-60 transform-gpu will-change-transform"
       >
         <div className="relative w-44 h-14 bg-white rounded-full shadow-[0_8px_16px_rgba(2,132,199,0.1)] border border-white/60">
           <div className="absolute -top-7 left-9 w-18 h-18 bg-white rounded-full" />

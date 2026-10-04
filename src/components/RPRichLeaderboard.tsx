@@ -289,13 +289,19 @@ export const RPRichLeaderboard: React.FC<RPRichLeaderboardProps> = ({
               {medal.isChampion && (
                 <div className="absolute -top-16 inset-x-0 flex items-center justify-center pointer-events-none -z-10 overflow-visible">
                   <div
-                    className={`w-48 h-48 sm:w-72 sm:h-72 rounded-full blur-md ${!reducedMotion ? 'animate-slow-spin' : ''} ${
+                    className={`w-48 h-48 sm:w-72 sm:h-72 rounded-full transform-gpu ${!reducedMotion ? 'animate-slow-spin will-change-transform' : ''} ${
                       isHellMode
-                        ? 'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-400/35 via-purple-600/25 to-transparent'
-                        : 'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-300/40 via-yellow-200/20 to-transparent'
+                        ? 'bg-[radial-gradient(circle,_rgba(251,191,36,0.35)_0%,_rgba(147,51,234,0.2)_40%,_transparent_70%)]'
+                        : 'bg-[radial-gradient(circle,_rgba(253,224,71,0.4)_0%,_rgba(254,240,138,0.25)_40%,_transparent_70%)]'
                     }`}
                   />
-                  <div className={`absolute w-36 h-36 sm:w-52 sm:h-52 rounded-full blur-2xl pointer-events-none ${isHellMode ? 'bg-purple-600/25' : 'bg-yellow-300/30'}`} />
+                  <div
+                    className={`absolute w-36 h-36 sm:w-52 sm:h-52 rounded-full pointer-events-none transform-gpu ${
+                      isHellMode
+                        ? 'bg-[radial-gradient(circle,_rgba(168,85,247,0.3)_0%,_transparent_70%)]'
+                        : 'bg-[radial-gradient(circle,_rgba(253,224,71,0.35)_0%,_transparent_70%)]'
+                    }`}
+                  />
                 </div>
               )}
 

@@ -408,8 +408,8 @@ export const HellFallingOverlay: React.FC<HellFallingOverlayProps> = ({
               transition={{ duration: 0.7, ease: 'easeOut' }}
               className="relative flex items-center justify-center"
             >
-              {/* Fiery Metamorphosis Vortex Core */}
-              <div className="w-72 h-72 sm:w-[420px] sm:h-[420px] rounded-full bg-gradient-to-tr from-red-600 via-rose-600 to-amber-400 blur-2xl animate-spin" />
+              {/* Fiery Metamorphosis Vortex Core (Single-pass GPU Radial Gradient) */}
+              <div className="w-72 h-72 sm:w-[420px] sm:h-[420px] rounded-full bg-[radial-gradient(circle,_rgba(239,68,68,0.7)_0%,_rgba(244,63,94,0.5)_35%,_rgba(251,191,36,0.3)_60%,_transparent_75%)] animate-spin transform-gpu will-change-transform" />
               
               {/* Expanding Shockwave Ring */}
               <motion.div

@@ -124,9 +124,9 @@ export const MongCheSecretLetterModal: React.FC<MongCheSecretLetterModalProps> =
             <X className="w-5 h-5" />
           </button>
 
-          {/* Floating animated sparkles around card */}
-          <div className="absolute -top-6 -left-6 w-24 h-24 bg-pink-400/20 rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-rose-400/20 rounded-full blur-2xl pointer-events-none" />
+          {/* Floating animated sparkles around card (Single-pass GPU Radial Gradients) */}
+          <div className="absolute -top-6 -left-6 w-24 h-24 rounded-full bg-[radial-gradient(circle,_rgba(244,114,182,0.3)_0%,_transparent_70%)] pointer-events-none transform-gpu" />
+          <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-[radial-gradient(circle,_rgba(251,113,133,0.3)_0%,_transparent_70%)] pointer-events-none transform-gpu" />
 
           {/* Header Tag */}
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md mb-4 uppercase tracking-wider">

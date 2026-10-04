@@ -31,6 +31,45 @@ export default function App() {
   const [noButtonOffset, setNoButtonOffset] = useState({ x: 0, y: 0 });
   const pianoAudioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Sync reduced motion preference
+  const [reducedMotion, setReducedMotion] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('roblox_rp_reduced_motion');
+      if (saved !== null) return saved === 'true';
+      return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.toggle('reduced-motion-mode', reducedMotion);
+    }
+    const handleStorage = () => {
+      try {
+        const saved = localStorage.getItem('roblox_rp_reduced_motion');
+        if (saved !== null) setReducedMotion(saved === 'true');
+      } catch {}
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [reducedMotion]);
+
+  const handleToggleReducedMotion = () => {
+    setReducedMotion((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('roblox_rp_reduced_motion', String(next));
+      } catch {}
+      if (typeof document !== 'undefined') {
+        document.documentElement.classList.toggle('reduced-motion-mode', next);
+      }
+      playUiClick(soundEnabled);
+      return next;
+    });
+  };
+
   // Background Piano Music Controls: Mute/Pause during Jumpscare or when disabled
   useEffect(() => {
     if (pianoAudioRef.current) {
@@ -175,9 +214,13 @@ export default function App() {
   if (currentScreen === 'rphub') {
     return (
       <>
-        <FloatingEmojiClickEffect />
+        <FloatingEmojiClickEffect disabled={reducedMotion} />
         <RPCharacterHub
           onBackToWelcome={() => {
+            try {
+              const saved = localStorage.getItem('roblox_rp_reduced_motion');
+              if (saved !== null) setReducedMotion(saved === 'true');
+            } catch {}
             playUiClick(soundEnabled);
             setCurrentScreen('welcome');
           }}
@@ -194,14 +237,16 @@ export default function App() {
       style={{ backgroundColor: '#87CEEB' }}
     >
       {/* Global Interactive Floating Emoji Click Effect */}
-      <FloatingEmojiClickEffect />
+      <FloatingEmojiClickEffect disabled={reducedMotion} />
       {/* Background Landscape Construction */}
-      <RobloxBackground />
+      <RobloxBackground reducedMotion={reducedMotion} />
 
       {/* Top Bar Header */}
       <RobloxTopBar
         soundEnabled={soundEnabled}
         onToggleSound={handleToggleSound}
+        reducedMotion={reducedMotion}
+        onToggleReducedMotion={handleToggleReducedMotion}
       />
 
       {/* Background Gentle Instrumental Piano Music (Turns off when entering rphub screen or during jumpscare) */}
@@ -386,6 +431,7 @@ export default function App() {
             soundEnabled={soundEnabled}
             onPlayClickSound={() => playUiClick(soundEnabled)}
             onPlayVictorySound={() => playVictoryChime(soundEnabled)}
+            reducedMotion={reducedMotion}
           />
         )}
       </AnimatePresence>
