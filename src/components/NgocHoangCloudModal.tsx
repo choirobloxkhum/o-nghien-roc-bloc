@@ -23,6 +23,7 @@ interface NgocHoangCloudModalProps {
   onClose: () => void;
   soundEnabled?: boolean;
   isHellMode?: boolean;
+  onOpenImperialEdict?: () => void;
 }
 
 export const NgocHoangCloudModal: React.FC<NgocHoangCloudModalProps> = ({
@@ -30,6 +31,7 @@ export const NgocHoangCloudModal: React.FC<NgocHoangCloudModalProps> = ({
   onClose,
   soundEnabled = true,
   isHellMode = false,
+  onOpenImperialEdict,
 }) => {
   // Play appropriate sound effect on modal open
   useEffect(() => {
@@ -381,16 +383,32 @@ export const NgocHoangCloudModal: React.FC<NgocHoangCloudModalProps> = ({
                   </div>
                 </div>
 
-                {/* FOOTER ACTION */}
-                <div className="mt-3 sm:mt-5 w-full flex items-center justify-center">
+                {/* FOOTER ACTIONS */}
+                <div className="mt-3 sm:mt-5 w-full flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
+                  {onOpenImperialEdict && (
+                    <motion.button
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.96 }}
+                      onClick={() => {
+                        playSparkleSound(soundEnabled);
+                        onClose();
+                        onOpenImperialEdict();
+                      }}
+                      className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-gradient-to-r from-rose-500 via-amber-500 to-yellow-500 hover:from-rose-600 hover:to-amber-600 border-2 border-white text-white font-black text-xs sm:text-sm shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <ScrollText className="w-4 h-4 text-white shrink-0" />
+                      <span>📜 XEM CHIẾU CHỈ CẬP NHẬT MỚI 👑</span>
+                    </motion.button>
+                  )}
+
                   <motion.button
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.96 }}
                     onClick={handleConfirm}
-                    className="w-full sm:w-auto px-6 sm:px-10 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-500 hover:to-yellow-500 border-2 border-amber-200 text-amber-950 font-black text-xs sm:text-sm md:text-base shadow-lg shadow-amber-300/50 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full sm:w-auto px-6 sm:px-8 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-500 hover:to-yellow-500 border-2 border-amber-200 text-amber-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-300/50 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <Crown className="w-4 h-4 sm:w-5 sm:h-5 text-amber-950 fill-amber-300 animate-bounce shrink-0" />
-                    <span>👑 DẠ NGỌC HOÀNG MUÔN NĂM! (ĐÃ ĐỌC CHỈ DỤ)</span>
+                    <Crown className="w-4 h-4 text-amber-950 fill-amber-300 animate-bounce shrink-0" />
+                    <span>👑 DẠ NGỌC HOÀNG MUÔN NĂM!</span>
                   </motion.button>
                 </div>
               </div>

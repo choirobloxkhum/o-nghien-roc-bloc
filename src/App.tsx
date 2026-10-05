@@ -195,9 +195,14 @@ export default function App() {
     });
   };
 
-  const handleEnterGame = () => {
+  const [targetCharacterId, setTargetCharacterId] = useState<string | null>(null);
+
+  const handleEnterGame = (targetCharId?: string) => {
     setShowJoinModal(false);
     setCurrentScreen('rphub');
+    if (targetCharId) {
+      setTargetCharacterId(targetCharId);
+    }
     try {
       if (window.location.hash) {
         history.replaceState(null, '', window.location.pathname + window.location.search);
@@ -226,6 +231,8 @@ export default function App() {
           }}
           soundEnabled={soundEnabled}
           onToggleSound={handleToggleSound}
+          targetCharacterId={targetCharacterId}
+          onClearTargetCharacter={() => setTargetCharacterId(null)}
         />
       </>
     );

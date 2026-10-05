@@ -1,17 +1,19 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, RotateCcw, Play, Sparkles, Heart, Zap, Award } from 'lucide-react';
+import { X, RotateCcw, Play, Sparkles, Heart, Zap, Award, Crown } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Maruko3DRunner } from './Maruko3DRunner';
 import { startRunningSoundLoop, stopRunningSoundLoop } from '../utils/audio';
+import { NgocHoangImperialEdictModal } from './NgocHoangImperialEdictModal';
 
 interface RobloxLoadingScreenProps {
   isOpen: boolean;
   onClose: () => void;
-  onEnterGame?: () => void;
+  onEnterGame?: (targetCharId?: string) => void;
   soundEnabled: boolean;
   onPlayClickSound: () => void;
   onPlayVictorySound: () => void;
+  reducedMotion?: boolean;
 }
 
 export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
@@ -21,9 +23,11 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
   soundEnabled,
   onPlayClickSound,
   onPlayVictorySound,
+  reducedMotion = false,
 }) => {
   const [progress, setProgress] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [showImperialEdict, setShowImperialEdict] = useState(false);
 
   // Dynamic server stage step texts
   const currentStatusText = useMemo(() => {
@@ -39,6 +43,7 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
     if (isOpen) {
       setProgress(0);
       setIsCompleted(false);
+      setShowImperialEdict(false);
 
       // Start the cute running footstep sound effect
       startRunningSoundLoop(soundEnabled);
@@ -65,6 +70,7 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
                 colors: ['#22c55e', '#4ade80', '#fbbf24', '#38bdf8', '#f472b6'],
               });
             } catch {}
+            // Chờ người dùng bấm vào mới hiển thị chiếu chỉ (theo yêu cầu)
             return 100;
           }
           return Math.max(prev, rawProgress);
@@ -76,6 +82,7 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
         stopRunningSoundLoop();
       };
     } else {
+      setShowImperialEdict(false);
       stopRunningSoundLoop();
     }
   }, [isOpen, soundEnabled, onPlayVictorySound]);
@@ -84,6 +91,7 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
     onPlayClickSound();
     setProgress(0);
     setIsCompleted(false);
+    setShowImperialEdict(false);
 
     // Restart running footstep sound
     startRunningSoundLoop(soundEnabled);
@@ -328,23 +336,17 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
               <button
                 onClick={() => {
                   onPlayClickSound();
-                  if (onEnterGame) {
-                    onEnterGame();
-                  } else {
-                    onClose();
-                  }
+                  setShowImperialEdict(true);
                 }}
-                className="relative group w-full sm:w-auto px-10 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-b from-[#4ade80] via-[#22c55e] to-[#15803d] hover:from-[#86efac] hover:to-[#16a34a] text-white font-black text-lg sm:text-xl shadow-[0_10px_25px_rgba(34,197,94,0.5)] border-t-2 border-white/60 border-b-4 border-[#14532d] transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2.5 cursor-pointer overflow-hidden"
+                className="w-full sm:w-auto px-8 sm:px-10 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-b from-[#4ade80] via-[#22c55e] to-[#15803d] hover:from-[#86efac] hover:to-[#16a34a] text-white font-black text-base sm:text-xl shadow-[0_10px_25px_rgba(34,197,94,0.5)] border-t-2 border-white/60 border-b-4 border-[#14532d] transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
               >
-                {/* Shine Sweep FX */}
-                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
-                <Play className="w-6 h-6 fill-white stroke-none drop-shadow" />
-                <span>Chơi Ngay</span>
+                <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-white" />
+                <span>Vào chơi</span>
               </button>
 
               <button
                 onClick={handleRestart}
-                className="w-full sm:w-auto px-6 py-3.5 sm:py-4 rounded-2xl bg-white/20 hover:bg-white/30 text-white font-bold text-sm sm:text-base border-2 border-white/30 backdrop-blur-md transition-all shadow-md hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-5 py-3.5 sm:py-4 rounded-2xl bg-white/20 hover:bg-white/30 text-white font-bold text-sm sm:text-base border-2 border-white/30 backdrop-blur-md transition-all shadow-md hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <RotateCcw className="w-5 h-5" />
                 <span>Chạy Lại</span>
@@ -359,6 +361,36 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
           )}
         </AnimatePresence>
       </motion.div>
+
+      {/* Pop up Chiếu chỉ từ Ngọc Hoàng khi người dùng bấm vào sau khi load xong */}
+      <NgocHoangImperialEdictModal
+        isOpen={showImperialEdict}
+        onClose={() => {
+          setShowImperialEdict(false);
+          if (onEnterGame) {
+            onEnterGame();
+          } else {
+            onClose();
+          }
+        }}
+        onEnterGame={() => {
+          setShowImperialEdict(false);
+          if (onEnterGame) {
+            onEnterGame();
+          } else {
+            onClose();
+          }
+        }}
+        onSelectCharacter={(charId) => {
+          setShowImperialEdict(false);
+          if (onEnterGame) {
+            onEnterGame(charId);
+          } else {
+            onClose();
+          }
+        }}
+        soundEnabled={soundEnabled}
+      />
     </div>
   );
 };

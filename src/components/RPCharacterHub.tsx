@@ -15,6 +15,7 @@ import { HellFallingOverlay } from './HellFallingOverlay';
 import { ActiveVoiceBanner } from './ActiveVoiceBanner';
 import { AnnouncementBanner } from './AnnouncementBanner';
 import { NgocHoangCloudModal } from './NgocHoangCloudModal';
+import { NgocHoangImperialEdictModal } from './NgocHoangImperialEdictModal';
 import { RapunzelTributeFooter } from './RapunzelTributeFooter';
 import { PasswordModal } from './PasswordModal';
 import { CocKienTroiModal } from './CocKienTroiModal';
@@ -58,12 +59,16 @@ interface RPCharacterHubProps {
   onBackToWelcome?: () => void;
   soundEnabled: boolean;
   onToggleSound: () => void;
+  targetCharacterId?: string | null;
+  onClearTargetCharacter?: () => void;
 }
 
 export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
   onBackToWelcome,
   soundEnabled,
   onToggleSound,
+  targetCharacterId,
+  onClearTargetCharacter,
 }) => {
   const [characters, setCharacters] = useState<RPCharacter[]>(() => getStoredRPCharacters());
   const [votedIds, setVotedIds] = useState<string[]>(() =>
@@ -85,6 +90,7 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
   const [activeCategory, setActiveCategory] = useState<'all' | 'locked' | 'hiendai' | 'hocduong' | 'cotrang' | 'vnxua' | 'ngot' | 'nguoc' | 'khac' | 'f7'>('all');
   const [isGachaOpen, setIsGachaOpen] = useState(false);
   const [isNgocHoangModalOpen, setIsNgocHoangModalOpen] = useState(false);
+  const [isImperialEdictOpen, setIsImperialEdictOpen] = useState(false);
 
   // NSFW / Hell Realm State (Always defaults to false / Hạ Giới on fresh visit or entering game)
   const [isHellMode, setIsHellMode] = useState<boolean>(false);
@@ -141,6 +147,59 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, activeCategory, isHellMode]);
+
+  // Smooth scroll to character from Imperial Edict or direct links
+  const scrollToCharacter = useCallback((charId: string) => {
+    setIsImperialEdictOpen(false);
+    setIsNgocHoangModalOpen(false);
+
+    // If currently in Hell Mode, switch back to Normal mode
+    setIsHellMode(false);
+
+    // Clear search and reset category to show all characters
+    setSearchQuery('');
+    setDebouncedSearchQuery('');
+    setActiveCategory('all');
+    setActiveSubTab('home');
+
+    // Find the character index in normal mode
+    const normalList = characters.filter((c) => !c.isNsfw);
+    const charIndex = normalList.findIndex((c) => c.id === charId);
+    const targetPage = charIndex !== -1 ? Math.floor(charIndex / itemsPerPage) + 1 : 1;
+
+    // Set page
+    setCurrentPage(targetPage);
+
+    // Scroll to the card and trigger highlight
+    const attemptScroll = (retries = 8) => {
+      setCurrentPage((cur) => {
+        if (cur !== targetPage) return targetPage;
+        return cur;
+      });
+
+      const el = document.getElementById(`char-${charId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('ring-4', 'ring-amber-400', 'ring-offset-4', 'scale-[1.03]');
+        setTimeout(() => {
+          el.classList.remove('ring-4', 'ring-amber-400', 'ring-offset-4', 'scale-[1.03]');
+        }, 3000);
+      } else if (retries > 0) {
+        setTimeout(() => attemptScroll(retries - 1), 120);
+      }
+    };
+
+    setTimeout(() => {
+      attemptScroll();
+    }, 150);
+  }, [characters, itemsPerPage]);
+
+  useEffect(() => {
+    if (targetCharacterId) {
+      scrollToCharacter(targetCharacterId);
+      onClearTargetCharacter?.();
+    }
+  }, [targetCharacterId, scrollToCharacter, onClearTargetCharacter]);
 
   // Sync data from centralized database
   const syncServerData = useCallback(async () => {
@@ -1017,6 +1076,15 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
         onClose={() => setIsNgocHoangModalOpen(false)}
         soundEnabled={soundEnabled}
         isHellMode={isHellMode}
+        onOpenImperialEdict={() => setIsImperialEdictOpen(true)}
+      />
+
+      {/* Chiếu Chỉ Từ Ngọc Hoàng (Imperial Edict Modal) */}
+      <NgocHoangImperialEdictModal
+        isOpen={isImperialEdictOpen}
+        onClose={() => setIsImperialEdictOpen(false)}
+        onSelectCharacter={scrollToCharacter}
+        soundEnabled={soundEnabled}
       />
 
       {/* 18+ Age Verification Caution Modal for Hell Realm */}
