@@ -17,6 +17,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { playUiClick } from '../utils/audio';
 import { copyTextToClipboard } from '../utils/clipboard';
+import { generateClientRPDirective } from '../utils/clientAiCommandEngine';
 
 interface AIChatMessage {
   id: string;
@@ -315,28 +316,49 @@ Tôi đã được huấn luyện đầy đủ về **Khung Sườn 7 Khối Chu
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/ai/command-chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages: newHistory.map((m) => ({
+      let replyText: string | null = null;
+
+      try {
+        const response = await fetch('/api/ai/command-chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            messages: newHistory.map((m) => ({
+              role: m.role,
+              content: m.content,
+            })),
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.reply) {
+            replyText = data.reply;
+          }
+        }
+      } catch (serverErr) {
+        console.warn('Backend server unavailable, attempting Client-Side AI (GitHub Pages fallback)...', serverErr);
+      }
+
+      // If backend is not available (e.g. running on GitHub Pages Static Hosting), fallback to Client-Side AI Engine
+      if (!replyText) {
+        replyText = await generateClientRPDirective(
+          newHistory.map((m) => ({
             role: m.role,
             content: m.content,
-          })),
-        }),
-      });
+          }))
+        );
+      }
 
-      const data = await response.json();
-
-      if (data.success && data.reply) {
+      if (replyText) {
         setMessages((prev) => [
           ...prev,
           {
             id: `model-${Date.now()}`,
             role: 'model',
-            content: data.reply,
+            content: replyText as string,
             timestamp: Date.now(),
           },
         ]);
@@ -346,18 +368,18 @@ Tôi đã được huấn luyện đầy đủ về **Khung Sườn 7 Khối Chu
           {
             id: `err-${Date.now()}`,
             role: 'model',
-            content: `⚠️ Có lỗi khi tạo lệnh: ${data.message || data.error || 'Vui lòng thử lại sau.'}`,
+            content: `⚠️ Không thể khởi tạo lệnh AI lúc này. Vui lòng thử lại sau!`,
             timestamp: Date.now(),
           },
         ]);
       }
-    } catch (err) {
+    } catch (err: any) {
       setMessages((prev) => [
         ...prev,
         {
           id: `err-${Date.now()}`,
           role: 'model',
-          content: '⚠️ Lỗi kết nối tới máy chủ. Vui lòng kiểm tra lại mạng hoặc thử lại sau giây lát!',
+          content: `⚠️ Lỗi kết nối tới AI: ${err?.message || 'Vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau giây lát!'}`,
           timestamp: Date.now(),
         },
       ]);
