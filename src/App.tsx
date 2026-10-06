@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Check, X, Sparkles, Star } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -197,7 +197,7 @@ export default function App() {
 
   const [targetCharacterId, setTargetCharacterId] = useState<string | null>(null);
 
-  const handleEnterGame = (targetCharId?: string) => {
+  const handleEnterGame = useCallback((targetCharId?: string) => {
     setShowJoinModal(false);
     setCurrentScreen('rphub');
     if (targetCharId) {
@@ -214,7 +214,15 @@ export default function App() {
       spread: 80,
       origin: { y: 0.5 },
     });
-  };
+  }, [soundEnabled]);
+
+  const handlePlayClickSound = useCallback(() => {
+    playUiClick(soundEnabled);
+  }, [soundEnabled]);
+
+  const handlePlayVictorySound = useCallback(() => {
+    playVictoryChime(soundEnabled);
+  }, [soundEnabled]);
 
   if (currentScreen === 'rphub') {
     return (
@@ -436,8 +444,8 @@ export default function App() {
             onClose={() => setShowJoinModal(false)}
             onEnterGame={handleEnterGame}
             soundEnabled={soundEnabled}
-            onPlayClickSound={() => playUiClick(soundEnabled)}
-            onPlayVictorySound={() => playVictoryChime(soundEnabled)}
+            onPlayClickSound={handlePlayClickSound}
+            onPlayVictorySound={handlePlayVictorySound}
             reducedMotion={reducedMotion}
           />
         )}

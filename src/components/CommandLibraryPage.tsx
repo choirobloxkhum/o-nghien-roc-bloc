@@ -21,7 +21,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import { RPCommand } from '../types';
 import { INITIAL_RP_COMMANDS } from '../data/initialCommands';
 import { playUiClick } from '../utils/audio';
+import { copyTextToClipboard } from '../utils/clipboard';
 import { AgeVerificationModal } from './AgeVerificationModal';
+import { AICommandGeneratorModal } from './AICommandGeneratorModal';
+import { Bot } from 'lucide-react';
 
 const NSFW_EXTERNAL_LINK =
   'https://ellipsus.com/read/3j5tv2LCFAlyI6rrHXdBq8/Chi-Roblox-Khum_TNG-HP-LNH-NSFW';
@@ -90,6 +93,9 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
 
   // NSFW 18+ Age Verification Modal State
   const [isNsfwAgeModalOpen, setIsNsfwAgeModalOpen] = useState(false);
+
+  // AI Command Generator Modal State
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
   // Copy Feedback State (Map of commandId => boolean)
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -180,27 +186,12 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
     };
   }, [commands]);
 
-  // Copy to clipboard handler with fallback
+  // Copy to clipboard handler with foolproof fallback
   const handleCopyCommand = useCallback(
     async (command: RPCommand) => {
       playUiClick(soundEnabled);
-      try {
-        if (navigator?.clipboard?.writeText) {
-          await navigator.clipboard.writeText(command.commandText);
-        } else {
-          // Fallback for iFrame or older webview
-          const textArea = document.createElement('textarea');
-          textArea.value = command.commandText;
-          textArea.style.position = 'fixed';
-          textArea.style.left = '-999999px';
-          textArea.style.top = '-999999px';
-          document.body.appendChild(textArea);
-          textArea.focus();
-          textArea.select();
-          document.execCommand('copy');
-          document.body.removeChild(textArea);
-        }
-
+      const success = await copyTextToClipboard(command.commandText);
+      if (success) {
         setCopiedId(command.id);
         setToastMessage(`✓ Đã sao chép thành công: "${command.title}"!`);
 
@@ -211,8 +202,6 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
         setTimeout(() => {
           setToastMessage(null);
         }, 2500);
-      } catch (err) {
-        console.error('Failed to copy text: ', err);
       }
     },
     [soundEnabled]
@@ -238,6 +227,20 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
         confirmButtonText="Tôi đã đủ 18 tuổi • Chuyển đến liên kết"
       />
 
+      {/* AI Command Generator Pop-up Modal */}
+      <AICommandGeneratorModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        isHellMode={isHellMode}
+        soundEnabled={soundEnabled}
+        onCopiedToast={(msg) => {
+          setToastMessage(msg);
+          setTimeout(() => {
+            setToastMessage(null);
+          }, 2500);
+        }}
+      />
+
       {/* Toast Notification - Nằm ở DƯỚI, CHÍNH GIỮA MÀN HÌNH */}
       <AnimatePresence>
         {toastMessage && (
@@ -246,14 +249,14 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
             exit={{ opacity: 0, y: 20, scale: 0.9, x: '-50%' }}
             transition={{ type: 'spring', bounce: 0.25, duration: 0.35 }}
-            className={`fixed bottom-8 sm:bottom-10 left-1/2 -translate-x-1/2 z-50 px-5 sm:px-7 py-3 sm:py-3.5 rounded-full shadow-2xl border-2 flex items-center gap-3 backdrop-blur-xl select-none ${
+            className={`fixed bottom-8 sm:bottom-10 left-1/2 -translate-x-1/2 z-[100] px-6 sm:px-8 py-3.5 sm:py-4 rounded-full shadow-2xl border-2 flex items-center justify-center text-center gap-3 backdrop-blur-xl select-none max-w-[92vw] ${
               isHellMode
                 ? 'bg-gradient-to-r from-red-950 via-purple-950 to-red-950 border-red-500 text-white shadow-[0_0_35px_rgba(220,38,38,0.85)] ring-2 ring-red-400/50'
                 : 'bg-gradient-to-r from-emerald-950 via-teal-900 to-emerald-950 border-emerald-400 text-white shadow-[0_10px_35px_rgba(16,185,129,0.8)] ring-2 ring-emerald-300/50'
             }`}
           >
             <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400 shrink-0 animate-bounce" />
-            <span className="text-xs sm:text-sm font-black tracking-wide whitespace-nowrap">
+            <span className="text-xs sm:text-sm font-black tracking-wide text-center truncate">
               {toastMessage}
             </span>
           </motion.div>
@@ -312,14 +315,104 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
         </div>
       </div>
 
-      {/* 2. DEDICATED NSFW 18+ BUTTON (PLACED ABOVE THE SEARCH BAR) & SEARCH / FILTER SECTION */}
+      {/* 2. DEDICATED ACTION BUTTONS: AI TRỢ LÝ SOẠN LỆNH & LỆNH NSFW (18+) */}
       <div className="mb-6 sm:mb-8 space-y-4">
-        {/* Dedicated NSFW Entry Button */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3.5 sm:gap-5 max-w-4xl mx-auto">
+          {/* Nút 1: AI Trợ Lý Soạn Lệnh (3D DESSERT & GALAXY GLOW THEMED BUTTON) */}
+          <div className="relative flex-1 group">
+            {/* 🌌 AMBIENT GALAXY & DESSERT GLOW HALO (HÀO QUANG PHÁT SÁNG ĐA TẦNG) */}
+            <div
+              className={`absolute -inset-1 sm:-inset-1.5 rounded-[26px] sm:rounded-[34px] blur-md opacity-75 group-hover:opacity-100 transition-all duration-500 animate-pulse pointer-events-none transform-gpu ${
+                isHellMode
+                  ? 'bg-gradient-to-r from-red-600 via-purple-700 to-amber-600 shadow-[0_0_25px_rgba(220,38,38,0.7)]'
+                  : 'bg-gradient-to-r from-pink-500 via-purple-500 via-amber-400 to-cyan-400 shadow-[0_0_30px_rgba(236,72,153,0.6)]'
+              }`}
+            />
+
+            {/* SECONDARY SOFT DIFFUSED AMBIENT AURA */}
+            <div
+              className={`absolute -inset-3 sm:-inset-4 rounded-full blur-xl opacity-40 group-hover:opacity-70 transition-opacity duration-500 pointer-events-none ${
+                isHellMode
+                  ? 'bg-red-600/30'
+                  : 'bg-gradient-to-tr from-pink-400/40 via-purple-400/30 to-sky-300/40'
+              }`}
+            />
+
+            {/* 🧁 3D PHYSICAL DESSERT BUTTON CONTAINER */}
+            <button
+              type="button"
+              onClick={() => {
+                playUiClick(soundEnabled);
+                setIsAiModalOpen(true);
+              }}
+              className={`relative w-full overflow-hidden px-4 sm:px-6 py-3 sm:py-3.5 rounded-2xl sm:rounded-[28px] font-black text-xs sm:text-sm md:text-base transition-all duration-300 transform group-hover:scale-[1.02] group-hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-1 cursor-pointer flex items-center justify-between gap-3 select-none ${
+                isHellMode
+                  ? 'bg-gradient-to-r from-[#2c051a] via-[#480829] to-[#200214] text-purple-100 border-t-2 border-l-2 border-red-400/70 border-b-4 border-r-4 border-purple-950 shadow-[0_10px_25px_rgba(0,0,0,0.8),inset_0_2px_4px_rgba(255,255,255,0.2)]'
+                  : 'bg-gradient-to-r from-[#ff5e98] via-[#a855f7] via-[#f59e0b] to-[#06b6d4] text-white border-t-2 border-l-2 border-white/90 border-b-4 border-r-4 border-purple-900/40 shadow-[0_10px_30px_rgba(236,72,153,0.45),0_4px_12px_rgba(168,85,247,0.35),inset_0_2px_4px_rgba(255,255,255,0.7)]'
+              }`}
+            >
+              {/* Glossy Candy Glaze Highlight Top Layer */}
+              <div className="absolute top-0 inset-x-0 h-1/2 bg-gradient-to-b from-white/35 via-white/10 to-transparent rounded-t-2xl pointer-events-none" />
+
+              {/* Shimmer Light Beam on Hover */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
+
+              {/* Floating Galaxy Star Dust Particles */}
+              <div className="absolute top-1 right-12 w-1.5 h-1.5 rounded-full bg-white/80 animate-ping pointer-events-none" />
+              <div className="absolute bottom-1.5 left-20 w-1 h-1 rounded-full bg-yellow-200/90 pointer-events-none" />
+
+              {/* Left 3D Glass Bubble Icon Wrapper */}
+              <div className="relative z-10 flex items-center gap-2.5 sm:gap-3.5">
+                <span
+                  className={`flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-2xl border-2 shadow-[0_4px_10px_rgba(0,0,0,0.25),inset_0_2px_4px_rgba(255,255,255,0.8)] backdrop-blur-md shrink-0 transition-transform group-hover:rotate-6 group-hover:scale-110 ${
+                    isHellMode
+                      ? 'bg-black/60 border-red-400 text-amber-300'
+                      : 'bg-white/30 border-white text-white drop-shadow-md'
+                  }`}
+                >
+                  <Bot className="w-5 h-5 sm:w-5.5 sm:h-5.5 animate-pulse" />
+                </span>
+
+                <div className="text-left">
+                  <div className="flex items-center gap-1.5">
+                    <span className="tracking-wide uppercase font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] flex items-center gap-1">
+                      <span>AI SOẠN LỆNH RP</span>
+                    </span>
+                    <Sparkles className="w-4 h-4 text-yellow-300 fill-yellow-300 animate-bounce drop-shadow-[0_0_8px_rgba(253,224,71,0.9)]" />
+                  </div>
+                  <div
+                    className={`text-[9.5px] sm:text-[10.5px] font-black drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)] ${
+                      isHellMode ? 'text-amber-200' : 'text-pink-100'
+                    }`}
+                  >
+                    ✨ Chuẩn 7 khối • Bấm mở pop-up chat 💬
+                  </div>
+                </div>
+              </div>
+
+              {/* Right 3D Sweet Dessert Capsule Pill Badge */}
+              <div className="relative z-10 shrink-0">
+                <span
+                  className={`px-3 py-1.5 rounded-xl sm:rounded-2xl font-black text-[10.5px] sm:text-xs flex items-center gap-1.5 border-2 shadow-md transition-transform group-hover:scale-105 ${
+                    isHellMode
+                      ? 'bg-black/80 text-amber-300 border-red-500/70 shadow-[0_0_12px_rgba(220,38,38,0.5)]'
+                      : 'bg-white/95 text-purple-950 border-white shadow-[0_4px_12px_rgba(0,0,0,0.15),inset_0_1px_3px_rgba(255,255,255,0.9)]'
+                  }`}
+                >
+                  <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent font-black">
+                    Mở Chat
+                  </span>
+                  <Sparkles className="w-3.5 h-3.5 text-pink-500 fill-pink-400 animate-spin" />
+                </span>
+              </div>
+            </button>
+          </div>
+
+          {/* Nút 2: Lệnh NSFW (18+) */}
           <button
             type="button"
             onClick={handleClickNsfwButton}
-            className={`group relative overflow-hidden w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-2xl sm:rounded-3xl font-black text-xs sm:text-sm md:text-base transition-all duration-300 transform active:scale-95 cursor-pointer border-2 shadow-xl flex items-center justify-center gap-2.5 sm:gap-3.5 select-none ${
+            className={`group relative overflow-hidden sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl sm:rounded-3xl font-black text-xs sm:text-sm md:text-base transition-all duration-300 transform active:scale-95 cursor-pointer border-2 shadow-xl flex items-center justify-between sm:justify-center gap-2.5 sm:gap-3 select-none ${
               isHellMode
                 ? 'bg-gradient-to-r from-[#2a041c] via-[#40062a] to-[#2a041c] text-rose-200 border-red-500/60 hover:border-red-400 hover:shadow-[0_0_25px_rgba(239,68,68,0.6)]'
                 : 'bg-gradient-to-r from-rose-900 via-red-900 to-rose-950 text-white border-rose-300/80 hover:border-rose-400 hover:shadow-[0_8px_30px_rgba(225,29,72,0.65)]'
@@ -329,7 +422,7 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
 
             {/* Flame Icon with badge wrapper */}
-            <span className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-500/30 border border-red-300/50 shadow-inner shrink-0">
+            <span className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-red-500/30 border border-red-300/50 shadow-inner shrink-0">
               <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-rose-400 fill-rose-500 animate-pulse" />
             </span>
 
@@ -344,7 +437,7 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
             </div>
 
             {/* Status indicator */}
-            <span className="text-[10px] sm:text-xs px-2.5 py-1 rounded-xl font-black backdrop-blur-md bg-black/40 text-rose-200 border border-white/10 flex items-center gap-1.5">
+            <span className="text-[10px] sm:text-xs px-2.5 py-1 sm:py-1.5 rounded-xl font-black backdrop-blur-md bg-black/40 text-rose-200 border border-white/10 flex items-center gap-1.5">
               <span>Mở kho lệnh</span>
               <ExternalLink className="w-3.5 h-3.5 stroke-[2.5]" />
             </span>

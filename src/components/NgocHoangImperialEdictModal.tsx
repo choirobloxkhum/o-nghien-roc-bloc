@@ -1,40 +1,30 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Crown, Sparkles, Heart, ChevronDown, Check, ArrowRight } from 'lucide-react';
 import { playSparkleSound, playUiClick, playGachaRevealFanfare } from '../utils/audio';
+import { INITIAL_RP_CHARACTERS } from '../data/rpCharacters';
 
 const ngocHoangAvatar = 'https://i.ibb.co/sLXrS2L/FB-IMG-1787048727875.jpg';
 
-// 3 nhân vật mới nhất
-const NEWEST_CHARACTERS = [
-  {
-    id: 'char-17-au-duong-nhat-si',
-    name: 'Âu Dương Nhất Sĩ',
-    avatarUrl: 'https://i.ibb.co/ccs4WQXR/Kh-ng-C-Ti-u-80.jpg',
-    roleTag: 'Học đường',
-    subTag: 'Sĩ diện x Thanh mai trúc mã',
-    quote: 'Hình này là hình gì? Hình như cô ấy cũng thích mình...',
-    badge: 'MỚI ✨',
-  },
-  {
-    id: 'char-16-hoang-nhat-thien',
-    name: 'Hoàng Nhất Thiên',
-    avatarUrl: 'https://i.ibb.co/zjDNf5m/Kh-ng-C-Ti-u-65-20260919130152.jpg',
-    roleTag: 'Hiện đại',
-    subTag: 'Trai IT máu S • Sài Gòn',
-    quote: 'Tôi phát hiện bạn gái ngoại tình với... Google AI Studio?',
-    badge: 'MỚI ✨',
-  },
-  {
-    id: 'char-15-seo-jihoon',
-    name: 'Seo Jihoon',
-    avatarUrl: 'https://i.ibb.co/XrJQzRnq/Kh-ng-C-Ti-u-4-20260908130049.png',
-    roleTag: 'Học đường',
-    subTag: '🦊 Cáo x 🐰 Thỏ',
-    quote: 'Sau này nếu cậu muốn hôn. Thì hôn tôi cũng được.',
-    badge: 'MỚI ✨',
-  },
-];
+// Tự động trích xuất 3 nhân vật mới nhất ở đầu danh sách (Index 0, 1, 2)
+function getNewestCharacters() {
+  return INITIAL_RP_CHARACTERS.slice(0, 3).map((char) => {
+    const cleanTags = (char.tags || []).filter(
+      (t) => t.toLowerCase() !== 'khác' && t.toLowerCase() !== 'mới' && !t.startsWith('#')
+    );
+    const subTag = cleanTags.slice(0, 3).join(' • ') || char.roleTag || 'Cực phẩm chồng mới';
+
+    return {
+      id: char.id,
+      name: char.name,
+      avatarUrl: char.avatarUrl,
+      roleTag: char.roleTag,
+      subTag,
+      quote: char.plotSummary || char.tagline || 'Ghé chơi cùng anh nhé em bé ✨',
+      badge: 'MỚI ✨',
+    };
+  });
+}
 
 // 4 nhân vật cũ vừa được cập nhật prompt mới: xếp thứ tự Vô Trần, Kenji, Nolan, James
 const UPDATED_PROMPT_CHARACTERS = [
@@ -91,6 +81,8 @@ export const NgocHoangImperialEdictModal: React.FC<NgocHoangImperialEdictModalPr
   onSelectCharacter,
   soundEnabled = true,
 }) => {
+  const newestCharacters = useMemo(() => getNewestCharacters(), []);
+
   useEffect(() => {
     if (isOpen) {
       playGachaRevealFanfare(soundEnabled);
@@ -265,7 +257,7 @@ export const NgocHoangImperialEdictModal: React.FC<NgocHoangImperialEdictModalPr
 
               {/* Danh sách 3 nhân vật mới nhất có ký hiệu MỚI */}
               <div className="space-y-2">
-                {NEWEST_CHARACTERS.map((char, idx) => (
+                {newestCharacters.map((char, idx) => (
                   <div
                     key={char.id}
                     onClick={() => handleSelectChar(char.id)}

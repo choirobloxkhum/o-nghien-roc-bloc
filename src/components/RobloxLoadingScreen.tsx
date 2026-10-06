@@ -29,6 +29,10 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
   const [isCompleted, setIsCompleted] = useState(false);
   const [showImperialEdict, setShowImperialEdict] = useState(false);
 
+  const prevIsOpenRef = useRef(false);
+  const onPlayVictorySoundRef = useRef(onPlayVictorySound);
+  onPlayVictorySoundRef.current = onPlayVictorySound;
+
   // Dynamic server stage step texts
   const currentStatusText = useMemo(() => {
     if (progress < 20) return '🚀 Đang kết nối mạng máy chủ Thiên Đình...';
@@ -40,52 +44,55 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
   }, [progress]);
 
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) {
       setProgress(0);
       setIsCompleted(false);
       setShowImperialEdict(false);
-
-      // Start the cute running footstep sound effect
-      startRunningSoundLoop(soundEnabled);
-
-      // Smooth realistic loading progress sequence
-      const startTime = Date.now();
-      const totalDuration = 3800; // 3.8 seconds
-
-      const interval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const rawProgress = Math.min(100, Math.floor((elapsed / totalDuration) * 100));
-
-        setProgress((prev) => {
-          if (rawProgress >= 100) {
-            clearInterval(interval);
-            setIsCompleted(true);
-            stopRunningSoundLoop();
-            onPlayVictorySound();
-            try {
-              confetti({
-                particleCount: 90,
-                spread: 75,
-                origin: { y: 0.55 },
-                colors: ['#22c55e', '#4ade80', '#fbbf24', '#38bdf8', '#f472b6'],
-              });
-            } catch {}
-            // Chờ người dùng bấm vào mới hiển thị chiếu chỉ (theo yêu cầu)
-            return 100;
-          }
-          return Math.max(prev, rawProgress);
-        });
-      }, 65);
-
-      return () => {
-        clearInterval(interval);
-        stopRunningSoundLoop();
-      };
-    } else {
-      setShowImperialEdict(false);
       stopRunningSoundLoop();
+      return;
     }
-  }, [isOpen, soundEnabled, onPlayVictorySound]);
+
+    // Luôn reset và khởi động chu kỳ load server khi mở
+    setProgress(0);
+    setIsCompleted(false);
+    setShowImperialEdict(false);
+
+    // Bật âm thanh bước chân chạy
+    startRunningSoundLoop(soundEnabled);
+
+    // Tiến trình chạy server mượt mà 0% -> 100%
+    const startTime = Date.now();
+    const totalDuration = 3600; // 3.6 giây
+
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const rawProgress = Math.min(100, Math.floor((elapsed / totalDuration) * 100));
+
+      setProgress((prev) => {
+        if (rawProgress >= 100) {
+          clearInterval(interval);
+          setIsCompleted(true);
+          stopRunningSoundLoop();
+          onPlayVictorySoundRef.current?.();
+          try {
+            confetti({
+              particleCount: 90,
+              spread: 75,
+              origin: { y: 0.55 },
+              colors: ['#22c55e', '#4ade80', '#fbbf24', '#38bdf8', '#f472b6'],
+            });
+          } catch {}
+          return 100;
+        }
+        return Math.max(prev, rawProgress);
+      });
+    }, 45);
+
+    return () => {
+      clearInterval(interval);
+      stopRunningSoundLoop();
+    };
+  }, [isOpen, soundEnabled]);
 
   const handleRestart = () => {
     onPlayClickSound();
@@ -334,11 +341,13 @@ export const RobloxLoadingScreen: React.FC<RobloxLoadingScreenProps> = ({
               className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full justify-center"
             >
               <button
-                onClick={() => {
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
                   onPlayClickSound();
                   setShowImperialEdict(true);
                 }}
-                className="w-full sm:w-auto px-8 sm:px-10 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-b from-[#4ade80] via-[#22c55e] to-[#15803d] hover:from-[#86efac] hover:to-[#16a34a] text-white font-black text-base sm:text-xl shadow-[0_10px_25px_rgba(34,197,94,0.5)] border-t-2 border-white/60 border-b-4 border-[#14532d] transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-8 sm:px-10 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-b from-[#4ade80] via-[#22c55e] to-[#15803d] hover:from-[#86efac] hover:to-[#16a34a] text-white font-black text-base sm:text-xl shadow-[0_10px_25px_rgba(34,197,94,0.5)] border-t-2 border-white/60 border-b-4 border-[#14532d] transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer touch-manipulation select-none"
               >
                 <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-white" />
                 <span>Vào chơi</span>

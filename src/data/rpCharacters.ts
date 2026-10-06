@@ -45,6 +45,26 @@ export const MONG_CHE_CHARACTER: RPCharacter = {
 // và gắn cờ isNew: true, cornerTag: 'MỚI' để hiển thị tag nổi bật ở góc phải trên cùng ảnh (tối đa 3 nhân vật).
 export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
   {
+    id: 'char-18-victor-laurent',
+    name: 'Victor Laurent',
+    avatarUrl: 'https://i.ibb.co/G4wqCfF7/media-1791283543.png',
+    roleTag: 'Quân nhân',
+    tags: ['Quân nhân', 'Ngọt', 'user tặng bu cao sao cho char (?)', '1910s', 'Pháp', 'Khác'],
+    tagline: '',
+    robuxDonations: 0,
+    personality: 'Quân nhân, 1910s, Pháp, dịu dàng, cưng chiều',
+    plotTitle: '',
+    plotSummary: 'Em bé...có chắc...khụ...đây là gói bánh chị gái em tặng không?',
+    fullPlot: '',
+    sampleDialogue: [],
+    playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22%3A%5B%2218Mp0WweUCM_iLfq7T_INaqBg651EKy2g%22%5D%2C%22action%22%3A%22open%22%2C%22userId%22%3A%22102834450421569886676%22%2C%22resourceKeys%22%3A%7B%7D%7D&usp=drive_link',
+    plotUrl: 'https://rentry.co/choirobloxkhum_Victor',
+    voiceUrl: 'https://res.cloudinary.com/xi0o6gls/video/upload/v1791283473/ElevenLabs_2026-10-06T10_35_50_Meisam_-_Deep_Strong_and_Engaging_pvc_sp115_s80_sb13_v4_1.mp3',
+    createdAt: now + 7000,
+    isNew: true,
+    cornerTag: 'MỚI',
+  },
+  {
     id: 'char-17-au-duong-nhat-si',
     name: 'Âu Dương Nhất Sĩ',
     avatarUrl: 'https://i.ibb.co/ccs4WQXR/Kh-ng-C-Ti-u-80.jpg',
@@ -106,8 +126,6 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     plotUrl: 'https://rentry.co/choirobloxkhum_jihoon',
     voiceUrl: 'https://res.cloudinary.com/opmwpbzb/video/upload/v1789908658/ElevenLabs_2026-09-20T12_49_54_Chris_-_Warm_and_Clear_pvc_sp100_s55_sb55_v3.mp3',
     createdAt: now + 4000,
-    isNew: true,
-    cornerTag: 'MỚI',
   },
   {
     id: 'char-14-gabriel',

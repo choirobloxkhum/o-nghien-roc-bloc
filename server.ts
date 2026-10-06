@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
@@ -569,7 +571,7 @@ app.post('/api/artworks/clear-all', async (req, res) => {
 });
 
 // ==========================================
-// 12. COMMAND LIBRARY (KHO LỆNH) API
+// 12. COMMAND LIBRARY (KHO LỆNH) & AI GENERATOR API
 // ==========================================
 
 // GET /api/commands - Return admin-uploaded commands
@@ -583,6 +585,43 @@ app.get('/api/commands', async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ success: false, error: String(err) });
+  }
+});
+
+// POST /api/ai/command-chat - Multi-turn AI Command Directive Generator based on 7-Block Architecture
+app.post('/api/ai/command-chat', async (req, res) => {
+  try {
+    const { messages, prompt } = req.body;
+    let chatMessages: Array<{ role: 'user' | 'model' | 'assistant'; content: string }> = [];
+
+    if (Array.isArray(messages) && messages.length > 0) {
+      chatMessages = messages.map((m: any) => ({
+        role: m.role === 'model' || m.role === 'assistant' ? 'model' : 'user',
+        content: String(m.content || m.text || ''),
+      }));
+    } else if (prompt && typeof prompt === 'string') {
+      chatMessages = [{ role: 'user', content: prompt.trim() }];
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'Vui lòng cung cấp nội dung yêu cầu hoặc lịch sử tin nhắn!',
+      });
+    }
+
+    const { generateRPDirective } = await import('./aiCommandEngine');
+    const reply = await generateRPDirective(chatMessages);
+
+    res.json({
+      success: true,
+      reply,
+    });
+  } catch (err: any) {
+    console.error('[AI Command Error]:', err);
+    res.status(500).json({
+      success: false,
+      error: String(err?.message || err),
+      message: 'Không thể khởi tạo lệnh AI lúc này. Vui lòng thử lại!',
+    });
   }
 });
 

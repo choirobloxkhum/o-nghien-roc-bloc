@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Sparkles, ExternalLink, Copy, Check, X, UserCheck, Plus, Trash2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import avatarMemeImg from '../assets/images/maruko_roblox_head_1787049027788.jpg';
+import { copyTextToClipboard } from '../utils/clipboard';
 
 interface RPCharacter {
   id: string;
@@ -66,11 +67,13 @@ export const JoinGameModal: React.FC<JoinGameModalProps> = ({
     }
   }, [isOpen, onPlayVictorySound]);
 
-  const handleCopy = (id: string, link: string) => {
+  const handleCopy = async (id: string, link: string) => {
     onPlayClickSound();
-    navigator.clipboard.writeText(link);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+    const success = await copyTextToClipboard(link);
+    if (success) {
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    }
   };
 
   const handleAddCharacter = (e: React.FormEvent) => {

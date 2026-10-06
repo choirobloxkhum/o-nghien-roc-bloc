@@ -4,6 +4,7 @@ import { X, Lock, Unlock, Play, ChevronRight, Copy, Check } from 'lucide-react';
 import { RPCharacter } from '../types';
 import { playUiClick, playSparkleSound } from '../utils/audio';
 import { getCharacterSessionPassword } from '../utils/passwordGenerator';
+import { copyTextToClipboard } from '../utils/clipboard';
 
 interface PasswordModalProps {
   isOpen: boolean;
@@ -178,10 +179,10 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
                               </div>
                               <button
                                 type="button"
-                                onClick={() => {
+                                onClick={async () => {
                                   playUiClick(soundEnabled);
                                   if (activePassword) {
-                                    navigator.clipboard.writeText(activePassword);
+                                    await copyTextToClipboard(activePassword);
                                     setPasswordInput(activePassword);
                                     setCopiedPassword(true);
                                     setTimeout(() => setCopiedPassword(false), 2000);
