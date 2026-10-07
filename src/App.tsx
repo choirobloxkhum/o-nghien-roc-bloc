@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Check, X, Sparkles, Star } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { fireConfetti } from './utils/confettiHelper';
 import { RobloxTopBar } from './components/RobloxTopBar';
 import { RobloxAvatarCompanion } from './components/RobloxAvatarCompanion';
 import { RobloxLoadingScreen } from './components/RobloxLoadingScreen';
@@ -188,7 +188,7 @@ export default function App() {
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
     setCompanionDialogue(randomQuote);
 
-    confetti({
+    fireConfetti({
       particleCount: 25,
       spread: 40,
       origin: { y: 0.7 },
@@ -209,7 +209,7 @@ export default function App() {
       }
     } catch {}
     playVictoryChime(soundEnabled);
-    confetti({
+    fireConfetti({
       particleCount: 50,
       spread: 80,
       origin: { y: 0.5 },

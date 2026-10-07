@@ -42,6 +42,10 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
 
   if (!character) return null;
 
+  const isReduced =
+    typeof document !== 'undefined' &&
+    document.documentElement.classList.contains('reduced-motion-mode');
+
   const activePassword = character.hasDynamicPassword
     ? getCharacterSessionPassword(character.id, character.password)
     : character.password || '';
@@ -72,14 +76,16 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
           />
 
           <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            initial={isReduced ? { opacity: 0 } : { scale: 0.9, opacity: 0, y: 20 }}
+            animate={isReduced ? { opacity: 1 } : { scale: 1, opacity: 1, y: 0 }}
+            exit={isReduced ? { opacity: 0 } : { scale: 0.9, opacity: 0, y: 20 }}
+            transition={isReduced ? { duration: 0.1, ease: 'linear' } : undefined}
             className={`relative w-full max-w-md rounded-3xl overflow-hidden border-2 ${
               isHellMode 
                 ? 'bg-gradient-to-b from-[#3f0f0f] to-black border-red-900 shadow-[0_10px_40px_rgba(220,38,38,0.3)]' 

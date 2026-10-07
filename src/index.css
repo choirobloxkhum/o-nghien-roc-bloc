@@ -80,6 +80,38 @@
 .reduced-motion-mode *::after {
   animation: none !important;
 }
+
+/* 1. Tắt chuyển động tia sáng lướt qua (Shimmer Light Beam) trên toàn bộ nút */
+.reduced-motion-mode .group:hover [class*="group-hover:translate-x-full"],
+.reduced-motion-mode [class*="-translate-x-full"],
+.reduced-motion-mode [class*="group-hover:translate-x-full"] {
+  display: none !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* 2. Cắt giảm bóng đổ phát sáng đa tầng (Multi-layer Glow & Ambient Auras) */
+.reduced-motion-mode [class*="shadow-[0_0_"],
+.reduced-motion-mode [class*="shadow-[0_10px_30px_"],
+.reduced-motion-mode [class*="shadow-[0_10px_35px_"],
+.reduced-motion-mode [class*="shadow-[0_20px_60px_"] {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -2px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Ẩn các lớp hào quang phát sáng nặng (Ambient Blur Auras) */
+.reduced-motion-mode .blur-xl,
+.reduced-motion-mode .blur-2xl,
+.reduced-motion-mode .blur-3xl,
+.reduced-motion-mode .blur-md {
+  display: none !important;
+}
+
+/* 3. Chuyển động đàn hồi của Modal: chuyển sang hiện mờ tức thì (opacity: 0 -> 1 trong 0.1s không dùng lò xo physics) */
+.reduced-motion-mode [role="dialog"],
+.reduced-motion-mode [data-modal="true"] {
+  transition: opacity 0.1s linear !important;
+  transform: none !important;
+}
 .dessert-title-shadow {
   text-shadow: 
     0 2px 0 #94a3b8,

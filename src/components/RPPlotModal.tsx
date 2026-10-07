@@ -20,12 +20,17 @@ export const RPPlotModal: React.FC<RPPlotModalProps> = ({
 }) => {
   if (!character) return null;
 
+  const isReduced =
+    typeof document !== 'undefined' &&
+    document.documentElement.classList.contains('reduced-motion-mode');
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/60 backdrop-blur-md">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 15 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95 }}
+        initial={isReduced ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 15 }}
+        animate={isReduced ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+        exit={isReduced ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+        transition={isReduced ? { duration: 0.1, ease: 'linear' } : { duration: 0.25 }}
         className="relative w-full max-w-2xl bg-white rounded-[32px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh]"
       >
         {/* Header with Character Banner Image & Centered Art */}

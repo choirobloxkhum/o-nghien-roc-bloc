@@ -601,6 +601,7 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
         <CommandLibraryPage
           isHellMode={isHellMode}
           soundEnabled={soundEnabled}
+          reducedMotion={reducedMotion}
         />
       ) : (
         <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-2.5 sm:px-6 md:px-12 py-4 sm:py-8">
@@ -1042,6 +1043,7 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
         onClose={() => setIsGachaOpen(false)}
         characters={activeModeCharacters}
         soundEnabled={soundEnabled}
+        reducedMotion={reducedMotion}
         onSelectCharacter={handleSelectFromGacha}
         onPlay={handlePlay}
         onReadPlot={handleReadPlot}

@@ -15,11 +15,11 @@ import {
   RefreshCw,
   Link as LinkIcon,
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { RPCharacter, Artwork } from '../types';
 import { MONG_CHE_CHARACTER } from '../data/rpCharacters';
 import { submitArtwork, uploadArtworkFile } from '../services/artworksApi';
 import { playUiClick, playVictoryChime } from '../utils/audio';
+import { fireConfetti } from '../utils/confettiHelper';
 
 interface ArtworkSubmissionModalProps {
   isOpen: boolean;
@@ -197,7 +197,7 @@ export const ArtworkSubmissionModal: React.FC<ArtworkSubmissionModalProps> = ({
       if (result.success && result.artwork) {
         setUploadProgress(100);
         playVictoryChime(soundEnabled);
-        confetti({
+        fireConfetti({
           particleCount: 50,
           spread: 70,
           origin: { y: 0.6 },
@@ -239,6 +239,10 @@ export const ArtworkSubmissionModal: React.FC<ArtworkSubmissionModalProps> = ({
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
 
+  const isReduced =
+    typeof document !== 'undefined' &&
+    document.documentElement.classList.contains('reduced-motion-mode');
+
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
@@ -247,6 +251,7 @@ export const ArtworkSubmissionModal: React.FC<ArtworkSubmissionModalProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.1 }}
           onClick={() => {
             if (!isSubmitting) {
               playUiClick(soundEnabled);
@@ -258,9 +263,10 @@ export const ArtworkSubmissionModal: React.FC<ArtworkSubmissionModalProps> = ({
 
         {/* Modal Window */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          initial={isReduced ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 15 }}
+          animate={isReduced ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+          exit={isReduced ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 15 }}
+          transition={isReduced ? { duration: 0.1, ease: 'linear' } : { duration: 0.25 }}
           className={`relative w-full max-w-lg rounded-2xl sm:rounded-3xl p-4 sm:p-7 shadow-2xl border-2 z-10 my-auto max-h-[92vh] overflow-y-auto ${
             isHellMode
               ? 'bg-[#15021a] border-red-700/80 text-purple-100 shadow-[0_0_50px_rgba(220,38,38,0.5)]'

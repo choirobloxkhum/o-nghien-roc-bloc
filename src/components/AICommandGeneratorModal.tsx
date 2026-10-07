@@ -31,6 +31,7 @@ interface AICommandGeneratorModalProps {
   onClose: () => void;
   isHellMode?: boolean;
   soundEnabled?: boolean;
+  reducedMotion?: boolean;
   onCopiedToast?: (message: string) => void;
 }
 
@@ -234,8 +235,14 @@ export const AICommandGeneratorModal: React.FC<AICommandGeneratorModalProps> = (
   onClose,
   isHellMode = false,
   soundEnabled = true,
+  reducedMotion = false,
   onCopiedToast,
 }) => {
+  const isReduced =
+    reducedMotion ||
+    (typeof document !== 'undefined' &&
+      document.documentElement.classList.contains('reduced-motion-mode'));
+
   const [inputPrompt, setInputPrompt] = useState('');
   const [messages, setMessages] = useState<AIChatMessage[]>([
     {
@@ -417,39 +424,41 @@ Tôi đã được huấn luyện đầy đủ về **Khung Sườn 7 Khối Chu
           className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity"
         />
 
-        {/* Ambient floating sparkles */}
-        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-          {[...Array(10)].map((_, i) => (
-            <motion.div
-              key={`star-${i}`}
-              animate={{
-                y: ['100vh', '-10vh'],
-                x: [0, (i % 2 === 0 ? 20 : -20) * ((i % 3) + 1)],
-                opacity: [0, 0.8, 0],
-                scale: [0.5, 1.2, 0.4],
-              }}
-              transition={{
-                duration: 3 + (i % 4) * 0.5,
-                repeat: Infinity,
-                delay: (i * 0.2) % 2,
-                ease: 'linear',
-              }}
-              className="absolute text-amber-300 pointer-events-none"
-              style={{ left: `${(i * 9 + 5) % 94}%` }}
-            >
-              <Sparkles className="w-3.5 h-3.5 fill-amber-300 drop-shadow-[0_0_8px_rgba(253,224,71,0.8)]" />
-            </motion.div>
-          ))}
-        </div>
+        {/* Ambient floating sparkles (only when reducedMotion is off) */}
+        {!isReduced && (
+          <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+            {[...Array(10)].map((_, i) => (
+              <motion.div
+                key={`star-${i}`}
+                animate={{
+                  y: ['100vh', '-10vh'],
+                  x: [0, (i % 2 === 0 ? 20 : -20) * ((i % 3) + 1)],
+                  opacity: [0, 0.8, 0],
+                  scale: [0.5, 1.2, 0.4],
+                }}
+                transition={{
+                  duration: 3 + (i % 4) * 0.5,
+                  repeat: Infinity,
+                  delay: (i * 0.2) % 2,
+                  ease: 'linear',
+                }}
+                className="absolute text-amber-300 pointer-events-none"
+                style={{ left: `${(i * 9 + 5) % 94}%` }}
+              >
+                <Sparkles className="w-3.5 h-3.5 fill-amber-300 drop-shadow-[0_0_8px_rgba(253,224,71,0.8)]" />
+              </motion.div>
+            ))}
+          </div>
+        )}
 
         {/* ========================================================================= */}
         {/* MAIN POPUP MODAL CONTAINER                                                */}
         {/* ========================================================================= */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 25 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 25 }}
-          transition={{ type: 'spring', damping: 24, stiffness: 280 }}
+          initial={isReduced ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 25 }}
+          animate={isReduced ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+          exit={isReduced ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 25 }}
+          transition={isReduced ? { duration: 0.1, ease: 'linear' } : { type: 'spring', damping: 24, stiffness: 280 }}
           className={`relative z-10 w-full max-w-4xl max-h-[90vh] flex flex-col rounded-2xl sm:rounded-[32px] border-3 sm:border-4 shadow-2xl overflow-hidden backdrop-blur-xl ${
             isHellMode
               ? 'bg-[#15021a]/95 border-red-700/80 shadow-[0_0_50px_rgba(220,38,38,0.4)] text-purple-100'

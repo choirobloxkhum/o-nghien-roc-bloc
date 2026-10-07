@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, ExternalLink, Copy, Check, X, UserCheck, Plus, Trash2 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import avatarMemeImg from '../assets/images/maruko_roblox_head_1787049027788.jpg';
 import { copyTextToClipboard } from '../utils/clipboard';
+import { fireConfetti } from '../utils/confettiHelper';
 
 interface RPCharacter {
   id: string;
@@ -56,9 +56,13 @@ export const JoinGameModal: React.FC<JoinGameModalProps> = ({
   const [newRole, setNewRole] = useState('');
   const [newLink, setNewLink] = useState('');
 
+  const isReduced =
+    typeof document !== 'undefined' &&
+    document.documentElement.classList.contains('reduced-motion-mode');
+
   React.useEffect(() => {
     if (isOpen) {
-      confetti({
+      fireConfetti({
         particleCount: 50,
         spread: 60,
         origin: { y: 0.6 },
@@ -95,7 +99,7 @@ export const JoinGameModal: React.FC<JoinGameModalProps> = ({
     setNewRole('');
     setNewLink('');
     setShowAddForm(false);
-    confetti({ particleCount: 30 });
+    fireConfetti({ particleCount: 20 });
   };
 
   const handleDelete = (id: string) => {
@@ -108,9 +112,10 @@ export const JoinGameModal: React.FC<JoinGameModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md font-dessert">
       <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        initial={isReduced ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 20 }}
+        animate={isReduced ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+        exit={isReduced ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 20 }}
+        transition={isReduced ? { duration: 0.1, ease: 'linear' } : { type: 'spring', damping: 25, stiffness: 300 }}
         className="relative w-full max-w-lg max-h-[90vh] flex flex-col bg-slate-900 border-4 border-emerald-500 rounded-3xl p-6 sm:p-7 shadow-2xl overflow-hidden text-white"
       >
         {/* Background ambient glow with zero-blur radial gradients */}

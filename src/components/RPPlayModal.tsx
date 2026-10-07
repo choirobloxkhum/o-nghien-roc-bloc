@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { X, Send, Sparkles, MessageCircle, RefreshCw, Heart, ExternalLink, ShieldCheck } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { RPCharacter } from '../types';
+import { fireConfetti } from '../utils/confettiHelper';
 
 interface RPPlayModalProps {
   character: RPCharacter | null;
@@ -54,10 +54,14 @@ export const RPPlayModal: React.FC<RPPlayModalProps> = ({
     }, 800);
   };
 
+  const isReduced =
+    typeof document !== 'undefined' &&
+    document.documentElement.classList.contains('reduced-motion-mode');
+
   const handleBurstConfetti = () => {
     if (hasVoted) return;
     onDonateRobux(character.id);
-    confetti({
+    fireConfetti({
       particleCount: 35,
       spread: 60,
       origin: { y: 0.6 },
@@ -67,9 +71,10 @@ export const RPPlayModal: React.FC<RPPlayModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/60 backdrop-blur-md">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 15 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95 }}
+        initial={isReduced ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 15 }}
+        animate={isReduced ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+        exit={isReduced ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+        transition={isReduced ? { duration: 0.1, ease: 'linear' } : { duration: 0.25 }}
         className="relative w-full max-w-xl bg-white rounded-[32px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col h-[600px] max-h-[90vh]"
       >
         {/* Header with Character Status */}

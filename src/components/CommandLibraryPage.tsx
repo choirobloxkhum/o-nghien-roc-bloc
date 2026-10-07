@@ -32,6 +32,7 @@ const NSFW_EXTERNAL_LINK =
 interface CommandLibraryPageProps {
   isHellMode?: boolean;
   soundEnabled?: boolean;
+  reducedMotion?: boolean;
 }
 
 // Truncated & Summarized Syntax Preview Box Component
@@ -84,6 +85,7 @@ const SummarizedCodeViewer: React.FC<{
 export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
   isHellMode = false,
   soundEnabled = true,
+  reducedMotion = false,
 }) => {
   // Authoritative commands uploaded by Admin
   const [commands] = useState<RPCommand[]>(INITIAL_RP_COMMANDS);
@@ -233,6 +235,7 @@ export const CommandLibraryPage: React.FC<CommandLibraryPageProps> = ({
         onClose={() => setIsAiModalOpen(false)}
         isHellMode={isHellMode}
         soundEnabled={soundEnabled}
+        reducedMotion={reducedMotion}
         onCopiedToast={(msg) => {
           setToastMessage(msg);
           setTimeout(() => {
