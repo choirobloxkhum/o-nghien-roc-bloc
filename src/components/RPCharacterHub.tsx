@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Sparkles, Users, Search, X, Flame, SunMedium, ArrowUp, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Lock } from 'lucide-react';
+import { Sparkles, Users, Search, X, Flame, SunMedium, ArrowUp, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Lock, AlertTriangle, BookOpen, Volume2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { RPCharacter } from '../types';
 import { RPTopNavBar } from './RPTopNavBar';
@@ -103,6 +103,8 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
 
   // Locked link toast message
   const [lockedToastMessage, setLockedToastMessage] = useState<string | null>(null);
+  const [lockedToastType, setLockedToastType] = useState<'lock' | 'warning'>('lock');
+  const [warningNoticeChar, setWarningNoticeChar] = useState<RPCharacter | null>(null);
 
   useEffect(() => {
     if (!lockedToastMessage) return;
@@ -491,7 +493,15 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
   // Quick Open Play
   const handlePlay = useCallback((char: RPCharacter) => {
     playUiClick(soundEnabled);
+    if (char.hasWarningPlayButton) {
+      setWarningNoticeChar(char);
+      setLockedToastType('warning');
+      setLockedToastMessage(char.warningPlayMessage || 'Đợi thông báo tiếp theo để biết cách nhận được link');
+      return;
+    }
+
     if (char.isLinkLocked) {
+      setLockedToastType('lock');
       setLockedToastMessage(`🔒 Link của ${char.name} đang tạm thời khóa theo yêu cầu của tác giả! Vui lòng quay lại sau nha ✨`);
       return;
     }
@@ -1104,7 +1114,136 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
         soundEnabled={soundEnabled}
       />
 
-      {/* Toast Notification when clicking a temporarily locked link */}
+      {/* Modal Thông Báo Nhận Link (ví dụ Valentin De Vigny) */}
+      <AnimatePresence>
+        {warningNoticeChar && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[190] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => setWarningNoticeChar(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+              onClick={(e) => e.stopPropagation()}
+              className={`w-full max-w-md p-6 rounded-3xl border-2 shadow-2xl relative overflow-hidden ${
+                isHellMode
+                  ? 'bg-[#121215] border-amber-500/60 shadow-[0_20px_60px_rgba(0,0,0,0.85)] text-slate-100'
+                  : 'bg-[#181d24] border-amber-400/80 shadow-[0_20px_60px_rgba(0,0,0,0.7)] text-slate-100'
+              }`}
+            >
+              <div className="absolute top-3 right-3">
+                <button
+                  onClick={() => setWarningNoticeChar(null)}
+                  className="p-2 rounded-full transition-colors cursor-pointer text-slate-400 hover:text-white hover:bg-white/10"
+                  aria-label="Đóng"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex flex-col items-center text-center">
+                {/* Warning Icon Badge */}
+                <div className="w-16 h-16 rounded-2xl bg-amber-500/15 text-amber-400 flex items-center justify-center mb-4 border border-amber-400/40 shadow-[0_0_24px_rgba(245,158,11,0.25)]">
+                  <AlertTriangle className="w-8 h-8 stroke-[2.5]" />
+                </div>
+
+                {/* Character preview */}
+                <div className="flex items-center gap-2.5 mb-3 px-3.5 py-1.5 rounded-full bg-black/40 border border-amber-400/30">
+                  <img
+                    src={warningNoticeChar.avatarUrl}
+                    alt={warningNoticeChar.name}
+                    className="w-6 h-6 rounded-full object-cover border border-amber-400/40"
+                  />
+                  <span className="text-xs font-bold text-amber-300">
+                    {warningNoticeChar.name}
+                  </span>
+                </div>
+
+                <h3 className="text-lg sm:text-xl font-black mb-2 text-amber-400 tracking-wide drop-shadow-sm">
+                  Thông Báo Nhận Link
+                </h3>
+
+                <p className="text-sm sm:text-base font-semibold mb-5 leading-relaxed px-3 text-slate-200">
+                  {warningNoticeChar.warningPlayMessage || 'Đợi thông báo tiếp theo để biết cách nhận được link'}
+                </p>
+
+                {/* Tiện ích trong lúc chờ link: Đọc Plot Truyện & Nghe Voice */}
+                <div className="w-full mb-5 p-3.5 rounded-2xl bg-black/40 border border-amber-400/30 flex flex-col gap-2.5 text-left">
+                  <div className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5 px-0.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Tiện ích trong lúc chờ link:</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {/* Nút Đọc Plot Truyện */}
+                    {warningNoticeChar.plotUrl ? (
+                      <a
+                        href={warningNoticeChar.plotUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => playUiClick(soundEnabled)}
+                        className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer border border-amber-300"
+                      >
+                        <BookOpen className="w-4 h-4 text-slate-950" />
+                        <span>Đọc Plot Truyện</span>
+                      </a>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          playUiClick(soundEnabled);
+                          handleReadPlot(warningNoticeChar);
+                          setWarningNoticeChar(null);
+                        }}
+                        className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer border border-amber-300"
+                      >
+                        <BookOpen className="w-4 h-4 text-slate-950" />
+                        <span>Đọc Plot Truyện</span>
+                      </button>
+                    )}
+
+                    {/* Nút Nghe Voice (Bật/Tắt voice ngay trong modal) */}
+                    {warningNoticeChar.voiceUrl ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleToggleVoice(warningNoticeChar);
+                        }}
+                        className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border transition-all cursor-pointer shadow-sm active:scale-95 ${
+                          playingId === warningNoticeChar.id
+                            ? 'bg-amber-400 text-slate-950 border-amber-200 shadow-amber-400/40 animate-pulse font-extrabold'
+                            : 'bg-white/10 hover:bg-white/15 text-slate-100 border-white/15 hover:border-amber-400/50'
+                        }`}
+                      >
+                        <Volume2 className={`w-4 h-4 ${playingId === warningNoticeChar.id ? 'text-slate-950 animate-bounce' : 'text-amber-400'}`} />
+                        <span>{playingId === warningNoticeChar.id ? 'Đang phát...' : 'Nghe Voice'}</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs text-slate-400 italic border border-dashed border-white/15">
+                        <Volume2 className="w-3.5 h-3.5 opacity-50" />
+                        <span>Chưa có voice</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setWarningNoticeChar(null)}
+                  className="w-full py-2.5 px-4 rounded-xl font-black text-sm sm:text-base bg-gradient-to-b from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 border-t border-amber-100 border-b-2 border-amber-600 shadow-lg shadow-amber-500/30 active:scale-95 transition-all cursor-pointer"
+                >
+                  Đã hiểu
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Toast Notification when clicking a temporarily locked or warning link */}
       <AnimatePresence>
         {lockedToastMessage && (
           <motion.div
@@ -1115,7 +1254,11 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
             className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[150] max-w-[92vw] sm:max-w-md px-4 py-3 rounded-2xl bg-slate-950/95 text-white border-2 border-amber-400 shadow-[0_10px_35px_rgba(0,0,0,0.65)] backdrop-blur-md flex items-center gap-3"
           >
             <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0 border border-amber-400/40">
-              <Lock className="w-4 h-4 stroke-[2.5]" />
+              {lockedToastType === 'warning' ? (
+                <AlertTriangle className="w-4 h-4 stroke-[2.5]" />
+              ) : (
+                <Lock className="w-4 h-4 stroke-[2.5]" />
+              )}
             </div>
             <p className="text-xs sm:text-sm font-bold text-slate-100 flex-1 leading-snug">
               {lockedToastMessage}

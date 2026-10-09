@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Play, BookOpen, Sparkles, Crown, Check, Volume2, Flame, Lock } from 'lucide-react';
+import { Play, BookOpen, Sparkles, Crown, Check, Volume2, Flame, Lock, AlertTriangle } from 'lucide-react';
 import { RPCharacter } from '../types';
 import { RPCharacterComments } from './RPCharacterComments';
 
@@ -40,6 +40,7 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
 
   const isLuciferLocked = character.id === 'char-11-lucifer' || character.name.toLowerCase().includes('lucifer') || Boolean(character.password);
   const isLinkLocked = Boolean(character.isLinkLocked);
+  const hasWarningPlayButton = Boolean(character.hasWarningPlayButton);
 
   const handleImageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -285,13 +286,17 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
                 ? 'Nhập mật khẩu để mở khóa'
                 : isLinkLocked
                 ? 'Link hiện đang tạm khóa'
+                : hasWarningPlayButton
+                ? (character.warningPlayMessage || 'Đợi thông báo tiếp theo để biết cách nhận được link')
                 : '"Chơi"'
             }
-            aria-label={isLuciferLocked ? 'Mật khẩu' : isLinkLocked ? 'Tạm khóa' : '"Chơi"'}
-            className={`w-full py-2 sm:py-2.5 px-2 rounded-xl text-white font-extrabold text-sm sm:text-base shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer ${
-              isLinkLocked
+            aria-label={isLuciferLocked ? 'Mật khẩu' : isLinkLocked ? 'Tạm khóa' : hasWarningPlayButton ? 'Cảnh báo nhận link' : '"Chơi"'}
+            className={`w-full py-2 sm:py-2.5 px-2 rounded-xl font-extrabold text-sm sm:text-base shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              hasWarningPlayButton
+                ? 'bg-gradient-to-b from-amber-400 via-amber-500 to-yellow-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 border-t border-amber-200 border-b-2 border-amber-800 shadow-[0_4px_14px_rgba(245,158,11,0.4)]'
+                : isLinkLocked
                 ? 'bg-gradient-to-b from-[#3f3f46] via-[#27272a] to-[#18181b] hover:from-[#52525b] hover:to-[#27272a] border-t border-zinc-500/40 border-b-2 border-black text-amber-200'
-                : 'bg-gradient-to-b from-[#dc2626] via-[#991b1b] to-[#7f1d1d] hover:from-[#ef4444] hover:to-[#991b1b] border-t border-red-300/50 border-b-2 border-[#450a0a] shadow-red-950'
+                : 'bg-gradient-to-b from-[#dc2626] via-[#991b1b] to-[#7f1d1d] hover:from-[#ef4444] hover:to-[#991b1b] border-t border-red-300/50 border-b-2 border-[#450a0a] shadow-red-950 text-white'
             }`}
           >
             {isLuciferLocked ? (
@@ -300,6 +305,11 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
               <>
                 <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5] text-amber-300" />
                 <span>"Tạm khóa"</span>
+              </>
+            ) : hasWarningPlayButton ? (
+              <>
+                <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5] text-slate-950 fill-amber-300" />
+                <span>"Chơi"</span>
               </>
             ) : (
               <>
@@ -319,13 +329,17 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
                 ? 'Nhập mật khẩu để mở khóa'
                 : isLinkLocked
                 ? 'Link hiện đang tạm khóa'
+                : hasWarningPlayButton
+                ? (character.warningPlayMessage || 'Đợi thông báo tiếp theo để biết cách nhận được link')
                 : 'Chơi'
             }
-            aria-label={isLuciferLocked ? 'Mật khẩu' : isLinkLocked ? 'Tạm khóa' : 'Chơi'}
-            className={`w-full py-1.5 sm:py-2.5 px-2 rounded-xl text-white font-extrabold text-xs sm:text-sm shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer ${
-              isLinkLocked
+            aria-label={isLuciferLocked ? 'Mật khẩu' : isLinkLocked ? 'Tạm khóa' : hasWarningPlayButton ? 'Cảnh báo nhận link' : 'Chơi'}
+            className={`w-full py-1.5 sm:py-2.5 px-2 rounded-xl font-extrabold text-xs sm:text-sm shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              hasWarningPlayButton
+                ? 'bg-gradient-to-b from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 border-t border-amber-100 border-b-2 border-amber-600 shadow-[0_4px_14px_rgba(245,158,11,0.35)]'
+                : isLinkLocked
                 ? 'bg-gradient-to-b from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 border-t border-slate-400/40 border-b-2 border-slate-900 text-amber-200 shadow-xs'
-                : 'bg-gradient-to-b from-[#22c55e] to-[#16a34a] hover:from-[#4ade80] hover:to-[#22c55e] border-t border-white/40 border-b-2 border-[#15803d] hover:shadow-green-500/20'
+                : 'bg-gradient-to-b from-[#22c55e] to-[#16a34a] hover:from-[#4ade80] hover:to-[#22c55e] border-t border-white/40 border-b-2 border-[#15803d] hover:shadow-green-500/20 text-white'
             }`}
           >
             {isLuciferLocked ? (
@@ -334,6 +348,11 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
               <>
                 <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5] text-amber-300" />
                 <span>Tạm khóa</span>
+              </>
+            ) : hasWarningPlayButton ? (
+              <>
+                <AlertTriangle className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2.5] text-slate-950 fill-amber-300" />
+                <span>Chơi</span>
               </>
             ) : (
               <>

@@ -31,6 +31,8 @@ export interface RPCharacter {
   hint2Url?: string;
   isLinkLocked?: boolean;
   linkLockReason?: string;
+  hasWarningPlayButton?: boolean;
+  warningPlayMessage?: string;
 }
 
 export interface PlayScenarioModalData {
