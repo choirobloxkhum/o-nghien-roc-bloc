@@ -120,7 +120,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22%3A%5B%221ERpUQlKrc-YcynTWrJgw2yU8BdMnChqn%22%5D%2C%22action%22%3A%22open%22%2C%22userId%22%3A%22102834450421569886676%22%2C%22resourceKeys%22%3A%7B%7D%7D&usp=drive_link',
     plotUrl: 'https://rentry.co/choirobloxkhum_thien',
-    voiceUrl: 'https://res.cloudinary.com/opmwpbzb/video/upload/v1789908496/ElevenLabs_2026-09-20T12_44_00_Hung_Tran_-_Deep_Calm_and_Reflective_pvc_sp105_s50_sb75_v3.mp3',
+    voiceUrl: '/voices/hoang-nhat-thien.mp3',
     createdAt: now + 5000,
     hasDynamicPassword: true,
     password: 'HN1T89',
@@ -143,7 +143,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%2211oW_p0ptUtGAbMOC2zsw09SLdnY7MLOQ%22%5D,%22action%22:%22open%22,%22userId%22:%22118220567926520160271%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing',
     plotUrl: 'https://rentry.co/choirobloxkhum_jihoon',
-    voiceUrl: 'https://res.cloudinary.com/opmwpbzb/video/upload/v1789908658/ElevenLabs_2026-09-20T12_49_54_Chris_-_Warm_and_Clear_pvc_sp100_s55_sb55_v3.mp3',
+    voiceUrl: '/voices/seo-jihoon.mp3',
     createdAt: now + 4000,
   },
   {
@@ -202,7 +202,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221j46zIyS0HeoKc0qMlcYE1-I9cokHLPKi%22%5D,%22action%22:%22open%22,%22userId%22:%22102834450421569886676%22,%22resourceKeys%22:%7B%7D%7D',
     plotUrl: 'https://rentry.co/choirobloxkhum_jaxon',
-    voiceUrl: 'https://res.cloudinary.com/opmwpbzb/video/upload/v1788452056/ElevenLabs_2026-09-03T16_10_32_Ryan_-_Rich_Smooth_and_Engaging_pvc_sp89_s39_sb32_v3.mp3',
+    voiceUrl: '/voices/jaxon-petrov.mp3',
     createdAt: now + 1500,
   },
   {
