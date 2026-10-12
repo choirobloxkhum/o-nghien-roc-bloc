@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Sparkles, Users, Search, X, Flame, SunMedium, ArrowUp, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Lock, AlertTriangle, BookOpen, Volume2 } from 'lucide-react';
+import { Sparkles, Users, Search, X, Flame, SunMedium, ArrowUp, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Lock, AlertTriangle, BookOpen, Volume2, MessageCircle, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { RPCharacter } from '../types';
 import { RPTopNavBar } from './RPTopNavBar';
@@ -1130,13 +1130,13 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
               onClick={(e) => e.stopPropagation()}
-              className={`w-full max-w-md p-6 rounded-3xl border-2 shadow-2xl relative overflow-hidden ${
+              className={`w-full max-w-lg max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-3xl border-2 shadow-2xl relative ${
                 isHellMode
                   ? 'bg-[#121215] border-amber-500/60 shadow-[0_20px_60px_rgba(0,0,0,0.85)] text-slate-100'
                   : 'bg-[#181d24] border-amber-400/80 shadow-[0_20px_60px_rgba(0,0,0,0.7)] text-slate-100'
               }`}
             >
-              <div className="absolute top-3 right-3">
+              <div className="absolute top-3 right-3 z-10">
                 <button
                   onClick={() => setWarningNoticeChar(null)}
                   className="p-2 rounded-full transition-colors cursor-pointer text-slate-400 hover:text-white hover:bg-white/10"
@@ -1148,38 +1148,95 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
 
               <div className="flex flex-col items-center text-center">
                 {/* Warning Icon Badge */}
-                <div className="w-16 h-16 rounded-2xl bg-amber-500/15 text-amber-400 flex items-center justify-center mb-4 border border-amber-400/40 shadow-[0_0_24px_rgba(245,158,11,0.25)]">
-                  <AlertTriangle className="w-8 h-8 stroke-[2.5]" />
+                <div className="w-14 h-14 rounded-2xl bg-amber-500/15 text-amber-400 flex items-center justify-center mb-3 border border-amber-400/40 shadow-[0_0_24px_rgba(245,158,11,0.25)]">
+                  <AlertTriangle className="w-7 h-7 stroke-[2.5]" />
                 </div>
 
                 {/* Character preview */}
-                <div className="flex items-center gap-2.5 mb-3 px-3.5 py-1.5 rounded-full bg-black/40 border border-amber-400/30">
+                <div className="flex items-center gap-2 mb-2 px-3 py-1 rounded-full bg-black/40 border border-amber-400/30">
                   <img
                     src={warningNoticeChar.avatarUrl}
                     alt={warningNoticeChar.name}
-                    className="w-6 h-6 rounded-full object-cover border border-amber-400/40"
+                    className="w-5 h-5 rounded-full object-cover border border-amber-400/40"
                   />
                   <span className="text-xs font-bold text-amber-300">
                     {warningNoticeChar.name}
                   </span>
                 </div>
 
-                <h3 className="text-lg sm:text-xl font-black mb-2 text-amber-400 tracking-wide drop-shadow-sm">
-                  Thông Báo Nhận Link
+                <h3 className="text-lg sm:text-xl font-black mb-3 text-amber-400 tracking-wide drop-shadow-sm">
+                  Cảnh Báo Nội Dung & Hướng Dẫn Nhận Link
                 </h3>
 
-                <p className="text-sm sm:text-base font-semibold mb-5 leading-relaxed px-3 text-slate-200">
-                  {warningNoticeChar.warningPlayMessage || 'Đợi thông báo tiếp theo để biết cách nhận được link'}
-                </p>
+                {/* Khối Cảnh Báo Nội Dung */}
+                <div className="w-full mb-3.5 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-400/40 text-left">
+                  <div className="flex items-center gap-1.5 font-bold text-amber-300 text-xs sm:text-sm uppercase tracking-wide mb-1.5">
+                    <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span>Cảnh báo nội dung:</span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                    Nhân vật này chứa các yếu tố được coi là <strong className="text-amber-300 font-bold">&quot;lệch lạc&quot;</strong> so với các tiêu chuẩn đạo đức thông thường. Rất mong bạn cân nhắc kỹ, đảm bảo tinh thần thoải mái nhất và giữ vững nhận thức phân biệt rõ ràng giữa thực tế và RP (Roleplay) trước khi bắt đầu.
+                  </p>
+                </div>
+
+                {/* Khối Điều Kiện Nhận Link */}
+                <div className="w-full mb-3.5 p-3.5 rounded-2xl bg-black/40 border border-slate-700/80 text-left space-y-2.5">
+                  <div className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+                    Vì tính chất của nhân vật, để nhận link Mộng Chè cần đảm bảo:
+                  </div>
+
+                  <div className="space-y-2 text-xs sm:text-sm text-slate-200">
+                    <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white/[0.04] border border-white/5">
+                      <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-300 font-black text-xs flex items-center justify-center shrink-0 border border-amber-400/30">
+                        1
+                      </span>
+                      <p className="leading-relaxed">
+                        Chụp <strong className="text-amber-300">CCCD</strong> của các bạn để rõ <strong className="text-white">tên</strong> và <strong className="text-white">năm sinh</strong> <span className="text-slate-400 text-xs">(có thể che tất cả các thông tin khác)</span>.
+                      </p>
+                    </div>
+
+                    <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white/[0.04] border border-white/5">
+                      <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-300 font-black text-xs flex items-center justify-center shrink-0 border border-amber-400/30">
+                        2
+                      </span>
+                      <div className="flex-1">
+                        <p className="leading-relaxed mb-2">
+                          Inbox Facebook của Mộng Chè để nhận được link.
+                        </p>
+                        <a
+                          href="https://www.facebook.com/profile.php?id=61590620211736"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => playUiClick(soundEnabled)}
+                          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-bold text-xs bg-[#1877F2] hover:bg-[#166fe5] text-white shadow-md shadow-blue-900/40 active:scale-95 transition-all cursor-pointer border border-blue-400/30"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          <span>Inbox Facebook Mộng Chè</span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Lưu ý riêng từ Mộng Chè */}
+                  <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-400/30 text-xs leading-relaxed text-amber-200/90 mt-2">
+                    <div className="flex items-center gap-1.5 font-bold text-amber-300 mb-1">
+                      <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
+                      <span>💡 Lưu ý riêng từ Mộng Chè:</span>
+                    </div>
+                    <p className="text-slate-300">
+                      Hãy chắc chắn bạn đã đủ tin tưởng Mộng Chè trước khi gửi thông tin. Mình cam kết tuyệt đối bảo mật và không chia sẻ hay sử dụng thông tin cá nhân của bạn cho bất kỳ mục đích nào khác hoặc bên thứ ba.
+                    </p>
+                  </div>
+                </div>
 
                 {/* Tiện ích trong lúc chờ link: Đọc Plot Truyện & Nghe Voice */}
-                <div className="w-full mb-5 p-3.5 rounded-2xl bg-black/40 border border-amber-400/30 flex flex-col gap-2.5 text-left">
-                  <div className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5 px-0.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <div className="w-full mb-4 p-3 rounded-2xl bg-black/40 border border-amber-400/30 flex flex-col gap-2 text-left">
+                  <div className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5 px-0.5">
+                    <Sparkles className="w-3 h-3 text-amber-400" />
                     <span>Tiện ích trong lúc chờ link:</span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {/* Nút Đọc Plot Truyện */}
                     {warningNoticeChar.plotUrl ? (
                       <a
@@ -1187,9 +1244,9 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => playUiClick(soundEnabled)}
-                        className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer border border-amber-300"
+                        className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl font-bold text-xs bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer border border-amber-300"
                       >
-                        <BookOpen className="w-4 h-4 text-slate-950" />
+                        <BookOpen className="w-3.5 h-3.5 text-slate-950" />
                         <span>Đọc Plot Truyện</span>
                       </a>
                     ) : (
@@ -1199,31 +1256,31 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
                           handleReadPlot(warningNoticeChar);
                           setWarningNoticeChar(null);
                         }}
-                        className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer border border-amber-300"
+                        className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl font-bold text-xs bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer border border-amber-300"
                       >
-                        <BookOpen className="w-4 h-4 text-slate-950" />
+                        <BookOpen className="w-3.5 h-3.5 text-slate-950" />
                         <span>Đọc Plot Truyện</span>
                       </button>
                     )}
 
-                    {/* Nút Nghe Voice (Bật/Tắt voice ngay trong modal) */}
+                    {/* Nút Nghe Voice */}
                     {warningNoticeChar.voiceUrl ? (
                       <button
                         type="button"
                         onClick={() => {
                           handleToggleVoice(warningNoticeChar);
                         }}
-                        className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border transition-all cursor-pointer shadow-sm active:scale-95 ${
+                        className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl font-bold text-xs border transition-all cursor-pointer shadow-sm active:scale-95 ${
                           playingId === warningNoticeChar.id
                             ? 'bg-amber-400 text-slate-950 border-amber-200 shadow-amber-400/40 animate-pulse font-extrabold'
                             : 'bg-white/10 hover:bg-white/15 text-slate-100 border-white/15 hover:border-amber-400/50'
                         }`}
                       >
-                        <Volume2 className={`w-4 h-4 ${playingId === warningNoticeChar.id ? 'text-slate-950 animate-bounce' : 'text-amber-400'}`} />
+                        <Volume2 className={`w-3.5 h-3.5 ${playingId === warningNoticeChar.id ? 'text-slate-950 animate-bounce' : 'text-amber-400'}`} />
                         <span>{playingId === warningNoticeChar.id ? 'Đang phát...' : 'Nghe Voice'}</span>
                       </button>
                     ) : (
-                      <div className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs text-slate-400 italic border border-dashed border-white/15">
+                      <div className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs text-slate-400 italic border border-dashed border-white/15">
                         <Volume2 className="w-3.5 h-3.5 opacity-50" />
                         <span>Chưa có voice</span>
                       </div>
@@ -1233,7 +1290,7 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
 
                 <button
                   onClick={() => setWarningNoticeChar(null)}
-                  className="w-full py-2.5 px-4 rounded-xl font-black text-sm sm:text-base bg-gradient-to-b from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 border-t border-amber-100 border-b-2 border-amber-600 shadow-lg shadow-amber-500/30 active:scale-95 transition-all cursor-pointer"
+                  className="w-full py-2.5 px-4 rounded-xl font-black text-sm bg-gradient-to-b from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 border-t border-amber-100 border-b-2 border-amber-600 shadow-lg shadow-amber-500/30 active:scale-95 transition-all cursor-pointer"
                 >
                   Đã hiểu
                 </button>
