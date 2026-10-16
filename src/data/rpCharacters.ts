@@ -45,6 +45,26 @@ export const MONG_CHE_CHARACTER: RPCharacter = {
 // và gắn cờ isNew: true, cornerTag: 'MỚI' để hiển thị tag nổi bật ở góc phải trên cùng ảnh (tối đa 3 nhân vật).
 export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
   {
+    id: 'char-20-le-minh-khai',
+    name: 'Lê Minh Khải',
+    avatarUrl: 'https://i.ibb.co/rKG6tFPZ/media-1792146870.png',
+    roleTag: 'VN xưa',
+    tags: ['VN xưa', 'Ngọt', 'miền tây', 'cưới trước yêu sau'],
+    tagline: '',
+    robuxDonations: 0,
+    personality: 'Ấm áp, cưng chiều, ngọt ngào, chất phác',
+    plotTitle: '',
+    plotSummary: 'Con chim nó nói tầm bậy. Mợ đừng có nghe.',
+    fullPlot: '',
+    sampleDialogue: [],
+    playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221Bvc6hwQcsFoRcfKjWH2KJfKkK6dXDTRo%22%5D,%22action%22:%22open%22,%22userId%22:%22102834450421569886676%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing',
+    plotUrl: 'https://rentry.co/choirobloxkhum_MinhKhai',
+    voiceUrl: 'https://res.cloudinary.com/xi0o6gls/video/upload/v1792147538/ElevenLabs_2026-10-16T10_42_16_Hoang_Anh_-_Warm_Expressive_pvc_sp96_s76_sb75_v4.mp3',
+    createdAt: now + 9000,
+    isNew: true,
+    cornerTag: 'MỚI',
+  },
+  {
     id: 'char-19-valentin-de-vigny',
     name: 'Valentin De Vigny',
     avatarUrl: 'https://i.ibb.co/0RrD7K1h/media-1791543819.png',
@@ -102,8 +122,6 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     plotUrl: 'https://rentry.co/choirobloxkhum_NhatSi',
     voiceUrl: 'https://res.cloudinary.com/xi0o6gls/video/upload/v1790484914/ElevenLabs_2026-09-27T04_48_23_Evan_Zhao_-_Warm_Calm_and_Trustworthy_pvc_sp106_s60_sb75_v3.mp3',
     createdAt: now + 6000,
-    isNew: true,
-    cornerTag: 'MỚI',
   },
   {
     id: 'char-16-hoang-nhat-thien',
@@ -120,7 +138,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22%3A%5B%221ERpUQlKrc-YcynTWrJgw2yU8BdMnChqn%22%5D%2C%22action%22%3A%22open%22%2C%22userId%22%3A%22102834450421569886676%22%2C%22resourceKeys%22%3A%7B%7D%7D&usp=drive_link',
     plotUrl: 'https://rentry.co/choirobloxkhum_thien',
-    voiceUrl: 'https://res.cloudinary.com/opmwpbzb/video/upload/v1789908496/ElevenLabs_2026-09-20T12_44_00_Hung_Tran_-_Deep_Calm_and_Reflective_pvc_sp105_s50_sb75_v3.mp3',
+    voiceUrl: 'https://res.cloudinary.com/xi0o6gls/video/upload/v1792148253/ElevenLabs_2026-09-20T12_44_00_Hung_Tran_-_Deep_Calm_and_Reflective_pvc_sp105_s50_sb75_v3_1.mp3',
     createdAt: now + 5000,
     hasDynamicPassword: true,
     password: 'HN1T89',
@@ -143,7 +161,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%2211oW_p0ptUtGAbMOC2zsw09SLdnY7MLOQ%22%5D,%22action%22:%22open%22,%22userId%22:%22118220567926520160271%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing',
     plotUrl: 'https://rentry.co/choirobloxkhum_jihoon',
-    voiceUrl: 'https://res.cloudinary.com/opmwpbzb/video/upload/v1789908658/ElevenLabs_2026-09-20T12_49_54_Chris_-_Warm_and_Clear_pvc_sp100_s55_sb55_v3.mp3',
+    voiceUrl: 'https://res.cloudinary.com/xi0o6gls/video/upload/v1792147801/ElevenLabs_2026-09-20T12_49_54_Chris_-_Warm_and_Clear_pvc_sp100_s55_sb55_v3_1.mp3',
     createdAt: now + 4000,
   },
   {
