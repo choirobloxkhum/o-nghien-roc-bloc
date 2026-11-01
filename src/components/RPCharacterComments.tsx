@@ -186,7 +186,7 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
     const unsubscribe = subscribeToCharacterComments(characterId, (updated) => {
       setComments(updated);
       setIsLoading(false);
-    });
+    }, isHellMode);
 
     return () => {
       unsubscribe();
@@ -262,7 +262,8 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
       trimmedName,
       trimmedText,
       targetParentId,
-      targetReplyTo
+      targetReplyTo,
+      isHellMode
     );
 
     setIsSubmitting(false);
@@ -508,13 +509,15 @@ export const RPCharacterComments: React.FC<RPCharacterCommentsProps> = ({
                         >
                           <MessageSquareHeart className="w-6 h-6" />
                         </div>
-                        <p className="font-bold text-sm">Chưa có nhận xét nào cho chồng này.</p>
+                        <p className="font-bold text-sm">
+                          {isHellMode ? 'Chưa có nhận xét nào trong Chế độ Địa Ngục.' : 'Chưa có nhận xét nào cho chồng này.'}
+                        </p>
                         <p
                           className={`text-xs mt-1 font-semibold ${
                             isHellMode ? 'text-red-400' : 'text-sky-600'
                           }`}
                         >
-                          Hãy là người đầu tiên để lại lời nhắn yêu thương! 💕
+                          {isHellMode ? 'Hãy là linh hồn đầu tiên để lại lời thì thầm hắc ám! 🔮' : 'Hãy là người đầu tiên để lại lời nhắn yêu thương! 💕'}
                         </p>
                       </div>
                     )}

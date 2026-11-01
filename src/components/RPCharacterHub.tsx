@@ -11,6 +11,7 @@ import { GachaModal } from './GachaModal';
 import { RobloxBackground } from './RobloxBackground';
 import { HellBackground } from './HellBackground';
 import { AgeVerificationModal } from './AgeVerificationModal';
+import { HellModeDevModal } from './HellModeDevModal';
 import { HellFallingOverlay } from './HellFallingOverlay';
 import { ActiveVoiceBanner } from './ActiveVoiceBanner';
 import { AnnouncementBanner } from './AnnouncementBanner';
@@ -20,9 +21,23 @@ import { RapunzelTributeFooter } from './RapunzelTributeFooter';
 import { PasswordModal } from './PasswordModal';
 import { CocKienTroiModal } from './CocKienTroiModal';
 import { ArtGalleryEntranceCard } from './ArtGalleryEntranceCard';
-import { ArtGalleryPage } from './ArtGalleryPage';
-import { RPNavigationSubBar, MainSubTab } from './RPNavigationSubBar';
 import { CommandLibraryPage } from './CommandLibraryPage';
+import { RPNavigationSubBar, MainSubTab } from './RPNavigationSubBar';
+import { ArtGalleryPage } from './ArtGalleryPage';
+import { AuthModal } from './AuthModal';
+import { DailyCheckInBar } from './DailyCheckInBar';
+import { DailyCheckInInfoModal } from './DailyCheckInInfoModal';
+import { UnlockHellCharModal } from './UnlockHellCharModal';
+import { HellInteractiveCharacterView } from './HellInteractiveCharacterView';
+import { useAuth } from '../context/AuthContext';
+import {
+  subscribeUserDamRobux,
+  claimDailyCheckIn,
+  unlockHellCharacter,
+  getCharacterHellCost,
+  UserDamRobuxData,
+} from '../services/damRobuxApi';
+import { fireConfetti } from '../utils/confettiHelper';
 import { INITIAL_RP_COMMANDS } from '../data/initialCommands';
 import {
   getStoredRPCharacters,
@@ -92,10 +107,48 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
   const [isNgocHoangModalOpen, setIsNgocHoangModalOpen] = useState(false);
   const [isImperialEdictOpen, setIsImperialEdictOpen] = useState(false);
 
-  // NSFW / Hell Realm State (Always defaults to false / Hạ Giới on fresh visit or entering game)
+  // NSFW / Hell Realm State (Always defaults to false / Hạ Giới on fresh visit or reset)
   const [isHellMode, setIsHellMode] = useState<boolean>(false);
+
+  // User Authentication & Hell Mode Access Gate
+  const { currentUser, isAdmin, loading: authLoading } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
+  const [isHellModeAuthPrompt, setIsHellModeAuthPrompt] = useState(false);
   const [isAgeVerificationOpen, setIsAgeVerificationOpen] = useState(false);
+  const [isHellDevModalOpen, setIsHellDevModalOpen] = useState(false);
   const [isFallingOverlayActive, setIsFallingOverlayActive] = useState(false);
+
+  // Robux Dăm & Daily Check-In States
+  const [damRobuxData, setDamRobuxData] = useState<UserDamRobuxData>({
+    damRobux: 0,
+    lastCheckInDate: '',
+    unlockedHellChars: [],
+    isCheckedInToday: false,
+  });
+  const [isClaimingCheckIn, setIsClaimingCheckIn] = useState(false);
+  const [isDailyInfoModalOpen, setIsDailyInfoModalOpen] = useState(false);
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
+  const [selectedUnlockChar, setSelectedUnlockChar] = useState<RPCharacter | null>(null);
+  const [interactiveHellChar, setInteractiveHellChar] = useState<RPCharacter | null>(null);
+
+  useEffect(() => {
+    if (!currentUser) {
+      setDamRobuxData({
+        damRobux: 0,
+        lastCheckInDate: '',
+        unlockedHellChars: [],
+        isCheckedInToday: false,
+      });
+      return;
+    }
+
+    const unsubscribe = subscribeUserDamRobux(currentUser.uid, (data) => {
+      setDamRobuxData(data);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser]);
 
   // Password Modal states
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -122,6 +175,7 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   const handleOpenGallery = () => {
+    if (isHellMode) return;
     playUiClick(soundEnabled);
     setIsGalleryOpen(true);
   };
@@ -368,12 +422,48 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
     }
   }, [soundEnabled, votedIds]);
 
-  // Trigger Hell Mode Confirmation flow
+  // Trigger Hell Mode Confirmation flow - Strictly requires admin email hiendichai@gmail.com during development
   const handleOpenAgeVerification = () => {
+    if (!isAdmin) {
+      playUiClick(soundEnabled);
+      setIsHellDevModalOpen(true);
+      return;
+    }
+    if (!currentUser) {
+      setAuthModalMode('login');
+      setIsHellModeAuthPrompt(true);
+      setIsAuthModalOpen(true);
+      return;
+    }
     setIsAgeVerificationOpen(true);
   };
 
+  const handleAuthSuccess = () => {
+    if (isHellModeAuthPrompt) {
+      setIsHellModeAuthPrompt(false);
+      if (isAdmin) {
+        setIsAgeVerificationOpen(true);
+      } else {
+        setIsHellDevModalOpen(true);
+      }
+    }
+  };
+
   const handleConfirmHellMode = () => {
+    // Strictly restrict Hell Mode to admin during development
+    if (!isAdmin) {
+      setIsAgeVerificationOpen(false);
+      setIsHellDevModalOpen(true);
+      return;
+    }
+    if (!currentUser) {
+      setAuthModalMode('login');
+      setIsHellModeAuthPrompt(true);
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setIsGalleryOpen(false);
+    setIsGachaOpen(false);
     setIsAgeVerificationOpen(false);
     setIsHellMode(true);
     setIsFallingOverlayActive(true);
@@ -404,7 +494,65 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
     }
   }, [soundEnabled]);
 
-  // Characters active in current mode (in Hell Mode, remove Yuuma and Rex)
+  // If user is not admin (or logs out) while in Hell Mode, safely revert to Earth and show dev notice modal
+  useEffect(() => {
+    if (!authLoading && isHellMode && !isAdmin) {
+      handleReturnToEarth();
+      setIsHellDevModalOpen(true);
+    }
+  }, [authLoading, isHellMode, isAdmin, handleReturnToEarth]);
+
+  // Direct activeSubTab to 'home' when entering Hell Mode (Kho Lệnh is removed in Hell Mode)
+  useEffect(() => {
+    if (isHellMode && activeSubTab === 'commands') {
+      setActiveSubTab('home');
+    }
+  }, [isHellMode, activeSubTab]);
+
+  // Daily Check-In Claim Handler
+  const handleClaimDailyCheckIn = async () => {
+    if (!currentUser) {
+      setAuthModalMode('login');
+      setIsHellModeAuthPrompt(true);
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    setIsClaimingCheckIn(true);
+    const res = await claimDailyCheckIn(currentUser.uid);
+    setIsClaimingCheckIn(false);
+
+    if (res.success) {
+      fireConfetti();
+      setLockedToastType('warning');
+      setLockedToastMessage(res.message);
+    } else {
+      setLockedToastType('lock');
+      setLockedToastMessage(res.message);
+    }
+  };
+
+  // Confirm Unlock Character Handler
+  const handleConfirmUnlockHellChar = async (characterId: string): Promise<boolean> => {
+    if (!currentUser) return false;
+    const res = await unlockHellCharacter(currentUser.uid, characterId);
+    if (res.success) {
+      fireConfetti();
+      setLockedToastType('warning');
+      setLockedToastMessage(res.message);
+      if (selectedUnlockChar && selectedUnlockChar.id === characterId) {
+        setInteractiveHellChar(selectedUnlockChar);
+        setIsUnlockModalOpen(false);
+      }
+      return true;
+    } else {
+      setLockedToastType('lock');
+      setLockedToastMessage(res.message);
+      return false;
+    }
+  };
+
+  // Characters active in current mode (in Hell Mode, remove Yuuma, Rex, Âu Dương Nhất Sĩ, Seo Jihoon, Đừng Tạ Lỗi)
   const activeModeCharacters = useMemo(() => {
     if (!isHellMode) return characters;
     return characters.filter((c) => {
@@ -412,7 +560,10 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
       const lowerName = c.name.toLowerCase();
       const isYuuma = lowerId.includes('yuuma') || lowerName.includes('yuuma');
       const isRex = lowerId.includes('rex') || lowerName.includes('rex');
-      return !isYuuma && !isRex;
+      const isAuDuong = lowerId.includes('au-duong') || lowerName.includes('âu dương');
+      const isSeoJihoon = lowerId.includes('seo-jihoon') || lowerName.includes('seo jihoon');
+      const isTaLoi = lowerId.includes('taloi') || lowerName.includes('tạ lỗi');
+      return !isYuuma && !isRex && !isAuDuong && !isSeoJihoon && !isTaLoi;
     });
   }, [characters, isHellMode]);
 
@@ -493,6 +644,29 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
   // Quick Open Play
   const handlePlay = useCallback((char: RPCharacter) => {
     playUiClick(soundEnabled);
+
+    if (isHellMode) {
+      if (!currentUser) {
+        setAuthModalMode('login');
+        setIsHellModeAuthPrompt(true);
+        setIsAuthModalOpen(true);
+        return;
+      }
+
+      // Check if unlocked in Hell Mode (Admin has full access to all characters without restrictions)
+      const isUnlocked = isAdmin || damRobuxData.unlockedHellChars.includes(char.id);
+      if (!isUnlocked) {
+        setSelectedUnlockChar(char);
+        setIsUnlockModalOpen(true);
+        return;
+      }
+
+      // IN HELL MODE: Do NOT navigate to external links!
+      // Open the fullscreen interactive breathing character view directly:
+      setInteractiveHellChar(char);
+      return;
+    }
+
     if (char.hasWarningPlayButton) {
       setWarningNoticeChar(char);
       setLockedToastType('warning');
@@ -515,7 +689,7 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
     if (char.playUrl) {
       window.open(char.playUrl, '_blank');
     }
-  }, [soundEnabled]);
+  }, [soundEnabled, isHellMode, currentUser, isAdmin, damRobuxData.unlockedHellChars]);
 
   // Open Cóc Kiện Trời Modal
   const handleOpenCocKienTroi = (char?: RPCharacter) => {
@@ -558,7 +732,7 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
     return map;
   }, [top3LeaderboardCharacters]);
 
-  if (isGalleryOpen) {
+  if (isGalleryOpen && !isHellMode) {
     return (
       <ArtGalleryPage
         onBackToHub={handleCloseGallery}
@@ -591,11 +765,16 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
         onOpenAgeVerification={handleOpenAgeVerification}
         onReturnToEarth={handleReturnToEarth}
         onOpenGallery={handleOpenGallery}
+        onOpenAuthModal={() => {
+          setIsHellModeAuthPrompt(false);
+          setAuthModalMode('login');
+          setIsAuthModalOpen(true);
+        }}
         reducedMotion={reducedMotion}
         onToggleReducedMotion={handleToggleReducedMotion}
       />
 
-      {/* 1.1 DUAL-TAB NAVIGATION SUB-BAR (Trang Chủ & Kho Lệnh) */}
+      {/* 1.1 DUAL-TAB NAVIGATION SUB-BAR (Trang Chủ & Kho Lệnh & Chế độ Địa Ngục 18+) */}
       <RPNavigationSubBar
         activeTab={activeSubTab}
         onTabChange={setActiveSubTab}
@@ -603,11 +782,13 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
         soundEnabled={soundEnabled}
         totalCharacters={characters.length}
         totalCommands={INITIAL_RP_COMMANDS.length}
+        onOpenAgeVerification={handleOpenAgeVerification}
+        onReturnToEarth={handleReturnToEarth}
       />
 
 
-      {/* 2. DYNAMIC MAIN VIEW: TRANG CHỦ vs KHO LỆNH */}
-      {activeSubTab === 'commands' ? (
+      {/* 2. DYNAMIC MAIN VIEW: TRANG CHỦ vs KHO LỆNH (Kho lệnh chỉ hiển thị ở Hạ Giới) */}
+      {activeSubTab === 'commands' && !isHellMode ? (
         <CommandLibraryPage
           isHellMode={isHellMode}
           soundEnabled={soundEnabled}
@@ -707,6 +888,20 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
               </button>
             )}
           </div>
+
+          {/* DAILY CHECK-IN BAR (Chỉ có ở Chế độ Địa Ngục, nằm ngay dưới phần tìm tên chồng) */}
+          {isHellMode && (
+            <DailyCheckInBar
+              isHellMode={isHellMode}
+              damRobux={damRobuxData.damRobux}
+              isCheckedInToday={damRobuxData.isCheckedInToday}
+              isClaiming={isClaimingCheckIn}
+              onClaimCheckIn={handleClaimDailyCheckIn}
+              onOpenInfoModal={() => setIsDailyInfoModalOpen(true)}
+              soundEnabled={soundEnabled}
+              isAdmin={isAdmin}
+            />
+          )}
         </div>
 
         {/* SECTION 1: "Chồng giàu Robux" (LEADERBOARD TOP 3) - Only in normal mode */}
@@ -728,16 +923,16 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
           </div>
         )}
 
-        {/* PROMINENT GACHA WHEEL BANNER */}
-        {!searchQuery && (
+        {/* PROMINENT GACHA WHEEL BANNER (Chỉ hiển thị ở Hạ Giới, ẩn hoàn toàn trong Chế độ Địa Ngục) */}
+        {!searchQuery && !isHellMode && (
           <GachaWheelBanner
             onOpenGacha={() => setIsGachaOpen(true)}
             soundEnabled={soundEnabled}
           />
         )}
 
-        {/* 🎨 PHÒNG TRANH PROMINENT BANNER (DIRECTLY UNDER GACHA WHEEL) */}
-        {!searchQuery && (
+        {/* 🎨 PHÒNG TRANH PROMINENT BANNER (Chỉ hiển thị ở Hạ Giới, ẩn hoàn toàn trong Chế độ Địa Ngục) */}
+        {!searchQuery && !isHellMode && (
           <div className="mb-6 sm:mb-10 w-full">
             <ArtGalleryEntranceCard
               onOpenGallery={handleOpenGallery}
@@ -841,8 +1036,11 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
                     onDonateRobux={handleDonateRobux}
                     rankBadge={rankMap.get(character.id)}
                     isHellMode={isHellMode}
-                    commentCount={commentCounts[character.id] || 0}
+                    commentCount={commentCounts[isHellMode ? `${character.id}_hell` : character.id] || 0}
                     reducedMotion={reducedMotion}
+                    isUnlockedInHell={isAdmin || damRobuxData.unlockedHellChars.includes(character.id)}
+                    hellCost={getCharacterHellCost(character.id)}
+                    isAdmin={isAdmin}
                   />
                 ))}
               </motion.div>
@@ -1008,12 +1206,10 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
             </div>
           )}
         </section>
-      </main>
-      )}
 
-      {/* Tribute Footer with AI Họa Thần Rapunzel (chỉ hiển thị ở Trang Chủ) */}
-      {activeSubTab === 'home' && (
-        <RapunzelTributeFooter soundEnabled={soundEnabled} isHellMode={isHellMode} />
+        {/* AI Họa Thần Rapunzel Flower Tribute Footer (Only in Earth Mode) */}
+        {!isHellMode && <RapunzelTributeFooter soundEnabled={soundEnabled} isHellMode={isHellMode} />}
+      </main>
       )}
 
       {/* Floating "Trở về Hạ Giới" (Return to Earth) Button when in Hell Mode */}
@@ -1035,29 +1231,63 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
         </motion.div>
       )}
 
-      {/* Floating Bottom-Right Vinyl Record Audio Controller */}
-      <div className="fixed bottom-6 right-6 z-40">
-        <VinylRecordButton
-          isPlaying={soundEnabled}
-          onTogglePlay={onToggleSound}
-          isHellMode={isHellMode}
-        />
-      </div>
+      {/* Floating Bottom-Right Vinyl Record Audio Controller (Tự động tắt nhạc khi vào chế độ Chơi tương tác) */}
+      {!interactiveHellChar && (
+        <div className="fixed bottom-6 right-6 z-40">
+          <VinylRecordButton
+            isPlaying={soundEnabled && !interactiveHellChar}
+            onTogglePlay={onToggleSound}
+            isHellMode={isHellMode}
+          />
+        </div>
+      )}
 
       {/* Floating Active Character Voice Speaker Banner */}
       <ActiveVoiceBanner characters={activeModeCharacters} />
 
-      {/* Interactive Gacha Roulette Modal */}
-      <GachaModal
-        isOpen={isGachaOpen}
-        onClose={() => setIsGachaOpen(false)}
-        characters={activeModeCharacters}
+      {/* Daily Check-In Explanation Info Modal */}
+      <DailyCheckInInfoModal
+        isOpen={isDailyInfoModalOpen}
+        onClose={() => setIsDailyInfoModalOpen(false)}
         soundEnabled={soundEnabled}
-        reducedMotion={reducedMotion}
-        onSelectCharacter={handleSelectFromGacha}
-        onPlay={handlePlay}
-        onReadPlot={handleReadPlot}
       />
+
+      {/* Unlock Hell Mode Character Modal */}
+      <UnlockHellCharModal
+        isOpen={isUnlockModalOpen}
+        onClose={() => setIsUnlockModalOpen(false)}
+        character={selectedUnlockChar}
+        damRobux={damRobuxData.damRobux}
+        isCheckedInToday={damRobuxData.isCheckedInToday}
+        onConfirmUnlock={handleConfirmUnlockHellChar}
+        onClaimCheckIn={handleClaimDailyCheckIn}
+        soundEnabled={soundEnabled}
+      />
+
+      {/* Fullscreen Interactive Character View with AI Breathing Animation (Chế độ Địa Ngục) */}
+      {interactiveHellChar && (
+        <HellInteractiveCharacterView
+          character={interactiveHellChar}
+          isOpen={Boolean(interactiveHellChar)}
+          onClose={() => setInteractiveHellChar(null)}
+          soundEnabled={soundEnabled}
+          isAdmin={isAdmin}
+        />
+      )}
+
+      {/* Interactive Gacha Roulette Modal (Ẩn hoàn toàn trong Chế độ Địa Ngục) */}
+      {!isHellMode && (
+        <GachaModal
+          isOpen={isGachaOpen}
+          onClose={() => setIsGachaOpen(false)}
+          characters={activeModeCharacters}
+          soundEnabled={soundEnabled}
+          reducedMotion={reducedMotion}
+          onSelectCharacter={handleSelectFromGacha}
+          onPlay={handlePlay}
+          onReadPlot={handleReadPlot}
+        />
+      )}
 
       <PasswordModal
         isOpen={isPasswordModalOpen}
@@ -1096,6 +1326,16 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
         isOpen={isImperialEdictOpen}
         onClose={() => setIsImperialEdictOpen(false)}
         onSelectCharacter={scrollToCharacter}
+        soundEnabled={soundEnabled}
+      />
+
+      {/* User Login & Registration Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={handleAuthSuccess}
+        initialMode={authModalMode}
+        isHellModePrompt={isHellModeAuthPrompt}
         soundEnabled={soundEnabled}
       />
 
@@ -1330,6 +1570,13 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Feature Under Development Maintenance Modal for Non-Admin Users */}
+      <HellModeDevModal
+        isOpen={isHellDevModalOpen}
+        onClose={() => setIsHellDevModalOpen(false)}
+        soundEnabled={soundEnabled}
+      />
     </div>
   );
 };

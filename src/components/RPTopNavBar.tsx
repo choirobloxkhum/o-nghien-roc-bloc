@@ -1,6 +1,8 @@
 import React from 'react';
-import { ArrowLeft, Maximize2, Sparkles, Gamepad2, Flame, SunMedium, Skull, Zap } from 'lucide-react';
+import { ArrowLeft, Maximize2, Sparkles, Gamepad2, Flame, SunMedium, Skull, Zap, LogIn, LogOut, User as UserIcon } from 'lucide-react';
 import { playUiClick } from '../utils/audio';
+import { useAuth } from '../context/AuthContext';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface RPTopNavBarProps {
   onBackToWelcome?: () => void;
@@ -12,6 +14,7 @@ interface RPTopNavBarProps {
   onOpenAgeVerification?: () => void;
   onReturnToEarth?: () => void;
   onOpenGallery?: () => void;
+  onOpenAuthModal?: () => void;
   reducedMotion?: boolean;
   onToggleReducedMotion?: () => void;
 }
@@ -23,9 +26,12 @@ export const RPTopNavBar: React.FC<RPTopNavBarProps> = ({
   onOpenAgeVerification,
   onReturnToEarth,
   onOpenGallery,
+  onOpenAuthModal,
   reducedMotion = false,
   onToggleReducedMotion,
 }) => {
+  const { currentUser, logout } = useAuth();
+
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
@@ -137,8 +143,66 @@ export const RPTopNavBar: React.FC<RPTopNavBarProps> = ({
           </div>
         </div>
 
-        {/* Right Section: Smooth Performance Mode Switch & Fullscreen Action */}
+        {/* Right Section: Smooth Performance Mode Switch, Install App & Fullscreen Action */}
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          {/* PWA In-App Install Button */}
+          <PWAInstallButton isHellMode={isHellMode} soundEnabled={soundEnabled} />
+          {/* Nút Tài Khoản: Đăng Nhập / Đăng Ký hoặc Thông tin User */}
+          {currentUser ? (
+            <div
+              className={`flex items-center gap-1 sm:gap-1.5 p-0.5 sm:p-1 pl-1.5 sm:pl-2 rounded-lg sm:rounded-xl border backdrop-blur-md shrink-0 ${
+                isHellMode
+                  ? 'bg-red-950/70 border-red-500/50 text-red-200'
+                  : 'bg-white/20 border-white/40 text-white'
+              }`}
+            >
+              {currentUser.photoURL ? (
+                <img
+                  src={currentUser.photoURL}
+                  alt={currentUser.displayName || 'User'}
+                  className="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover border border-white/60 shrink-0"
+                />
+              ) : (
+                <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 font-black text-[10px] sm:text-xs flex items-center justify-center shrink-0 shadow-xs">
+                  {(currentUser.displayName || currentUser.email || 'U')[0].toUpperCase()}
+                </div>
+              )}
+              <span className="text-[9.5px] sm:text-xs font-bold max-w-[65px] sm:max-w-[100px] truncate hidden xs:inline">
+                {currentUser.displayName || currentUser.email?.split('@')[0]}
+              </span>
+              <button
+                type="button"
+                onClick={async () => {
+                  playUiClick(soundEnabled);
+                  await logout();
+                }}
+                title="Đăng xuất tài khoản"
+                className="p-1 rounded-md hover:bg-white/20 text-slate-300 hover:text-white transition-colors cursor-pointer shrink-0"
+                aria-label="Đăng xuất"
+              >
+                <LogOut className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <button
+              id="btn-nav-login"
+              type="button"
+              onClick={() => {
+                playUiClick(soundEnabled);
+                onOpenAuthModal?.();
+              }}
+              title="Đăng nhập hoặc Đăng ký tài khoản"
+              className={`group relative flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl font-black text-[10px] sm:text-xs border shadow-md cursor-pointer active:scale-95 transition-all shrink-0 ${
+                isHellMode
+                  ? 'bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white border-red-400/60 shadow-[0_0_12px_rgba(239,68,68,0.5)]'
+                  : 'bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 border-white/60 shadow-[0_2px_10px_rgba(245,158,11,0.4)]'
+              }`}
+            >
+              <LogIn className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
+              <span className="whitespace-nowrap">Đăng Nhập</span>
+            </button>
+          )}
+
           {/* Nút gạt Giảm effect */}
           {onToggleReducedMotion && (
             <button

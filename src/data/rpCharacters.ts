@@ -22,6 +22,19 @@ export function setCharacterAvatarRevealed(characterId: string) {
   }
 }
 
+/**
+ * Returns character avatar URL respecting Hell Mode overrides (e.g. Victor Laurent)
+ */
+export function getCharacterAvatar(character: RPCharacter, isHellMode: boolean = false): string {
+  if (isHellMode) {
+    if (character.hellAvatarUrl) return character.hellAvatarUrl;
+    if (character.id === 'char-18-victor-laurent' || character.name?.toLowerCase().includes('victor laurent')) {
+      return 'https://i.ibb.co/v4Wx6DbK/from-Pix-AI-2073222213758555178.png';
+    }
+  }
+  return character.avatarUrl;
+}
+
 // Mộng chè - Ngọc Hoàng đặc biệt luôn đứng đầu danh sách phòng tranh & tặng tranh
 export const MONG_CHE_CHARACTER: RPCharacter = {
   id: 'mong_che_admin',
@@ -45,6 +58,27 @@ export const MONG_CHE_CHARACTER: RPCharacter = {
 // và gắn cờ isNew: true, cornerTag: 'MỚI' để hiển thị tag nổi bật ở góc phải trên cùng ảnh (tối đa 3 nhân vật).
 export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
   {
+    id: 'char-21-hayton-donovan',
+    name: 'Hayton Donovan',
+    avatarUrl: 'https://i.ibb.co/NdwfZ5wK/from-Pix-AI-2071749386579919454-1.png',
+    roleTag: 'Hiện đại',
+    tags: ['Hiện đại', 'hồng hài nhi', 'mặt dày', 'fuck boy', 'red flag', 'truy thê'],
+    tagline: '',
+    robuxDonations: 0,
+    personality: 'Mặt dày, hồng hài nhi, fuck boy, red flag, truy thê',
+    plotTitle: '',
+    plotSummary: 'Em không ngại việc threesome đâu chị à~',
+    hellPlotSummary: 'Em không ngại việc threesome đâu chị à~',
+    fullPlot: '',
+    sampleDialogue: [],
+    playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221aCOs4Ku9dpZI80RsxtpwTvrL8LG-yh-i%22%5D,%22action%22:%22open%22,%22userId%22:%22102834450421569886676%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing',
+    plotUrl: 'https://rentry.co/choirobloxkhum_Hayton',
+    voiceUrl: 'https://res.cloudinary.com/xi0o6gls/video/upload/v1793511141/ElevenLabs_2026-11-01T05_31_28_Edward_-_British_Dark_Seductive_Low_pvc_sp100_s50_sb75_v4.mp3',
+    createdAt: now + 10000,
+    isNew: true,
+    cornerTag: 'MỚI',
+  },
+  {
     id: 'char-20-le-minh-khai',
     name: 'Lê Minh Khải',
     avatarUrl: 'https://i.ibb.co/rKG6tFPZ/media-1792146870.png',
@@ -55,6 +89,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     personality: 'Ấm áp, cưng chiều, ngọt ngào, chất phác',
     plotTitle: '',
     plotSummary: 'Con chim nó nói tầm bậy. Mợ đừng có nghe.',
+    hellPlotSummary: 'Mợ Cả...mợ đừng có ỷ tui chiều mà làm càng nhen...',
     fullPlot: '',
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221Bvc6hwQcsFoRcfKjWH2KJfKkK6dXDTRo%22%5D,%22action%22:%22open%22,%22userId%22:%22102834450421569886676%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing',
@@ -75,6 +110,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     personality: 'Trầm ổn, nguy hiểm, chiếm hữu, cưng chiều',
     plotTitle: '',
     plotSummary: 'Thiên thần nhỏ của chú...Cháu ngoan lắm',
+    hellPlotSummary: 'Thiên thần nhỏ của chú...thì ra cháu lại hư thế này...',
     fullPlot: '',
     sampleDialogue: [],
     plotUrl: 'https://rentry.co/choirobloxkhum_ValetinDeVigny',
@@ -89,6 +125,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     id: 'char-18-victor-laurent',
     name: 'Victor Laurent',
     avatarUrl: 'https://i.ibb.co/G4wqCfF7/media-1791283543.png',
+    hellAvatarUrl: 'https://i.ibb.co/v4Wx6DbK/from-Pix-AI-2073222213758555178.png',
     roleTag: 'Quân nhân',
     tags: ['Quân nhân', 'Ngọt', 'user tặng bu cao sao cho char (?)', '1910s', 'Pháp', 'Khác'],
     tagline: '',
@@ -96,14 +133,14 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     personality: 'Quân nhân, 1910s, Pháp, dịu dàng, cưng chiều',
     plotTitle: '',
     plotSummary: 'Em bé...có chắc...khụ...đây là gói bánh chị gái em tặng không?',
+    hellPlotSummary: 'Anh không nghĩ em sẽ làm được vậy...',
+    hellTags: [],
     fullPlot: '',
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22%3A%5B%2218Mp0WweUCM_iLfq7T_INaqBg651EKy2g%22%5D%2C%22action%22%3A%22open%22%2C%22userId%22%3A%22102834450421569886676%22%2C%22resourceKeys%22%3A%7B%7D%7D&usp=drive_link',
     plotUrl: 'https://rentry.co/choirobloxkhum_Victor',
     voiceUrl: 'https://res.cloudinary.com/xi0o6gls/video/upload/v1791283473/ElevenLabs_2026-10-06T10_35_50_Meisam_-_Deep_Strong_and_Engaging_pvc_sp115_s80_sb13_v4_1.mp3',
     createdAt: now + 7000,
-    isNew: true,
-    cornerTag: 'MỚI',
   },
   {
     id: 'char-17-au-duong-nhat-si',
@@ -134,6 +171,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     personality: 'Trai IT, máu S, sắc sảo, nguy hiểm',
     plotTitle: '',
     plotSummary: 'Tôi phát hiện bạn gái ngoại tình với...Google AI Studio?',
+    hellPlotSummary: 'Nhóc à...anh không ngờ em lại thích thú với mấy thứ này...',
     fullPlot: '',
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22%3A%5B%221ERpUQlKrc-YcynTWrJgw2yU8BdMnChqn%22%5D%2C%22action%22%3A%22open%22%2C%22userId%22%3A%22102834450421569886676%22%2C%22resourceKeys%22%3A%7B%7D%7D&usp=drive_link',
@@ -175,6 +213,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     personality: '',
     plotTitle: '',
     plotSummary: 'vậy em ơi, khi nào em mới để nắng đậu trọn vấn vương?',
+    hellPlotSummary: 'Em...việc này kì quá...em muốn thì cẩn thận nhé.',
     fullPlot: '',
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221STcC-TMWNpGfErOuEC01LyAW3a0xgfRG%22%5D,%22action%22:%22open%22,%22userId%22:%22102834450421569886676%22,%22resourceKeys%22:%7B%7D%7D',
@@ -193,6 +232,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     personality: '',
     plotTitle: '',
     plotSummary: 'Đối tượng của tôi lại là Ma Vương chim bé?!',
+    hellPlotSummary: 'Thứ sucubus/incubus hạ đẳng, sao ngươi dá-!? Ưm~',
     fullPlot: '',
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22%3A%5B%221WF5piR7Ba9qPmdWjSph7aYDjqPVz2-B2%22%5D%2C%22action%22%3A%22open%22%2C%22userId%22%3A%22102834450421569886676%22%2C%22resourceKeys%22%3A%7B%7D%7D&usp=drive_link',
@@ -216,6 +256,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     personality: '',
     plotTitle: '',
     plotSummary: 'Huh, vết cắn này sao? Just a crazy dog. Bit me and ran"',
+    hellPlotSummary: 'Ha...tôi không ngờ cô liều lĩnh vậy đấy...quản lý à~',
     fullPlot: '',
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221j46zIyS0HeoKc0qMlcYE1-I9cokHLPKi%22%5D,%22action%22:%22open%22,%22userId%22:%22102834450421569886676%22,%22resourceKeys%22:%7B%7D%7D',
@@ -234,6 +275,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     personality: '',
     plotTitle: '',
     plotSummary: 'Bị mẹ phát hiện khi đang móc, tôi chuyển sinh thành nhân viên bán s** toy cho Ma Vương Sắc Dục',
+    hellPlotSummary: 'Nhân viên của tôi à...em biết em làm vậy...Tôi thích lắm không hả~?',
     fullPlot: '',
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221Z7UyhD695Vu3-ggXj98ZL1U6bQS7nwBU%22%5D,%22action%22:%22open%22,%22userId%22:%22102834450421569886676%22,%22resourceKeys%22:%7B%7D%7D',
@@ -252,6 +294,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     personality: '',
     plotTitle: '',
     plotSummary: 'Bị BWM tông tôi chuyển sinh thành hệ thống Idol Live của Ma vương vỡ nợ',
+    hellPlotSummary: 'Thì ra hệ thống của tôi cũng có mặt này à?',
     fullPlot: '',
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221RBDzCPfiB4mG2n47wnvizDrXlv3CEiOX%22%5D,%22action%22:%22open%22,%22userId%22:%22102834450421569886676%22,%22resourceKeys%22:%7B%7D%7D',
@@ -288,6 +331,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     personality: '',
     plotTitle: '',
     plotSummary: 'Em…bớt mua Shopee lại đi. Cái váy này tiết kiệm vải dữ vậy hả? Rồi định bắt anh mặc…hay em mặc?',
+    hellPlotSummary: 'Bà xã...việc này kì quá. Thả anh ra đi..',
     fullPlot: '',
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%2219ZUYJp7bX64iY5bTz_DVt4bVgHMgwPOr%22%5D,%22action%22:%22open%22,%22userId%22:%22102834450421569886676%22,%22resourceKeys%22:%7B%7D%7D',
@@ -342,6 +386,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     personality: '',
     plotTitle: '',
     plotSummary: 'Nàng vừa khen ta…đẹp trai vãi ò? Đó là phương ngữ vùng nào?...Bỏ đi, đừng nhìn ta nữa. Uống thuốc!',
+    hellPlotSummary: 'N-Nàng...việc làm này thật không hợp lễ giáo chút nào...',
     fullPlot: '',
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22%3A%5B%221c9Rrxb2xjj6Rb3dI1-B6rcb6-bDqflVy%22%5D%2C%22action%22%3A%22open%22%2C%22userId%22%3A%22102834450421569886676%22%2C%22resourceKeys%22%3A%7B%7D%7D&usp=drive_link',
@@ -360,6 +405,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     personality: '',
     plotTitle: '',
     plotSummary: 'Hime-sama à, cô ho to quá, cá ngoài biển cũng không ngủ được kìa.',
+    hellPlotSummary: 'Oja-sama à...coi chừng cô thấy tôi hấp dẫn quá mà ho hết hơi đấy nhé~',
     fullPlot: '',
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22%3A%5B%221ue-YqFQ_yMNLRS68Uy1u0ufVqjN2Du0U%22%5D%2C%22action%22%3A%22open%22%2C%22userId%22%3A%22102834450421569886676%22%2C%22resourceKeys%22%3A%7B%7D%7D&usp=drive_link',
@@ -378,6 +424,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     personality: '',
     plotTitle: '',
     plotSummary: 'Como decía mi abuelo: ‘el amor es el único juicio donde el corazón siempre tiên la razón’',
+    hellPlotSummary: 'Mi amor...em làm vậy thật hấp dẫn',
     fullPlot: '',
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221pFZEWPKbnIimaFobpAfuOTUkKKMJ_HZ9%22%5D,%22action%22:%22open%22,%22userId%22:%22102834450421569886676%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing',
@@ -396,6 +443,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     personality: '',
     plotTitle: '',
     plotSummary: 'Em xinh đẹp nhất là khi không thể cựa quậy. Đừng sợ, kim của anh bén lắm, sẽ không đau lâu đâu…',
+    hellPlotSummary: 'Em trai à...em thử thả trói tay anh đi. Anh sẽ hướng dẫn em cách làm cho đúng.',
     fullPlot: '',
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221sHZouHxg9aeu1jLQ9U3k1oNgNhF-6gsK%22%5D,%22action%22:%22open%22,%22userId%22:%22102834450421569886676%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing',
@@ -414,6 +462,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     personality: '',
     plotTitle: '',
     plotSummary: 'Anh yêu em bằng tất cả những gì anh có - trừ sự thật',
+    hellPlotSummary: 'Em ơi...chậm chậm thôi.',
     fullPlot: '',
     sampleDialogue: [],
     playUrl: 'https://aistudio.google.com/app/prompts?state=%7B%22ids%22%3A%5B%221bgIXfpOGLV20xGCFakc6GpMM7tiQztKM%22%5D%2C%22action%22%3A%22open%22%2C%22userId%22%3A%22102834450421569886676%22%2C%22resourceKeys%22%3A%7B%7D%7D&usp=drive_link',

@@ -45,16 +45,26 @@ export function recordCommentPostTime(): void {
 }
 
 /**
+ * Helper to get separate comment character key for Hell Mode
+ * Ensures Hell Mode comments are reset to 0 and completely isolated from Earth realm
+ */
+export function getEffectiveCommentCharId(characterId: string, isHellMode: boolean = false): string {
+  return isHellMode ? `${characterId}_hell` : characterId;
+}
+
+/**
  * 1. Real-time subscription to comments of a specific character
  * Uses onSnapshot with 300ms debounce to prevent main-thread UI blocking
  */
 export function subscribeToCharacterComments(
   characterId: string,
-  onUpdate: (comments: CharacterComment[]) => void
+  onUpdate: (comments: CharacterComment[]) => void,
+  isHellMode: boolean = false
 ): () => void {
   try {
+    const targetId = getEffectiveCommentCharId(characterId, isHellMode);
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-    const itemsRef = collection(db, 'rp_comments', characterId, 'items');
+    const itemsRef = collection(db, 'rp_comments', targetId, 'items');
     
     const unsubscribe = onSnapshot(
       itemsRef,
@@ -74,13 +84,13 @@ export function subscribeToCharacterComments(
             (characterId === 'char-15-thien' && (uName.includes('em') && (cText.includes('pass') || cText.includes('mật khẩu') || cText.includes('spoil'))))
           ) {
             // Delete asynchronously from Firestore
-            deleteDoc(doc(db, 'rp_comments', characterId, 'items', docSnap.id)).catch(() => {});
+            deleteDoc(doc(db, 'rp_comments', targetId, 'items', docSnap.id)).catch(() => {});
             return;
           }
 
           list.push({
             id: docSnap.id,
-            characterId: data.characterId || characterId,
+            characterId: data.characterId || targetId,
             userName: data.userName || 'Vô danh',
             commentText: data.commentText || '',
             createdAt: data.createdAt || Date.now(),
@@ -97,7 +107,7 @@ export function subscribeToCharacterComments(
         }, 300);
       },
       (error) => {
-        handleFirestoreError(error, OperationType.GET, `rp_comments/${characterId}/items`);
+        handleFirestoreError(error, OperationType.GET, `rp_comments/${targetId}/items`);
       }
     );
 
@@ -161,8 +171,10 @@ export async function postCharacterComment(
   userName: string,
   commentText: string,
   parentId?: string | null,
-  replyToUserName?: string | null
+  replyToUserName?: string | null,
+  isHellMode: boolean = false
 ): Promise<{ success: boolean; comment?: CharacterComment; message?: string; error?: string }> {
+  const targetId = getEffectiveCommentCharId(characterId, isHellMode);
   const trimmedName = userName.trim();
   const trimmedText = commentText.trim();
   const validParentId = parentId ? parentId.trim() : null;
@@ -196,7 +208,7 @@ export async function postCharacterComment(
 
   // Try API route first
   try {
-    const res = await fetch(`/api/comments/${encodeURIComponent(characterId)}`, {
+    const res = await fetch(`/api/comments/${encodeURIComponent(targetId)}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -233,7 +245,7 @@ export async function postCharacterComment(
   // Direct Firestore write fallback (essential for GitHub Pages and offline resilience)
   try {
     const commentPayload: Record<string, any> = {
-      characterId,
+      characterId: targetId,
       userName: trimmedName,
       commentText: trimmedText,
       createdAt: now,
@@ -241,12 +253,12 @@ export async function postCharacterComment(
     if (validParentId) commentPayload.parentId = validParentId;
     if (validReplyTo) commentPayload.replyToUserName = validReplyTo;
 
-    const itemsRef = collection(db, 'rp_comments', characterId, 'items');
+    const itemsRef = collection(db, 'rp_comments', targetId, 'items');
     const docRef = await addDoc(itemsRef, commentPayload);
 
     // Update count
     try {
-      const countRef = doc(db, 'rp_comment_counts', characterId);
+      const countRef = doc(db, 'rp_comment_counts', targetId);
       const countSnap = await getDoc(countRef);
       if (!countSnap.exists()) {
         await setDoc(countRef, { count: 1 });
@@ -263,7 +275,7 @@ export async function postCharacterComment(
       success: true,
       comment: {
         id: docRef.id,
-        characterId,
+        characterId: targetId,
         userName: trimmedName,
         commentText: trimmedText,
         createdAt: now,

@@ -1,17 +1,25 @@
 import React from 'react';
-import { Maximize2, Sparkles, Zap } from 'lucide-react';
+import { Maximize2, Sparkles, Zap, LogIn, LogOut, User as UserIcon } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { playUiClick } from '../utils/audio';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface RobloxTopBarProps {
   soundEnabled?: boolean;
   onToggleSound?: () => void;
   reducedMotion?: boolean;
   onToggleReducedMotion?: () => void;
+  onOpenAuthModal?: () => void;
 }
 
 export const RobloxTopBar: React.FC<RobloxTopBarProps> = ({
+  soundEnabled = true,
   reducedMotion = false,
   onToggleReducedMotion,
+  onOpenAuthModal,
 }) => {
+  const { currentUser, logout } = useAuth();
+
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
@@ -53,8 +61,54 @@ export const RobloxTopBar: React.FC<RobloxTopBarProps> = ({
         </div>
       </div>
 
-      {/* Right Controls: Reduced Motion & Fullscreen */}
+      {/* Right Controls: Account, PWA Install, Reduced Motion & Fullscreen */}
       <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
+        <PWAInstallButton soundEnabled={soundEnabled} />
+        {/* Nút Tài Khoản: Đăng Nhập / Đăng Ký hoặc Thông tin User */}
+        {currentUser ? (
+          <div className="flex items-center gap-1 sm:gap-1.5 p-0.5 sm:p-1 pl-1.5 sm:pl-2.5 rounded-lg sm:rounded-2xl bg-white/20 border border-white/40 text-white backdrop-blur-md shrink-0 shadow-sm">
+            {currentUser.photoURL ? (
+              <img
+                src={currentUser.photoURL}
+                alt={currentUser.displayName || 'User'}
+                className="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover border border-white/60 shrink-0"
+              />
+            ) : (
+              <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 font-black text-[10px] sm:text-xs flex items-center justify-center shrink-0 shadow-xs">
+                {(currentUser.displayName || currentUser.email || 'U')[0].toUpperCase()}
+              </div>
+            )}
+            <span className="text-[10px] sm:text-xs font-bold max-w-[70px] sm:max-w-[120px] truncate hidden xs:inline">
+              {currentUser.displayName || currentUser.email?.split('@')[0]}
+            </span>
+            <button
+              type="button"
+              onClick={async () => {
+                playUiClick(soundEnabled);
+                await logout();
+              }}
+              title="Đăng xuất tài khoản"
+              className="p-1 rounded-md hover:bg-white/20 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0"
+              aria-label="Đăng xuất"
+            >
+              <LogOut className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            </button>
+          </div>
+        ) : (
+          <button
+            id="btn-welcome-login"
+            type="button"
+            onClick={() => {
+              playUiClick(soundEnabled);
+              onOpenAuthModal?.();
+            }}
+            title="Đăng nhập hoặc Đăng ký tài khoản"
+            className="group relative flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3.5 py-1 sm:py-1.5 rounded-lg sm:rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-[10px] sm:text-xs border border-white/60 shadow-[0_2px_12px_rgba(245,158,11,0.45)] cursor-pointer active:scale-95 transition-all shrink-0"
+          >
+            <LogIn className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
+            <span className="whitespace-nowrap">Đăng Nhập</span>
+          </button>
+        )}
         {/* Nút gạt Giảm effect */}
         {onToggleReducedMotion && (
           <button

@@ -21,6 +21,9 @@ export interface RPCharacter {
   isNew?: boolean;
   cornerTag?: string;
   realAvatarUrl?: string;
+  hellAvatarUrl?: string;
+  hellPlotSummary?: string;
+  hellTags?: string[];
   trollAvatarUrl?: string;
   password?: string;
   hasDynamicPassword?: boolean;

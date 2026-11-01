@@ -9,6 +9,8 @@ import { JumpscareOverlay } from './components/JumpscareOverlay';
 import { RobloxBackground } from './components/RobloxBackground';
 import { RPCharacterHub } from './components/RPCharacterHub';
 import { FloatingEmojiClickEffect } from './components/FloatingEmojiClickEffect';
+import { AuthModal } from './components/AuthModal';
+import { OfflineIndicator } from './components/OfflineIndicator';
 import {
   playUiClick,
   playHoverTick,
@@ -16,13 +18,13 @@ import {
   playBoingSound,
 } from './utils/audio';
 import {
-  startChillBgm,
   stopChillBgm,
 } from './utils/chillBgm';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<'welcome' | 'rphub'>('welcome');
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showJumpscare, setShowJumpscare] = useState(false);
   const [companionDialogue, setCompanionDialogue] = useState('Welcome my roblox\nkid ദ്ദി(~ ` ᴗ - ~) ✧');
@@ -81,24 +83,15 @@ export default function App() {
     }
   }, [showJumpscare, soundEnabled, currentScreen]);
 
-  // Handle Chill Background Music Lifecycle: ONLY active when inside the RP Character Hub ('rphub')
+  // Nhạc nền (chillBgm) tắt hoàn toàn khi vào app - chỉ giữ tiếng nhạc phát ra từ đĩa phát nhạc (VinylRecordButton)
   useEffect(() => {
-    if (currentScreen === 'rphub' && soundEnabled && !showJumpscare) {
-      startChillBgm(0.5);
-    } else {
-      stopChillBgm();
-    }
-  }, [currentScreen, soundEnabled, showJumpscare]);
+    stopChillBgm();
+  }, [currentScreen]);
 
   const handleToggleSound = () => {
     setSoundEnabled((prev) => {
       const next = !prev;
-      if (next && currentScreen === 'rphub') {
-        playUiClick(true);
-        startChillBgm(0.5);
-      } else {
-        stopChillBgm();
-      }
+      playUiClick(next);
       return next;
     });
   };
@@ -228,6 +221,7 @@ export default function App() {
     return (
       <>
         <FloatingEmojiClickEffect disabled={reducedMotion} />
+        <OfflineIndicator />
         <RPCharacterHub
           onBackToWelcome={() => {
             try {
@@ -251,6 +245,8 @@ export default function App() {
       className="relative min-h-screen w-full flex flex-col justify-between overflow-hidden select-none font-dessert"
       style={{ backgroundColor: '#87CEEB' }}
     >
+      {/* Offline Status Connectivity Indicator */}
+      <OfflineIndicator />
       {/* Global Interactive Floating Emoji Click Effect */}
       <FloatingEmojiClickEffect disabled={reducedMotion} />
       {/* Background Landscape Construction */}
@@ -262,6 +258,7 @@ export default function App() {
         onToggleSound={handleToggleSound}
         reducedMotion={reducedMotion}
         onToggleReducedMotion={handleToggleReducedMotion}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
       />
 
       {/* Background Gentle Instrumental Piano Music (Turns off when entering rphub screen or during jumpscare) */}
@@ -466,6 +463,13 @@ export default function App() {
           />
         )}
       </AnimatePresence>
+
+      {/* User Login & Registration Modal for Welcome Page */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        soundEnabled={soundEnabled}
+      />
     </div>
   );
 }

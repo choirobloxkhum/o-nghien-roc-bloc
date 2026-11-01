@@ -26,7 +26,7 @@ export const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
   questionText = 'Bạn đã đủ 18 tuổi để tiến vào Địa Ngục chưa?',
   descriptionText = (
     <>
-      Khu vực <span className="text-orange-400 font-bold">Địa Ngục 18+ (Hell Realm)</span> chứa các kịch bản hắc ám, ngược tâm, nội dung trưởng thành và giao diện u tối huyền bí.
+      Khu vực <span className="text-orange-400 font-bold">Địa Ngục 18+</span> chứa các hình ảnh và nội dung không phù hợp với người dưới 18 tuổi. Hãy cân nhắc trước khi bước vào
     </>
   ),
   subNoteText = 'Bạn có thể chuyển về Hạ Giới (Theme gốc) bất cứ lúc nào.',

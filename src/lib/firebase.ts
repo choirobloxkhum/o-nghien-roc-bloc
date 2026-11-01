@@ -1,5 +1,6 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore, Firestore } from 'firebase/firestore';
+import { getAuth, Auth } from 'firebase/auth';
 import rawConfig from '../../firebase-applet-config.json';
 
 // ============================================================================
@@ -24,6 +25,9 @@ export const app: FirebaseApp =
 
 // 2. Initialize Firestore Database instance
 export const db: Firestore = getFirestore(app, FIREBASE_CONFIG.firestoreDatabaseId);
+
+// 3. Initialize Firebase Auth instance
+export const auth: Auth = getAuth(app);
 
 // ============================================================================
 // FIRESTORE ERROR HANDLER (Theo chuẩn Firebase Security & Monitoring)

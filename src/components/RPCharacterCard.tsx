@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, BookOpen, Sparkles, Crown, Check, Volume2, Flame, Lock, AlertTriangle } from 'lucide-react';
 import { RPCharacter } from '../types';
+import { getCharacterAvatar } from '../data/rpCharacters';
 import { RPCharacterComments } from './RPCharacterComments';
 
 interface RPCharacterCardProps {
@@ -20,6 +21,9 @@ interface RPCharacterCardProps {
     color: string;
   };
   reducedMotion?: boolean;
+  isUnlockedInHell?: boolean;
+  hellCost?: number;
+  isAdmin?: boolean;
 }
 
 const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
@@ -34,13 +38,22 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
   commentCount = 0,
   rankBadge,
   reducedMotion = false,
+  isUnlockedInHell = false,
+  hellCost = 3,
+  isAdmin = false,
 }) => {
   const [floatingPuffs, setFloatingPuffs] = useState<{ id: number; text: string; isWarning?: boolean }[]>([]);
   const [isHovered, setIsHovered] = useState(false);
 
-  const isLuciferLocked = character.id === 'char-11-lucifer' || character.name.toLowerCase().includes('lucifer') || Boolean(character.password);
-  const isLinkLocked = Boolean(character.isLinkLocked);
-  const hasWarningPlayButton = Boolean(character.hasWarningPlayButton);
+  // Avatar respecting Hell mode overrides (e.g. Victor Laurent)
+  const displayAvatarUrl = getCharacterAvatar(character, isHellMode);
+
+  // Admin bypasses all locks in Hell Mode
+  const effectiveUnlockedInHell = isAdmin || isUnlockedInHell;
+  const isPasswordProtectedChar = character.id === 'char-11-lucifer' || character.id === 'char-16-hoang-nhat-thien' || character.name.toLowerCase().includes('lucifer') || character.name.toLowerCase().includes('nhất thiên');
+  const isLuciferLocked = !isHellMode && !isAdmin && isPasswordProtectedChar;
+  const isLinkLocked = !isAdmin && Boolean(character.isLinkLocked);
+  const hasWarningPlayButton = !isAdmin && Boolean(character.hasWarningPlayButton);
 
   const handleImageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -114,15 +127,15 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
             : 'group-hover:shadow-md'
         }`}
       >
-        {character.avatarUrl ? (
+        {displayAvatarUrl ? (
           <img
-            src={character.avatarUrl}
+            src={displayAvatarUrl}
             alt={character.name}
             loading="lazy"
             decoding="async"
             referrerPolicy="no-referrer"
-            className={`w-full h-full object-cover object-[center_15%] sm:object-center transition-transform duration-500 will-change-transform ${
-              isSpeaking ? 'scale-110' : 'group-hover:scale-105'
+            className={`w-full h-full object-cover object-center transition-transform duration-300 ${
+              isSpeaking ? 'scale-105' : 'group-hover:scale-105'
             }`}
           />
         ) : (
@@ -252,24 +265,22 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
           )}
         </div>
         <p className={`text-[10px] sm:text-xs line-clamp-2 mt-0.5 leading-snug ${isHellMode ? 'text-purple-300/70' : 'text-slate-500'}`}>
-          {character.plotSummary || character.tagline || 'Nhân vật Roleplay Roblox'}
+          {(isHellMode && character.hellPlotSummary) || character.plotSummary || character.tagline || 'Nhân vật Roleplay Roblox'}
         </p>
 
-        {/* Tag Pills */}
-        <div className="mt-1.5 sm:mt-2.5 flex items-center gap-1 sm:gap-1.5 flex-wrap">
-          {character.tags.map((tag, idx) => (
-            <span
-              key={idx}
-              className={`text-[8.5px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-md truncate max-w-full ${
-                isHellMode
-                  ? 'bg-purple-950/80 text-purple-200 border border-purple-800/60'
-                  : 'bg-sky-50 text-sky-700 border border-sky-100/80'
-              }`}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
+        {/* Tag Pills (Hidden in Hell Mode) */}
+        {!isHellMode && character.tags && character.tags.length > 0 && (
+          <div className="mt-1.5 sm:mt-2.5 flex items-center gap-1 sm:gap-1.5 flex-wrap">
+            {character.tags.map((tag, idx) => (
+              <span
+                key={idx}
+                className="text-[8.5px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-md truncate max-w-full bg-sky-50 text-sky-700 border border-sky-100/80"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 3. ACTION BUTTONS:
@@ -277,44 +288,72 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
           - Normal Mode: "Chơi" (or Lock icon for Lucifer) on top, then "Đọc plot" + "Robux" in bottom row
       */}
       {isHellMode ? (
-        <div className="mt-2.5 sm:mt-4 pt-2 sm:pt-3 border-t border-red-900/50 flex">
+        <div className="mt-2.5 sm:mt-4 pt-2 sm:pt-3 border-t border-red-900/50 flex flex-col gap-1.5">
+          {/* Unlock Badge Indicator for Hell Mode */}
+          <div className="flex items-center justify-between px-1 text-[10.5px] sm:text-xs font-black">
+            {isAdmin ? (
+              <span className="text-purple-300 flex items-center gap-1 font-extrabold">
+                <span>👑 Quyền Admin (Toàn quyền)</span>
+              </span>
+            ) : effectiveUnlockedInHell ? (
+              <span className="text-emerald-400 flex items-center gap-1">
+                <Check className="w-3 h-3 stroke-[3]" />
+                <span>Đã mở khóa vĩnh viễn</span>
+              </span>
+            ) : (
+              <span className="text-amber-300 flex items-center gap-1">
+                <Flame className="w-3 h-3 fill-amber-400 text-red-500 shrink-0 animate-pulse" />
+                <span>Yêu cầu: {hellCost} Robux Dăm</span>
+              </span>
+            )}
+          </div>
+
           {/* Play Button in Hell Mode */}
           <button
             onClick={() => onPlay(character)}
             title={
-              isLuciferLocked
+              !effectiveUnlockedInHell
+                ? `Cần ${hellCost} Robux "Dăm" để mở khóa`
+                : isLuciferLocked
                 ? 'Nhập mật khẩu để mở khóa'
                 : isLinkLocked
                 ? 'Link hiện đang tạm khóa'
                 : hasWarningPlayButton
-                ? (character.warningPlayMessage || 'Đợi thông báo tiếp theo để biết cách nhận được link')
-                : '"Chơi"'
+                ? (character.warningPlayMessage || 'Cảnh báo')
+                : 'Chơi'
             }
-            aria-label={isLuciferLocked ? 'Mật khẩu' : isLinkLocked ? 'Tạm khóa' : hasWarningPlayButton ? 'Cảnh báo nhận link' : '"Chơi"'}
+            aria-label={isLuciferLocked ? 'Mật khẩu' : isLinkLocked ? 'Tạm khóa' : hasWarningPlayButton ? 'Cảnh báo' : 'Chơi'}
             className={`w-full py-2 sm:py-2.5 px-2 rounded-xl font-extrabold text-sm sm:text-base shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-              hasWarningPlayButton
+              !effectiveUnlockedInHell
+                ? 'bg-gradient-to-b from-[#7f1d1d] via-[#450a0a] to-[#2c0606] hover:from-[#991b1b] hover:to-[#450a0a] border-t border-amber-400/50 border-b-2 border-black text-amber-200 shadow-lg'
+                : hasWarningPlayButton
                 ? 'bg-gradient-to-b from-amber-400 via-amber-500 to-yellow-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 border-t border-amber-200 border-b-2 border-amber-800 shadow-[0_4px_14px_rgba(245,158,11,0.4)]'
                 : isLinkLocked
                 ? 'bg-gradient-to-b from-[#3f3f46] via-[#27272a] to-[#18181b] hover:from-[#52525b] hover:to-[#27272a] border-t border-zinc-500/40 border-b-2 border-black text-amber-200'
                 : 'bg-gradient-to-b from-[#dc2626] via-[#991b1b] to-[#7f1d1d] hover:from-[#ef4444] hover:to-[#991b1b] border-t border-red-300/50 border-b-2 border-[#450a0a] shadow-red-950 text-white'
             }`}
           >
-            {isLuciferLocked ? (
+            {!effectiveUnlockedInHell ? (
+              <>
+                <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 stroke-[2.5]" />
+                <span>Mở Khóa ({hellCost} R$)</span>
+              </>
+            ) : isLuciferLocked ? (
               <Lock className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
             ) : isLinkLocked ? (
               <>
                 <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5] text-amber-300" />
-                <span>"Tạm khóa"</span>
+                <span>Tạm khóa</span>
               </>
             ) : hasWarningPlayButton ? (
               <>
                 <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5] text-slate-950 fill-amber-300" />
-                <span>"Chơi"</span>
+                <span>Chơi</span>
               </>
             ) : (
               <>
-                <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-white stroke-none" />
-                <span>"Chơi"</span>
+                <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 fill-amber-300 animate-pulse" />
+                <span>Chơi</span>
               </>
             )}
           </button>
@@ -429,7 +468,7 @@ const RPCharacterCardComponent: React.FC<RPCharacterCardProps> = ({
       <RPCharacterComments
         characterId={character.id}
         characterName={character.name}
-        characterAvatar={character.avatarUrl}
+        characterAvatar={displayAvatarUrl}
         characterRole={character.roleTag}
         isHellMode={isHellMode}
         commentCount={commentCount}

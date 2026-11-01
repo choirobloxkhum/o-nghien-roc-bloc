@@ -120,6 +120,38 @@
         }
       },
       "required": ["title", "category", "commandText", "createdAt"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Registered user profile details",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "User unique ID"
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User nickname or display name"
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "Avatar URL"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Registration timestamp"
+        },
+        "lastLoginAt": {
+          "type": "number",
+          "description": "Last login timestamp"
+        }
+      },
+      "required": ["uid", "email"]
     }
   },
   "firestore": {
@@ -138,6 +170,10 @@
     "/rp_commands/{commandId}": {
       "schema": "RPCommand",
       "description": "Public library of Roblox RP commands and HTML snippets"
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Registered user profiles"
     }
   }
 }

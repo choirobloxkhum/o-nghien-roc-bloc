@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Music, Volume1, Volume2 } from 'lucide-react';
+import { Music, Volume1, Flame } from 'lucide-react';
 import { useCharacterVoice } from '../utils/characterVoice';
-import { setChillBgmVolume } from '../utils/chillBgm';
 
 interface VinylRecordButtonProps {
   isPlaying: boolean;
@@ -12,8 +11,11 @@ interface VinylRecordButtonProps {
   isHellMode?: boolean;
 }
 
-const DEFAULT_PLAYLIST_AUDIO_URL =
-  'https://res.cloudinary.com/opmwpbzb/video/upload/v1789917302/PLAYLIST_01_songs_to_calm_you_down_after_a_hard_day_my20s.mp3';
+// YouTube video ID for Hạ Giới (Normal / Earth Mode): https://www.youtube.com/watch?v=u1rDeQKSqRM
+const EARTH_YOUTUBE_VIDEO_ID = 'u1rDeQKSqRM';
+
+// YouTube video ID for Hell Mode: "Bedroom R&B After Hours | Forbidden Desire Playlist Vol.04" (https://www.youtube.com/watch?v=qcwA2G7oYQk)
+const HELL_YOUTUBE_VIDEO_ID = 'qcwA2G7oYQk';
 
 export const VinylRecordButton: React.FC<VinylRecordButtonProps> = ({
   isPlaying,
@@ -25,55 +27,42 @@ export const VinylRecordButton: React.FC<VinylRecordButtonProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const [sparkles, setSparkles] = useState<{ id: number; x: number; y: number; char: string }[]>([]);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const bgmYtIframeRef = useRef<HTMLIFrameElement | null>(null);
   const { playingId } = useCharacterVoice();
   const isVoiceDucking = Boolean(playingId);
 
-  const audioSrc = playlistUrl || DEFAULT_PLAYLIST_AUDIO_URL;
+  const activeVideoId = isHellMode ? HELL_YOUTUBE_VIDEO_ID : EARTH_YOUTUBE_VIDEO_ID;
 
-  // Handle Play / Pause with Audio Ducking
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.volume = isVoiceDucking ? 0.15 : 0.8;
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Autoplay was prevented or user hasn't interacted yet
-        });
-      }
-    } else {
-      audio.pause();
-    }
-  }, [isPlaying, isVoiceDucking]);
-
-  // Audio Ducking: Smoothly adjust volume when voice is playing
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (audio && isPlaying) {
-      audio.volume = isVoiceDucking ? 0.15 : 0.8;
-    }
-
+  // PostMessage command sender to YouTube Iframe
+  const sendYtCommand = useCallback((func: string, args: any[] = []) => {
     try {
-      setChillBgmVolume(isVoiceDucking ? 0.12 : 0.6);
+      if (bgmYtIframeRef.current && bgmYtIframeRef.current.contentWindow) {
+        bgmYtIframeRef.current.contentWindow.postMessage(
+          JSON.stringify({ event: 'command', func, args }),
+          '*'
+        );
+      }
     } catch {
       // ignore
     }
-  }, [isVoiceDucking, isPlaying]);
+  }, []);
 
-  // Handle Audio Source Changes
+  // Synchronize playback for active mode track
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (audio.src !== audioSrc) {
-      audio.src = audioSrc;
-      if (isPlaying) {
-        audio.play().catch(() => {});
-      }
+    if (isPlaying) {
+      sendYtCommand('playVideo');
+      sendYtCommand('setVolume', [isVoiceDucking ? 15 : 80]);
+    } else {
+      sendYtCommand('pauseVideo');
     }
-  }, [audioSrc, isPlaying]);
+  }, [isPlaying, isHellMode, isVoiceDucking, sendYtCommand]);
+
+  // Audio Ducking: Smoothly adjust volume when character voice is playing
+  useEffect(() => {
+    if (isPlaying) {
+      sendYtCommand('setVolume', [isVoiceDucking ? 15 : 80]);
+    }
+  }, [isVoiceDucking, isPlaying, isHellMode, sendYtCommand]);
 
   // Spawn floating music notes / sparkles when playing
   useEffect(() => {
@@ -83,7 +72,9 @@ export const VinylRecordButton: React.FC<VinylRecordButtonProps> = ({
     }
 
     const interval = setInterval(() => {
-      const notes = ['🎵', '🎶', '✨', '💿', '💎'];
+      const normalNotes = ['🎵', '🎶', '✨', '💿', '💎'];
+      const hellNotes = ['🔥', '🍷', '💋', '🖤', '🎶', '✨'];
+      const notes = isHellMode ? hellNotes : normalNotes;
       const newSparkle = {
         id: Date.now() + Math.random(),
         x: Math.random() * 20 - 10,
@@ -99,7 +90,7 @@ export const VinylRecordButton: React.FC<VinylRecordButtonProps> = ({
     }, 1200);
 
     return () => clearInterval(interval);
-  }, [isPlaying]);
+  }, [isPlaying, isHellMode]);
 
   return (
     <div
@@ -114,14 +105,24 @@ export const VinylRecordButton: React.FC<VinylRecordButtonProps> = ({
         setShowTooltip(false);
       }}
     >
-      {/* HTML5 Direct Audio Player for Calming BGM Playlist */}
-      <audio
-        ref={audioRef}
-        id="bgm-vinyl-audio-player"
-        src={audioSrc}
-        loop
-        preload="auto"
-        className="hidden"
+      {/* Single Embedded YouTube Player - Guarantees strictly ONE active track per mode */}
+      <iframe
+        key={activeVideoId}
+        ref={bgmYtIframeRef}
+        id="bgm-youtube-player"
+        src={`https://www.youtube.com/embed/${activeVideoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${activeVideoId}&controls=0`}
+        allow="autoplay; encrypted-media"
+        title="Background Music Player"
+        onLoad={() => {
+          if (isPlaying) {
+            sendYtCommand('playVideo');
+            sendYtCommand('setVolume', [isVoiceDucking ? 15 : 80]);
+          } else {
+            sendYtCommand('pauseVideo');
+          }
+        }}
+        className="fixed -bottom-96 -right-96 w-1 h-1 opacity-0 pointer-events-none"
+        aria-hidden="true"
       />
 
       {/* Floating Animated Music Notes / Sparkles */}
@@ -150,31 +151,47 @@ export const VinylRecordButton: React.FC<VinylRecordButtonProps> = ({
             transition={{ duration: 0.18 }}
             className="absolute right-full mr-2.5 top-1/2 -translate-y-1/2 hidden md:flex flex-col items-end pointer-events-none whitespace-nowrap z-50"
           >
-            <div className="px-3 py-1.5 rounded-xl bg-slate-900/90 text-white backdrop-blur-md border border-white/25 shadow-xl flex flex-col items-start gap-0.5">
-              <div className="flex items-center gap-1 text-[11px] font-black text-amber-300">
+            <div
+              className={`px-3 py-2 rounded-xl backdrop-blur-md border shadow-xl flex flex-col items-start gap-0.5 ${
+                isHellMode
+                  ? 'bg-black/90 text-white border-red-500/60 shadow-[0_0_20px_rgba(220,38,38,0.5)]'
+                  : 'bg-slate-900/90 text-white border-white/25'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 text-[11px] font-black text-amber-300">
                 {isVoiceDucking ? (
-                  <Volume1 className="w-3 h-3 text-pink-400 animate-pulse" />
+                  <Volume1 className="w-3.5 h-3.5 text-pink-400 animate-pulse" />
+                ) : isHellMode ? (
+                  <Flame className="w-3.5 h-3.5 text-rose-400 fill-rose-500 animate-pulse" />
                 ) : (
-                  <Music className="w-3 h-3 animate-bounce" />
+                  <Music className="w-3.5 h-3.5 animate-bounce" />
                 )}
                 <span>
                   {isPlaying
                     ? isVoiceDucking
                       ? 'NHẠC ĐANG TỰ GIẢM NHỎ (NGHE GIỌNG)'
-                      : 'ĐANG PHÁT NHẠC ĐĨA THAN'
+                      : isHellMode
+                      ? 'BEDROOM R&B AFTER HOURS 🔥'
+                      : 'ĐANG PHÁT NHẠC HẠ GIỚI 🎵'
                     : 'NHẠC ĐANG TẮT'}
                 </span>
               </div>
-              <span className="text-[9px] text-slate-300">
+              <span className="text-[9.5px] text-slate-300">
                 {isPlaying
                   ? isVoiceDucking
-                    ? 'Nhạc đĩa than đang giảm âm lượng để bạn nghe rõ giọng nói'
-                    : 'Nhấn đĩa than để tắt nhạc'
+                    ? 'Nhạc đang tự giảm âm lượng để bạn nghe rõ giọng nói'
+                    : isHellMode
+                    ? 'Forbidden Desire Vol.04 (Nhấp đĩa than để tắt/bật)'
+                    : 'Nhạc đĩa than Hạ Giới (Nhấp đĩa than để tắt/bật)'
                   : 'Nhấn đĩa than để bật nhạc'}
               </span>
             </div>
             {/* Tiny arrow pointing to vinyl */}
-            <div className="w-2 h-2 bg-slate-900/90 border-r border-b border-white/25 rotate-[-45deg] -mr-1 -mt-2.5" />
+            <div
+              className={`w-2 h-2 border-r border-b rotate-[-45deg] -mr-1 -mt-2.5 ${
+                isHellMode ? 'bg-black/90 border-red-500/60' : 'bg-slate-900/90 border-white/25'
+              }`}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -188,9 +205,13 @@ export const VinylRecordButton: React.FC<VinylRecordButtonProps> = ({
         title={
           isPlaying
             ? isVoiceDucking
-              ? 'Nhạc đĩa than đang tự giảm nhỏ để nghe giọng nhân vật'
-              : 'Tạm dừng nhạc (Click vinyl)'
-            : 'Phát nhạc Roblox (Click vinyl)'
+              ? 'Nhạc đang tự giảm nhỏ để nghe giọng nhân vật'
+              : isHellMode
+              ? 'Tạm dừng nhạc Địa Ngục (Bedroom R&B)'
+              : 'Tạm dừng nhạc Hạ Giới (Click vinyl)'
+            : isHellMode
+            ? 'Phát nhạc Địa Ngục (Bedroom R&B After Hours)'
+            : 'Phát nhạc Hạ Giới (Click vinyl)'
         }
         aria-label="Toggle Vinyl Audio"
         className="relative group cursor-pointer focus:outline-none p-0.5 rounded-full"
@@ -201,6 +222,8 @@ export const VinylRecordButton: React.FC<VinylRecordButtonProps> = ({
             isPlaying
               ? isVoiceDucking
                 ? 'bg-gradient-to-tr from-pink-400/40 via-amber-400/30 to-sky-400/40 blur-sm opacity-60'
+                : isHellMode
+                ? 'bg-gradient-to-tr from-red-600/70 via-rose-600/60 to-purple-800/70 blur-sm opacity-90 animate-pulse'
                 : 'bg-gradient-to-tr from-sky-400/60 via-amber-400/50 to-emerald-400/60 blur-sm opacity-90 animate-pulse'
               : 'opacity-0'
           }`}
@@ -212,20 +235,30 @@ export const VinylRecordButton: React.FC<VinylRecordButtonProps> = ({
             className={`absolute -inset-0.5 rounded-full border border-dashed animate-spin pointer-events-none ${
               isVoiceDucking
                 ? 'border-pink-300/60 [animation-duration:8s]'
+                : isHellMode
+                ? 'border-rose-400/80 [animation-duration:4s]'
                 : 'border-sky-300/80 [animation-duration:5s]'
             }`}
           />
         )}
 
-        {/* VINYL LP DISK BODY (Responsive size for Mobile & Desktop) */}
-        <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-[#111115] shadow-lg border border-[#2b2b36] flex items-center justify-center overflow-hidden">
+        {/* VINYL LP DISK BODY */}
+        <div
+          className={`relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-[#111115] shadow-lg border flex items-center justify-center overflow-hidden ${
+            isHellMode ? 'border-red-600/80 shadow-[0_0_15px_rgba(220,38,38,0.6)]' : 'border-[#2b2b36]'
+          }`}
+        >
           {/* ROTATING DISK CONTAINER */}
           <div
             className={`w-full h-full rounded-full relative flex items-center justify-center transition-transform ${
-              isPlaying ? (isVoiceDucking ? 'animate-spin [animation-duration:6s]' : 'animate-spin [animation-duration:3.2s]') : ''
+              isPlaying
+                ? isVoiceDucking
+                  ? 'animate-spin [animation-duration:6s]'
+                  : 'animate-spin [animation-duration:3.2s]'
+                : ''
             }`}
           >
-            {/* Micro-Grooves Concentric Rings (Realistic LP Texture) */}
+            {/* Micro-Grooves Concentric Rings */}
             <div
               className="absolute inset-0.5 rounded-full pointer-events-none opacity-40"
               style={{
@@ -234,7 +267,7 @@ export const VinylRecordButton: React.FC<VinylRecordButtonProps> = ({
               }}
             />
 
-            {/* Specular Radial Sheen Reflections (Conic Sheen effect) */}
+            {/* Specular Radial Sheen Reflections */}
             <div
               className="absolute inset-0 rounded-full pointer-events-none opacity-25"
               style={{
@@ -244,35 +277,42 @@ export const VinylRecordButton: React.FC<VinylRecordButtonProps> = ({
             />
 
             {/* Center Label: Vibrant Colorful Round Label */}
-            <div className="relative w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 rounded-full bg-gradient-to-tr from-[#ec4899] via-[#f59e0b] to-[#38bdf8] border border-white/60 shadow-inner flex items-center justify-center">
-              {/* Retro typography ring */}
+            <div
+              className={`relative w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 rounded-full border border-white/60 shadow-inner flex items-center justify-center ${
+                isHellMode
+                  ? 'bg-gradient-to-tr from-red-600 via-rose-600 to-purple-800'
+                  : 'bg-gradient-to-tr from-[#ec4899] via-[#f59e0b] to-[#38bdf8]'
+              }`}
+            >
               <span className="text-[6px] sm:text-[7px] font-black text-white tracking-tighter drop-shadow-xs">
-                RBLX
+                {isHellMode ? 'HELL' : 'RBLX'}
               </span>
-
-              {/* Center Spindle Hole */}
               <div className="absolute w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-[#111115] border border-amber-200/90 shadow-2xs" />
             </div>
           </div>
 
-          {/* Top Glassy Reflection Overlay (Fixed stationary gloss) */}
+          {/* Top Glassy Reflection Overlay */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/25 via-white/5 to-transparent pointer-events-none" />
 
-          {/* Subtle Stylized Tonearm (Needle Arm) on the Edge */}
+          {/* Stylized Tonearm (Needle Arm) */}
           <div
             className={`absolute top-0.5 right-0.5 origin-top-right transition-transform duration-500 pointer-events-none z-10 ${
               isPlaying ? 'rotate-[12deg] scale-90 opacity-90' : '-rotate-[25deg] scale-75 opacity-60'
             }`}
           >
             <div className="w-3 sm:w-3.5 h-0.5 bg-slate-300 rounded-full shadow-xs border-t border-white" />
-            <div className="w-1 h-1 rounded-full bg-amber-400 ml-2.5 -mt-0.5 border border-amber-600 shadow-xs" />
+            <div
+              className={`w-1 h-1 rounded-full ml-2.5 -mt-0.5 border shadow-xs ${
+                isHellMode ? 'bg-red-500 border-red-700' : 'bg-amber-400 border-amber-600'
+              }`}
+            />
           </div>
         </div>
 
         {/* Small Audio Ducking Indicator Dot when character voice is active */}
         {isPlaying && isVoiceDucking && (
           <div
-            title="Nhạc đĩa than đang giảm nhỏ để nghe rõ giọng nhân vật"
+            title="Nhạc đang giảm nhỏ để nghe rõ giọng nhân vật"
             className="absolute -top-1 -left-1 px-1 py-0.2 bg-pink-500 text-white text-[8px] font-black rounded-full shadow-md animate-pulse border border-white/80"
           >
             -vol
@@ -282,4 +322,3 @@ export const VinylRecordButton: React.FC<VinylRecordButtonProps> = ({
     </div>
   );
 };
-

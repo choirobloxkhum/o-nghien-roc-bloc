@@ -348,7 +348,7 @@ export const RPRichLeaderboard: React.FC<RPRichLeaderboardProps> = ({
                       <img
                         src={character.avatarUrl}
                         alt={character.name}
-                        className="w-full h-full object-cover object-[center_15%]"
+                        className="w-full h-full object-cover object-center"
                         referrerPolicy="no-referrer"
                       />
                     ) : (
