@@ -11,6 +11,9 @@ import {
   AlertTriangle,
   Loader2,
   CheckCircle2,
+  Copy,
+  Check,
+  ExternalLink,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { playUiClick } from '../utils/audio';
@@ -41,14 +44,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isUnauthorizedDomain, setIsUnauthorizedDomain] = useState(false);
+  const [copiedDomain, setCopiedDomain] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const currentHostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const isInsideIframe = typeof window !== 'undefined' && window.self !== window.top;
 
   const handleTabSwitch = (newMode: 'login' | 'register') => {
     playUiClick(soundEnabled);
     setMode(newMode);
     setErrorMessage(null);
+    setIsUnauthorizedDomain(false);
     setSuccessMessage(null);
   };
 
@@ -56,6 +65,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     playUiClick(soundEnabled);
     setIsGoogleSubmitting(true);
     setErrorMessage(null);
+    setIsUnauthorizedDomain(false);
     try {
       await signInWithGoogle();
       setSuccessMessage('Đăng nhập với Google thành công! 🎉');
@@ -64,10 +74,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         onClose();
       }, 700);
     } catch (err: any) {
+      if (err?.code === 'auth/unauthorized-domain' || err?.message?.includes('unauthorized-domain')) {
+        setIsUnauthorizedDomain(true);
+      }
       setErrorMessage(formatAuthError(err));
     } finally {
       setIsGoogleSubmitting(false);
     }
+  };
+
+  const handleCopyHostname = () => {
+    if (!currentHostname) return;
+    navigator.clipboard.writeText(currentHostname);
+    setCopiedDomain(true);
+    setTimeout(() => setCopiedDomain(false), 2000);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -221,6 +241,40 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             )}
             <span>Tiếp tục với Google</span>
           </button>
+
+          {/* Diagnostic helper if unauthorized domain */}
+          {isUnauthorizedDomain && (
+            <div className="mb-4 p-3 rounded-2xl bg-amber-950/50 border border-amber-500/60 text-xs text-amber-200 space-y-2">
+              <div className="flex items-center gap-1.5 font-black text-amber-300">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
+                <span>Google OAuth chưa nhận diện tên miền này:</span>
+              </div>
+              <div className="flex items-center justify-between p-2 rounded-xl bg-black/60 border border-amber-400/30 text-[11px] font-mono">
+                <span className="truncate text-white">{currentHostname || 'ais-dev-...'}</span>
+                <button
+                  type="button"
+                  onClick={handleCopyHostname}
+                  className="ml-2 px-2 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold shrink-0 flex items-center gap-1 cursor-pointer transition-all"
+                >
+                  {copiedDomain ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                  <span>{copiedDomain ? 'Đã chép' : 'Sao chép'}</span>
+                </button>
+              </div>
+              <p className="text-[11px] text-amber-100/90 leading-relaxed">
+                Đảm bảo bạn đã thêm đúng tên miền trên vào <strong>Firebase Console</strong> của dự án <code>gen-lang-client-0387748439</code> (chỉ nhập tên miền, không kèm <code>https://</code> hay <code>/</code>).
+              </p>
+              {isInsideIframe && (
+                <button
+                  type="button"
+                  onClick={() => window.open(window.location.href, '_blank')}
+                  className="w-full py-1.5 px-3 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer border border-amber-400/40 transition-all"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Mở app ở Tab mới riêng biệt để thử lại</span>
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="relative flex items-center justify-center my-3">
             <div className="border-t border-white/15 w-full" />
