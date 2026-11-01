@@ -140,8 +140,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return 'Yêu cầu mở cửa sổ bị hủy do thao tác mới.';
       case 'auth/network-request-failed':
         return 'Lỗi kết nối mạng. Vui lòng kiểm tra lại đường truyền!';
+      case 'auth/unauthorized-domain':
+        return 'Tên miền trang web này chưa được ủy quyền trong Firebase Auth. Bạn có thể đăng nhập bằng Email/Mật khẩu hoặc kiểm tra Authorized Domains trong Firebase!';
+      case 'auth/popup-blocked':
+        return 'Cửa sổ popup bị trình duyệt chặn. Vui lòng cho phép mở popup trên trình duyệt của bạn!';
       case 'auth/operation-not-allowed':
-        return 'Phương thức đăng nhập email chưa được bật trên Firebase Console. Vui lòng sử dụng Đăng nhập bằng Google!';
+        return 'Phương thức đăng nhập chưa được kích hoạt trong Firebase Console.';
       default:
         return error.message || 'Đã có lỗi xảy ra khi xác thực tài khoản.';
     }
