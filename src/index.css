@@ -617,5 +617,32 @@
   will-change: transform, opacity;
 }
 
+/* Custom visible horizontal scrollbar for tag slider on mobile and desktop */
+.custom-tag-scrollbar {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #38bdf8 #e2e8f0;
+}
+
+.custom-tag-scrollbar::-webkit-scrollbar {
+  height: 5px;
+}
+
+.custom-tag-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 9999px;
+}
+
+.custom-tag-scrollbar::-webkit-scrollbar-thumb {
+  background: #38bdf8;
+  border-radius: 9999px;
+}
+
+.custom-tag-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #0284c7;
+}
+
+
 
 

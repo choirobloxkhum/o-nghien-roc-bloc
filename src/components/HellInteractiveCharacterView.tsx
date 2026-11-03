@@ -9,6 +9,8 @@ import {
   Radio,
   Eye,
   EyeOff,
+  Smartphone,
+  Sparkles,
 } from 'lucide-react';
 import { RPCharacter } from '../types';
 import { getCharacterAvatar } from '../data/rpCharacters';
@@ -243,6 +245,7 @@ export const HellInteractiveCharacterView: React.FC<HellInteractiveCharacterView
   const [climaxProgress, setClimaxProgress] = useState<number>(0);
   const [isWhiteoutFlashing, setIsWhiteoutFlashing] = useState<boolean>(false);
   const [isCleanView, setIsCleanView] = useState<boolean>(false);
+  const [showDesktopNotice, setShowDesktopNotice] = useState<boolean>(false);
 
   const voiceAudioRef = useRef<HTMLAudioElement | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -297,6 +300,16 @@ export const HellInteractiveCharacterView: React.FC<HellInteractiveCharacterView
       setClimaxProgress(0);
       setIsWhiteoutFlashing(false);
       setIsCleanView(false);
+
+      // Check if user is on tablet or desktop / laptop (screen width >= 640px)
+      const isTabletOrDesktop = typeof window !== 'undefined' && window.innerWidth >= 640;
+      if (isTabletOrDesktop) {
+        setShowDesktopNotice(true);
+      } else {
+        setShowDesktopNotice(false);
+      }
+    } else {
+      setShowDesktopNotice(false);
     }
   }, [isOpen, character.id, character.hellPlotSummary]);
 
@@ -659,8 +672,74 @@ export const HellInteractiveCharacterView: React.FC<HellInteractiveCharacterView
           ))}
         </div>
 
+        {/* CENTERED NOTICE MODAL FOR TABLET & DESKTOP (Must be dismissed before playing) */}
+        <AnimatePresence>
+          {showDesktopNotice && (
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 15 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+                className="relative w-full max-w-sm sm:max-w-md bg-gradient-to-b from-[#1c0f18] via-[#120812] to-[#0a040b] rounded-2xl p-5 sm:p-6 border-2 border-red-500/80 shadow-[0_0_50px_rgba(239,68,68,0.7)] text-white text-center overflow-hidden pointer-events-auto"
+              >
+                {/* Top glow sheen */}
+                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-red-600 via-amber-400 to-rose-500" />
+
+                {/* Close X button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    playUiClick(soundEnabled);
+                    setShowDesktopNotice(false);
+                  }}
+                  className="absolute top-3.5 right-3.5 p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all cursor-pointer"
+                  aria-label="Đóng"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+
+                {/* Icon */}
+                <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-red-600 via-rose-600 to-amber-500 p-0.5 shadow-[0_0_25px_rgba(239,68,68,0.6)] border border-red-300 flex items-center justify-center">
+                  <div className="w-full h-full bg-black/70 rounded-[14px] flex items-center justify-center">
+                    <Smartphone className="w-7 h-7 text-amber-300 animate-pulse" />
+                  </div>
+                </div>
+
+                {/* Tag */}
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-950/80 border border-red-500/50 text-amber-300 text-xs font-black tracking-wider uppercase mb-2">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <span>GỢI Ý TRẢI NGHIỆM</span>
+                </div>
+
+                {/* Title */}
+                <h3 className="text-lg sm:text-xl font-black text-white tracking-tight mb-2">
+                  TRẢI NGHIỆM TỐT NHẤT TRÊN ĐIỆN THOẠI
+                </h3>
+
+                {/* Description */}
+                <p className="text-xs sm:text-sm text-red-100 font-medium leading-relaxed mb-5">
+                  Chế độ tương tác Địa Ngục được tối ưu hóa và mang lại cảm giác chân thật nhất khi chạm trực tiếp trên <strong className="text-amber-300 font-bold">điện thoại</strong>. Bạn vẫn có thể tiếp tục chơi bình thường trên máy tính / tablet nha! 🔥✨
+                </p>
+
+                {/* Action button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    playUiClick(soundEnabled);
+                    setShowDesktopNotice(false);
+                  }}
+                  className="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black text-sm shadow-[0_0_25px_rgba(239,68,68,0.6)] border-t border-red-300 border-b-2 border-red-900 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <span>Tôi đã hiểu & Bắt đầu chơi</span>
+                </button>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
         {/* MINIMAL TOP FLOATING HEADER (Close X button + Eye toggle + Char Name) */}
-        <header className="relative z-40 w-full px-4 sm:px-6 pt-4 pb-2 flex items-center justify-between pointer-events-none">
+        <header className="relative z-40 w-full max-w-2xl sm:max-w-[480px] mx-auto px-4 sm:px-6 pt-4 pb-2 flex items-center justify-between pointer-events-none">
           {/* Left: Exit X button & Character Name */}
           <div className="flex items-center gap-2.5 pointer-events-auto">
             {!isCleanView && (
@@ -750,90 +829,93 @@ export const HellInteractiveCharacterView: React.FC<HellInteractiveCharacterView
           </div>
         </header>
 
-        {/* MAIN FULLSCREEN VIEWPORT: IMAGE FILLS ENTIRE SCREEN WITH BREATHING & SENSITIVE HOTSPOTS */}
-        <div className="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden">
-          {/* Animated Breathing Character Layer */}
-          <motion.div
-            animate={{
-              scale: isFlinching ? 1.045 : [1.0, 1.025, 1.0],
-              y: isFlinching ? -6 : [0, -4, 0],
-              filter: isFlinching
-                ? 'drop-shadow(0 0 60px rgba(244, 63, 94, 0.95)) brightness(1.12)'
-                : [
-                    'drop-shadow(0 0 30px rgba(220, 38, 38, 0.35)) brightness(1.0)',
-                    'drop-shadow(0 0 45px rgba(244, 63, 94, 0.55)) brightness(1.03)',
-                    'drop-shadow(0 0 30px rgba(220, 38, 38, 0.35)) brightness(1.0)',
-                  ],
-            }}
-            transition={{
-              duration: isFlinching ? 0.3 : 3.5,
-              repeat: isFlinching ? 0 : Infinity,
-              ease: 'easeInOut',
-            }}
-            className="relative w-full h-full flex items-center justify-center select-none will-change-transform"
-          >
-            {/* FULLSCREEN CHARACTER IMAGE */}
-            <img
-              src={avatarUrl}
-              alt={character.name}
-              className="w-full h-full object-cover object-top select-none pointer-events-none"
-              draggable={false}
-            />
-
-            {/* Subtle chest breathing light aura */}
+        {/* MAIN VIEWPORT: STANDARD PHONE RATIO (9:16) ON TABLET & DESKTOP, SHARP STRAIGHT EDGES (NO ROUNDED CORNERS) */}
+        <div className="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden pointer-events-none">
+          {/* Phone-Proportioned Container on Tablet & Desktop (aspect-[9/16], rounded-none) */}
+          <div className="relative w-full h-full sm:w-auto sm:aspect-[9/16] sm:h-full sm:max-h-[96vh] rounded-none border-0 sm:border-x-2 sm:border-y-2 border-red-500/60 shadow-[0_0_60px_rgba(239,68,68,0.55)] overflow-hidden flex items-center justify-center bg-black pointer-events-auto">
+            {/* Animated Breathing Character Layer */}
             <motion.div
               animate={{
-                opacity: [0.15, 0.45, 0.15],
-                scale: [0.95, 1.12, 0.95],
+                scale: isFlinching ? 1.045 : [1.0, 1.025, 1.0],
+                y: isFlinching ? -6 : [0, -4, 0],
+                filter: isFlinching
+                  ? 'drop-shadow(0 0 60px rgba(244, 63, 94, 0.95)) brightness(1.12)'
+                  : [
+                      'drop-shadow(0 0 30px rgba(220, 38, 38, 0.35)) brightness(1.0)',
+                      'drop-shadow(0 0 45px rgba(244, 63, 94, 0.55)) brightness(1.03)',
+                      'drop-shadow(0 0 30px rgba(220, 38, 38, 0.35)) brightness(1.0)',
+                    ],
               }}
               transition={{
-                duration: 3.5,
-                repeat: Infinity,
+                duration: isFlinching ? 0.3 : 3.5,
+                repeat: isFlinching ? 0 : Infinity,
                 ease: 'easeInOut',
               }}
-              className="absolute top-[58%] left-[50%] w-48 h-48 -translate-x-1/2 -translate-y-1/2 rounded-full bg-rose-500/20 blur-3xl pointer-events-none"
-            />
+              className="relative w-full h-full flex items-center justify-center select-none will-change-transform rounded-none"
+            >
+              {/* FULLSCREEN CHARACTER IMAGE */}
+              <img
+                src={avatarUrl}
+                alt={character.name}
+                className="w-full h-full object-cover object-top select-none pointer-events-none rounded-none"
+                draggable={false}
+              />
 
-            {/* SENSITIVE BODY HOTSPOTS FRAME: Perfectly centered frame with white heart icons */}
-            <div className="absolute inset-0 w-full h-full max-w-md mx-auto pointer-events-none">
-              {BODY_HOTSPOTS.map((hotspot) => {
-                const isActive = activeHotspotId === hotspot.id;
-                return (
-                  <motion.button
-                    key={hotspot.id}
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleHotspotClick(hotspot, e);
-                    }}
-                    animate={{
-                      scale: isActive ? [1, 1.35, 1.15] : [1, 1.22, 1],
-                      opacity: [0.8, 1, 0.8],
-                    }}
-                    transition={{
-                      duration: isActive ? 0.8 : 1.6,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-30 group flex items-center justify-center cursor-pointer select-none active:scale-90"
-                    style={{ top: hotspot.top, left: hotspot.left }}
-                    title={`Chạm vào ${hotspot.name} để phát voice`}
-                    aria-label={`Điểm tương tác ${hotspot.name}`}
-                  >
-                    <div className="relative flex items-center justify-center">
-                      {/* Subtle clean white pulse ring */}
-                      <span className="absolute -inset-2 rounded-full bg-white/25 animate-ping pointer-events-none" />
+              {/* Subtle chest breathing light aura */}
+              <motion.div
+                animate={{
+                  opacity: [0.15, 0.45, 0.15],
+                  scale: [0.95, 1.12, 0.95],
+                }}
+                transition={{
+                  duration: 3.5,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+                className="absolute top-[58%] left-[50%] w-48 h-48 -translate-x-1/2 -translate-y-1/2 rounded-full bg-rose-500/20 blur-3xl pointer-events-none"
+              />
 
-                      {/* Simple, clean white heart icon indicator */}
-                      <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/25 hover:bg-white/50 backdrop-blur-xs border border-white/80 shadow-[0_0_14px_rgba(255,255,255,0.75)] flex items-center justify-center transition-all group-hover:scale-120">
-                        <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white fill-white drop-shadow-sm" />
+              {/* SENSITIVE BODY HOTSPOTS FRAME */}
+              <div className="absolute inset-0 w-full h-full pointer-events-none">
+                {BODY_HOTSPOTS.map((hotspot) => {
+                  const isActive = activeHotspotId === hotspot.id;
+                  return (
+                    <motion.button
+                      key={hotspot.id}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleHotspotClick(hotspot, e);
+                      }}
+                      animate={{
+                        scale: isActive ? [1, 1.35, 1.15] : [1, 1.22, 1],
+                        opacity: [0.8, 1, 0.8],
+                      }}
+                      transition={{
+                        duration: isActive ? 0.8 : 1.6,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                      }}
+                      className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-30 group flex items-center justify-center cursor-pointer select-none active:scale-90"
+                      style={{ top: hotspot.top, left: hotspot.left }}
+                      title={`Chạm vào ${hotspot.name} để phát voice`}
+                      aria-label={`Điểm tương tác ${hotspot.name}`}
+                    >
+                      <div className="relative flex items-center justify-center">
+                        {/* Subtle clean white pulse ring */}
+                        <span className="absolute -inset-2 rounded-full bg-white/25 animate-ping pointer-events-none" />
+
+                        {/* Simple, clean white heart icon indicator */}
+                        <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/25 hover:bg-white/50 backdrop-blur-xs border border-white/80 shadow-[0_0_14px_rgba(255,255,255,0.75)] flex items-center justify-center transition-all group-hover:scale-120">
+                          <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white fill-white drop-shadow-sm" />
+                        </div>
                       </div>
-                    </div>
-                  </motion.button>
-                );
-              })}
-            </div>
-          </motion.div>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </div>
         </div>
 
         {/* CLICK PARTICLE BURSTS */}
@@ -860,9 +942,9 @@ export const HellInteractiveCharacterView: React.FC<HellInteractiveCharacterView
 
         {/* BOTTOM SECTION: PROGRESS BAR & DIALOGUE WHISPER SUBTITLE */}
         <footer className="relative z-40 w-full px-4 pb-5 pt-2 flex flex-col items-center pointer-events-none">
-          <div className="w-full max-w-2xl pointer-events-auto flex flex-col items-center">
+          <div className="w-full max-w-xl sm:max-w-[480px] pointer-events-auto flex flex-col items-center">
             {/* WHITE PROGRESS BAR */}
-            <div className="w-full max-w-xl mb-3 flex flex-col gap-1 select-none">
+            <div className="w-full mb-3 flex flex-col gap-1 select-none">
               <div className="flex items-center justify-between text-[11px] font-black tracking-wider text-white drop-shadow-sm px-1">
                 <span className="flex items-center gap-1.5 text-white/90">
                   <Heart className={`w-3.5 h-3.5 fill-white text-white ${climaxProgress > 70 ? 'animate-bounce' : ''}`} />

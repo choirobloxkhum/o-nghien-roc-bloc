@@ -73,3 +73,33 @@ export interface AIChatMessage {
   content: string;
   timestamp: number;
 }
+
+export type ConfessionCategory = 'feeling' | 'idea' | 'feedback' | 'memory' | 'other';
+
+export interface ConfessionReply {
+  id: string;
+  authorName: string;
+  authorAvatar?: string;
+  content: string;
+  createdAt: number;
+  likesCount?: number;
+  isAdmin?: boolean;
+}
+
+export interface Confession {
+  id: string;
+  authorName: string;
+  authorAvatar?: string;
+  characterId?: string; // e.g. "char-21-hayton-donovan" or "all"
+  characterName?: string; // e.g. "Hayton Donovan"
+  characterAvatar?: string;
+  category: ConfessionCategory;
+  content: string;
+  imageUrl?: string;
+  createdAt: number;
+  likesCount: number;
+  repliesCount: number;
+  pinned?: boolean;
+  isAdmin?: boolean;
+  replies?: ConfessionReply[];
+}

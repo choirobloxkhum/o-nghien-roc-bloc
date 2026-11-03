@@ -62,5 +62,27 @@ service cloud.firestore {
       allow read: if true;
       allow write: if request.auth != null && request.auth.uid == userId;
     }
+
+    match /confessions/{confessionId} {
+      allow read: if true;
+      allow create: if request.resource.data.content is string &&
+                       request.resource.data.content.size() > 0 &&
+                       request.resource.data.content.size() <= 6000 &&
+                       request.resource.data.authorName is string &&
+                       request.resource.data.authorName.size() > 0 &&
+                       request.resource.data.authorName.size() <= 120;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount', 'repliesCount', 'pinned']);
+      allow delete: if true;
+
+      match /replies/{replyId} {
+        allow read: if true;
+        allow create: if request.resource.data.content is string &&
+                         request.resource.data.content.size() > 0 &&
+                         request.resource.data.content.size() <= 1500 &&
+                         request.resource.data.authorName is string;
+        allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount']);
+        allow delete: if true;
+      }
+    }
   }
 }

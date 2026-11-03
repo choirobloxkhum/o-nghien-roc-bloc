@@ -22,6 +22,7 @@ import { PasswordModal } from './PasswordModal';
 import { CocKienTroiModal } from './CocKienTroiModal';
 import { ArtGalleryEntranceCard } from './ArtGalleryEntranceCard';
 import { CommandLibraryPage } from './CommandLibraryPage';
+import { ConfessionsPage } from './ConfessionsPage';
 import { RPNavigationSubBar, MainSubTab } from './RPNavigationSubBar';
 import { ArtGalleryPage } from './ArtGalleryPage';
 import { AuthModal } from './AuthModal';
@@ -502,9 +503,9 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
     }
   }, [authLoading, isHellMode, isAdmin, handleReturnToEarth]);
 
-  // Direct activeSubTab to 'home' when entering Hell Mode (Kho Lệnh is removed in Hell Mode)
+  // Direct activeSubTab to 'home' when entering Hell Mode (Kho Lệnh & Tâm Thư chỉ có ở Hạ Giới)
   useEffect(() => {
-    if (isHellMode && activeSubTab === 'commands') {
+    if (isHellMode && (activeSubTab === 'commands' || activeSubTab === 'confessions')) {
       setActiveSubTab('home');
     }
   }, [isHellMode, activeSubTab]);
@@ -787,10 +788,15 @@ export const RPCharacterHub: React.FC<RPCharacterHubProps> = ({
       />
 
 
-      {/* 2. DYNAMIC MAIN VIEW: TRANG CHỦ vs KHO LỆNH (Kho lệnh chỉ hiển thị ở Hạ Giới) */}
+      {/* 2. DYNAMIC MAIN VIEW: TRANG CHỦ vs KHO LỆNH vs TÂM THƯ */}
       {activeSubTab === 'commands' && !isHellMode ? (
         <CommandLibraryPage
           isHellMode={isHellMode}
+          soundEnabled={soundEnabled}
+          reducedMotion={reducedMotion}
+        />
+      ) : activeSubTab === 'confessions' && !isHellMode ? (
+        <ConfessionsPage
           soundEnabled={soundEnabled}
           reducedMotion={reducedMotion}
         />

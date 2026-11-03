@@ -123,7 +123,7 @@
     },
     "UserProfile": {
       "title": "UserProfile",
-      "description": "Registered user profile details",
+      "description": "Registered user profiles",
       "type": "object",
       "properties": {
         "uid": {
@@ -152,6 +152,26 @@
         }
       },
       "required": ["uid", "email"]
+    },
+    "Confession": {
+      "title": "Confession",
+      "description": "Threads-like community confessions, reviews and plot ideas",
+      "type": "object",
+      "properties": {
+        "authorName": { "type": "string" },
+        "authorAvatar": { "type": "string" },
+        "characterId": { "type": "string" },
+        "characterName": { "type": "string" },
+        "category": { "type": "string" },
+        "content": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "likesCount": { "type": "number" },
+        "repliesCount": { "type": "number" },
+        "pinned": { "type": "boolean" },
+        "isAdmin": { "type": "boolean" }
+      },
+      "required": ["authorName", "content", "createdAt"]
     }
   },
   "firestore": {
@@ -174,6 +194,10 @@
     "/users/{userId}": {
       "schema": "UserProfile",
       "description": "Registered user profiles"
+    },
+    "/confessions/{confessionId}": {
+      "schema": "Confession",
+      "description": "Community confessions and thoughts in Threads format"
     }
   }
 }

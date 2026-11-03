@@ -29,7 +29,10 @@ export function getCharacterAvatar(character: RPCharacter, isHellMode: boolean =
   if (isHellMode) {
     if (character.hellAvatarUrl) return character.hellAvatarUrl;
     if (character.id === 'char-18-victor-laurent' || character.name?.toLowerCase().includes('victor laurent')) {
-      return 'https://i.ibb.co/v4Wx6DbK/from-Pix-AI-2073222213758555178.png';
+      return 'https://i.ibb.co/XgRHT41/from-Pix-AI-2073222213758555178-2.png';
+    }
+    if (character.id === 'char-16-hoang-nhat-thien' || character.name?.toLowerCase().includes('nhất thiên')) {
+      return 'https://i.ibb.co/nMJBrhSK/from-Pix-AI-2073564423619333251.png';
     }
   }
   return character.avatarUrl;
@@ -125,7 +128,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     id: 'char-18-victor-laurent',
     name: 'Victor Laurent',
     avatarUrl: 'https://i.ibb.co/G4wqCfF7/media-1791283543.png',
-    hellAvatarUrl: 'https://i.ibb.co/v4Wx6DbK/from-Pix-AI-2073222213758555178.png',
+    hellAvatarUrl: 'https://i.ibb.co/XgRHT41/from-Pix-AI-2073222213758555178-2.png',
     roleTag: 'Quân nhân',
     tags: ['Quân nhân', 'Ngọt', 'user tặng bu cao sao cho char (?)', '1910s', 'Pháp', 'Khác'],
     tagline: '',
@@ -164,6 +167,7 @@ export const INITIAL_RP_CHARACTERS: RPCharacter[] = [
     id: 'char-16-hoang-nhat-thien',
     name: 'Hoàng Nhất Thiên',
     avatarUrl: 'https://i.ibb.co/zjDNf5m/Kh-ng-C-Ti-u-65-20260919130152.jpg',
+    hellAvatarUrl: 'https://i.ibb.co/nMJBrhSK/from-Pix-AI-2073564423619333251.png',
     roleTag: 'Hiện đại',
     tags: ['Hiện đại', 'Ngọt', 'char máu S', 'user ngoại tình (?)', 'trai IT', 'Sài Gòn'],
     tagline: '',
